@@ -52,6 +52,8 @@ MockBook/
 - Comment on posts (add + list with author)
 - Like / unlike comments (heart + count on each comment)
 - Delete **own** posts (⋮ menu + confirm dialog)
+- Single-post page at `/post/[postId]`; Share menu (copy link, X, Facebook, LinkedIn, WhatsApp)
+- Click post timestamp in the feed to open the single-post page
 - Profile feed shows that user’s posts only (`isProfile`)
 
 ### Friends & profiles
@@ -96,7 +98,7 @@ MockBook/
 - Who liked a post / comment (own + others’); save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
 - Home **Add people** rail (recent users + search; search lives in that widget, not the navbar)
 - Profile editing (location, occupation, avatar) + social links
-- Single-post page + Share menu (copy link, X, Facebook, LinkedIn, WhatsApp); Help/FAQ page
+- Help/FAQ page
 - Infinite-scroll feed; UI overhaul; tests; production deploy
 - Messaging / DMs — **out of scope**
 

@@ -54,9 +54,14 @@ export const authSlice = createSlice({
     },
     setPost: (state, action: PayloadAction<{ post: Post }>) => {
       const updated = action.payload.post
-      state.posts = state.posts.map(post =>
-        String(post._id) === String(updated._id) ? { ...post, ...updated } : post
-      )
+      const id = String(updated._id)
+      const idx = state.posts.findIndex(post => String(post._id) === id)
+      if (idx >= 0) {
+        state.posts[idx] = { ...state.posts[idx], ...updated }
+      } else {
+        // Upsert so single-post page likes/comments work when the feed is empty.
+        state.posts.push(updated)
+      }
     },
     removePost: (state, action: PayloadAction<{ postId: string }>) => {
       const id = String(action.payload.postId)

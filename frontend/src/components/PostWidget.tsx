@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import {
   ChatBubbleOutlineOutlined,
+  ContentCopy,
   DeleteOutlined,
   FavoriteBorderOutlined,
   FavoriteOutlined,
@@ -27,10 +28,12 @@ import {
   Typography,
   useTheme,
 } from "@mui/material"
+import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api, mediaUrl } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import { buildShareText, buildShareUrls, openShareWindow } from "@/lib/share"
 import { formatPostTime } from "@/lib/time"
 import { useToast } from "@/providers/ToastProvider"
 import { removePost, setPost } from "@/state"
@@ -41,10 +44,17 @@ import Friend from "./Friend"
 import UserImage from "./UserImage"
 import WidgetWrapper from "./WidgetWrapper"
 
-type PostWidgetProps = { post: Post }
+type PostWidgetProps = {
+  post: Post
+  /** When true (default), clicking the post timestamp opens `/post/[postId]`. */
+  linkToPost?: boolean
+  /** Called after a successful delete (e.g. leave the single-post page). */
+  onDeleted?: () => void
+}
 
-const PostWidget = ({ post }: PostWidgetProps) => {
+const PostWidget = ({ post, linkToPost = true, onDeleted }: PostWidgetProps) => {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const user = useAppSelector(state => state.user)
   const { success, error: toastError } = useToast()
   const likes = post.likes ?? {}
@@ -63,6 +73,7 @@ const PostWidget = ({ post }: PostWidgetProps) => {
   const [commentError, setCommentError] = useState<string | undefined>()
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
+  const [shareAnchor, setShareAnchor] = useState<null | HTMLElement>(null)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -112,11 +123,29 @@ const PostWidget = ({ post }: PostWidgetProps) => {
       dispatch(removePost({ postId: post._id }))
       setConfirmDeleteOpen(false)
       success("Post deleted")
+      onDeleted?.()
     } catch (err: unknown) {
       toastError(getErrorMessage(err, "Failed to delete post"))
     } finally {
       setIsDeleting(false)
     }
+  }
+
+  const share = buildShareUrls(post._id, { text: buildShareText(post.description) })
+
+  const copyPostLink = async () => {
+    setShareAnchor(null)
+    try {
+      await navigator.clipboard.writeText(share.pageUrl)
+      success("Link copied")
+    } catch {
+      toastError("Could not copy link")
+    }
+  }
+
+  const shareTo = (url: string) => {
+    setShareAnchor(null)
+    openShareWindow(url)
   }
 
   return (
@@ -127,6 +156,7 @@ const PostWidget = ({ post }: PostWidgetProps) => {
         subtitle={formatPostTime(post.createdAt)}
         url={post.user?.picturePath || ""}
         showFriendButton={false}
+        onSubtitleClick={linkToPost ? () => router.push(`/post/${post._id}`) : undefined}
         endAction={
           isOwnPost ? (
             <>
@@ -196,9 +226,40 @@ const PostWidget = ({ post }: PostWidgetProps) => {
             <Typography>{comments.length}</Typography>
           </FlexBetween>
         </FlexBetween>
-        <IconButton aria-label="Share" disabled>
+        <IconButton
+          aria-label="Share"
+          aria-haspopup="true"
+          aria-expanded={Boolean(shareAnchor)}
+          onClick={e => setShareAnchor(e.currentTarget)}
+        >
           <ShareOutlined />
         </IconButton>
+        <Menu
+          anchorEl={shareAnchor}
+          open={Boolean(shareAnchor)}
+          onClose={() => setShareAnchor(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MenuItem onClick={copyPostLink}>
+            <ListItemIcon>
+              <ContentCopy fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Copy link</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => shareTo(share.x)}>
+            <ListItemText>Share on X</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => shareTo(share.facebook)}>
+            <ListItemText>Share on Facebook</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => shareTo(share.linkedin)}>
+            <ListItemText>Share on LinkedIn</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => shareTo(share.whatsapp)}>
+            <ListItemText>Share on WhatsApp</ListItemText>
+          </MenuItem>
+        </Menu>
       </FlexBetween>
       {isComments && (
         <Box sx={{ mt: "0.5rem" }}>
