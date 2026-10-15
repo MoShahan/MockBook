@@ -1,6 +1,8 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 
-const initialState = {
+import type { AuthState, Friend, Post, User } from "@/types/models"
+
+const initialState: AuthState = {
   mode: "dark",
   user: null,
   posts: [],
@@ -14,7 +16,7 @@ export const authSlice = createSlice({
     toggleMode: state => {
       state.mode = state.mode === "light" ? "dark" : "light"
     },
-    setLogin: (state, action) => {
+    setLogin: (state, action: PayloadAction<{ user: User; accessToken: string }>) => {
       state.user = action.payload.user
       state.accessToken = action.payload.accessToken
     },
@@ -22,25 +24,19 @@ export const authSlice = createSlice({
       state.user = null
       state.accessToken = null
     },
-    setFriends: (state, action) => {
+    setFriends: (state, action: PayloadAction<{ friends: Friend[] }>) => {
       if (state.user) {
         state.user.friends = action.payload.friends
       } else {
         console.warn("User does not exist, cannot set Friends")
       }
     },
-    setPosts: (state, action) => {
+    setPosts: (state, action: PayloadAction<{ posts: Post[] }>) => {
       state.posts = action.payload.posts
     },
-    setPost: (state, action) => {
-      const updatedPosts = state.posts.map(post => {
-        if (post.id === action.payload.postId) {
-          return action.payload.post
-        } else {
-          return post
-        }
-      })
-      state.posts = updatedPosts
+    setPost: (state, action: PayloadAction<{ post: Post }>) => {
+      const updated = action.payload.post
+      state.posts = state.posts.map(post => (post._id === updated._id ? updated : post))
     },
   },
 })

@@ -1,3 +1,5 @@
+import type { ThemeOptions } from "@mui/material/styles"
+
 // color design tokens export
 export const colorTokens = {
   grey: {
@@ -27,16 +29,15 @@ export const colorTokens = {
     800: "#00353F",
     900: "#001519",
   },
-}
+} as const
 
 // mui theme settings
-export const themeSettings = mode => {
+export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
   return {
     palette: {
-      mode: mode,
+      mode,
       ...(mode === "dark"
         ? {
-            // palette values for dark mode
             primary: {
               dark: colorTokens.primary[200],
               main: colorTokens.primary[500],
@@ -52,7 +53,6 @@ export const themeSettings = mode => {
             background: { default: colorTokens.grey[900], alt: colorTokens.grey[800] },
           }
         : {
-            // palette values for light mode
             primary: { dark: colorTokens.primary[700], main: colorTokens.primary[500], light: colorTokens.primary[50] },
             neutral: {
               dark: colorTokens.grey[700],
