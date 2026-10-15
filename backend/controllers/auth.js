@@ -41,8 +41,11 @@ export const register = async (req, res, next) => {
     })
 
     const savedUser = await newUser.save()
+    const accessToken = jwt.sign({ id: savedUser._id }, process.env.ACCESS_TOKEN_SECRET)
+    const safeUser = toSafeUser(savedUser)
+    safeUser.friends = await formatFriendsList(savedUser.friends)
 
-    res.status(201).json(toSafeUser(savedUser))
+    res.status(201).json({ user: safeUser, accessToken })
   } catch (e) {
     res.status(500).json({ error: e.message })
   }

@@ -77,14 +77,15 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
   const register = async (vals: RegisterFormValues, onSubmitProps: FormikHelpers<RegisterFormValues>) => {
     try {
       onSubmitProps.setStatus(undefined)
-      await api.post("/auth/register", {
+      const { data } = await api.post<{ user: User; accessToken: string }>("/auth/register", {
         firstName: vals.firstName,
         lastName: vals.lastName,
         email: vals.email,
         password: vals.password,
       })
       onSubmitProps.resetForm()
-      handleGoToLogin()
+      dispatch(setLogin({ user: data.user, accessToken: data.accessToken }))
+      handleGoToHome()
     } catch (e: unknown) {
       onSubmitProps.setStatus(getErrorMessage(e, "Registration failed"))
     }
