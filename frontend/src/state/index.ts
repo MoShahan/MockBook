@@ -36,7 +36,10 @@ export const authSlice = createSlice({
     },
     setPost: (state, action: PayloadAction<{ post: Post }>) => {
       const updated = action.payload.post
-      state.posts = state.posts.map(post => (post._id === updated._id ? updated : post))
+      // Match Mongo `_id` (not `id` / postId)
+      state.posts = state.posts.map(post =>
+        String(post._id) === String(updated._id) ? { ...post, ...updated } : post
+      )
     },
   },
 })

@@ -28,13 +28,23 @@ export type User = {
 /** Post likes are a Map on the server, serialized as an object keyed by user id. */
 export type PostLikes = Record<string, boolean>
 
+export type PostComment = {
+  _id?: string
+  userId: string
+  text: string
+  createdAt?: string
+  user?: Pick<User, "firstName" | "lastName" | "picturePath"> | null
+}
+
 export type Post = {
   _id: string
   userId: string
   description: string
   url?: string
   likes: PostLikes
-  comments: string[]
+  comments: PostComment[]
+  createdAt?: string
+  updatedAt?: string
   user?: Pick<User, "firstName" | "lastName" | "location" | "picturePath"> | null
 }
 
@@ -56,6 +66,11 @@ export type RegisterFormValues = {
   email: string
   password: string
   cPassword: string
+}
+
+export type CreatePostFormValues = {
+  description: string
+  picture: File | null
 }
 
 export type ApiErrorBody = {
