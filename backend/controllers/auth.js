@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+
 import User from "../models/User.js"
 
 export const register = async (req, res, next) => {
@@ -8,7 +9,18 @@ export const register = async (req, res, next) => {
     const salt = await bcrypt.genSalt()
     const hashedPass = await bcrypt.hash(password, salt)
 
-    const newUser = new User({ firstName, lastName, email, password: hashedPass, picturePath, friends, location, occupation, viewedProfile: 0, impressions: 0 })
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPass,
+      picturePath,
+      friends,
+      location,
+      occupation,
+      viewedProfile: 0,
+      impressions: 0,
+    })
 
     const savedUser = await newUser.save()
 

@@ -1,42 +1,39 @@
 "use client"
 
-import React from "react"
-import { Provider } from "react-redux"
-import authReducer from "@/state"
-import { persistReducer, FLUSH, PURGE, REGISTER, REHYDRATE, PAUSE, PERSIST, persistStore } from "redux-persist"
-import storage from "redux-persist/lib/storage"
+import React, { ReactNode } from "react"
 import { configureStore } from "@reduxjs/toolkit"
+import { Provider } from "react-redux"
+import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from "redux-persist"
 import { PersistGate } from "redux-persist/integration/react"
+import storage from "redux-persist/lib/storage"
 
-// import createWebStorage from "redux-persist/lib/storage/createWebStorage"
-// const createNoopStorage = () => {
-//   return {
-//     getItem(_key: any) {
-//       return Promise.resolve(null)
-//     },
-//     setItem(_key: any, value: any) {
-//       return Promise.resolve(value)
-//     },
-//     removeItem(_key: any) {
-//       return Promise.resolve()
-//     },
-//   }
-// }
-// const storage = typeof window === "undefined" ? createNoopStorage() : createWebStorage('')
+import authReducer from "@/state"
 
 const persistConfig = { key: "root", storage, version: 1 }
 const persistedReducer = persistReducer(persistConfig, authReducer)
 const store = configureStore({
   reducer: persistedReducer,
-  middleware: getDefaultMiddleware => getDefaultMiddleware({ serializableCheck: { ignoredActions: [FLUSH, PURGE, REGISTER, REHYDRATE, PAUSE, PERSIST] } }),
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: { ignoredActions: [FLUSH, PURGE, REGISTER, REHYDRATE, PAUSE, PERSIST] },
+    }),
 })
 
-const ReduxProvider = ({ children }: any) => {
+const persistor = persistStore(store)
+
+// redux-persist types lag React 19; cast keeps PersistGate usable
+const Gate = PersistGate as unknown as React.ComponentType<{
+  loading: ReactNode
+  persistor: typeof persistor
+  children: ReactNode
+}>
+
+const ReduxProvider = ({ children }: { children: ReactNode }) => {
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistStore(store)}>
+      <Gate loading={null} persistor={persistor}>
         {children}
-      </PersistGate>
+      </Gate>
     </Provider>
   )
 }
@@ -44,5 +41,4 @@ const ReduxProvider = ({ children }: any) => {
 export default ReduxProvider
 
 export type RootState = ReturnType<typeof store.getState>
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch

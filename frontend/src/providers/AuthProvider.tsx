@@ -1,8 +1,9 @@
 "use client"
 
-import { useAppSelector } from "@/app/hooks"
-import { useRouter } from "next/navigation"
 import React from "react"
+import { useRouter } from "next/navigation"
+
+import { useAppSelector } from "@/app/hooks"
 
 const AuthProvider = ({ children }: any) => {
   const router = useRouter()

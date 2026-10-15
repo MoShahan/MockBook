@@ -1,14 +1,16 @@
 "use client"
 
-import { setLogin } from "@/state"
-import { Box, Button, TextField, Typography, useMediaQuery, useTheme } from "@mui/material"
 import React from "react"
-import { useRouter } from "next/navigation"
-import * as yup from "yup"
-import { Formik, FormikHelpers } from "formik"
 import { EditOutlined } from "@mui/icons-material"
+import { Box, Button, TextField, Typography, useMediaQuery, useTheme } from "@mui/material"
+import { Formik, FormikHelpers } from "formik"
+import { useRouter } from "next/navigation"
 import Dropzone from "react-dropzone"
+import * as yup from "yup"
+
 import { useAppDispatch } from "@/app/hooks"
+import { setLogin } from "@/state"
+
 import FlexBetween from "./FlexBetween"
 
 type FormProps = { type: "login" | "register"; validationSchema: any; initVals: any }
@@ -75,10 +77,10 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
       {({ values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue }: any) => (
         <form onSubmit={handleSubmit}>
           <Box
-            display="grid"
-            gap="30px"
-            gridTemplateColumns="repeat(4,minmax(0,1fr))"
             sx={{
+              display: "grid",
+              gap: "30px",
+              gridTemplateColumns: "repeat(4,minmax(0,1fr))",
               "& > div": {
                 gridColumn: isNonMobile ? undefined : "span 4",
               },
@@ -126,17 +128,22 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
                   helperText={touched.occupation && errors.occupation}
                   sx={{ gridColumn: "span 4" }}
                 />
-                <Box p="1rem" borderRadius="4px" gridColumn="span 4" border={`1px solid ${palette.neutral.medium}`}>
+                <Box
+                  sx={{
+                    gridColumn: "span 4",
+                    p: "1rem",
+                    borderRadius: "4px",
+                    border: `1px solid ${palette.neutral.medium}`,
+                  }}
+                >
                   <Dropzone multiple={false} onDrop={acceptedFiles => setFieldValue("picture", acceptedFiles[0])}>
                     {({ getRootProps, getInputProps }) => (
                       <Box
                         {...getRootProps()}
-                        border={`2px dashed ${palette.primary.main}`}
-                        p="1rem"
                         sx={{
-                          "&:hover": {
-                            cursor: "pointer",
-                          },
+                          border: `2px dashed ${palette.primary.main}`,
+                          p: "1rem",
+                          "&:hover": { cursor: "pointer" },
                         }}
                       >
                         <input {...getInputProps()} />

@@ -1,13 +1,15 @@
 "use client"
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { Box, IconButton, Typography, useTheme } from "@mui/material"
 import React from "react"
-import FlexBetween from "./FlexBetween"
-import { useRouter } from "next/navigation"
-import { setFriends } from "@/state"
-import UserImage from "./UserImage"
 import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material"
+import { Box, IconButton, Typography, useTheme } from "@mui/material"
+import { useRouter } from "next/navigation"
+
+import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { setFriends } from "@/state"
+
+import FlexBetween from "./FlexBetween"
+import UserImage from "./UserImage"
 
 type FriendProps = { id: string; subtitle: string; url: string; name: string }
 
@@ -47,14 +49,14 @@ const Friend = ({ id, name, subtitle, url }: FriendProps) => {
 
   return (
     <FlexBetween>
-      <FlexBetween gap="1rem">
+      <FlexBetween sx={{ gap: "1rem" }}>
         <UserImage image={url} size="55px" />
         <Box onClick={handleGoToProfile}>
           <Typography
-            color={main}
             variant="h5"
-            fontWeight="500"
             sx={{
+              color: main,
+              fontWeight: "500",
               "&:hover": {
                 cursor: "pointer",
                 color: pLight,
@@ -63,9 +65,7 @@ const Friend = ({ id, name, subtitle, url }: FriendProps) => {
           >
             {name}
           </Typography>
-          <Typography color={medium} fontSize="0.75rem">
-            {subtitle}
-          </Typography>
+          <Typography sx={{ color: medium, fontSize: "0.75rem" }}>{subtitle}</Typography>
         </Box>
       </FlexBetween>
       <IconButton sx={{ backgroundColor: pLight, p: "0.6rem" }} onClick={patchFriend}>

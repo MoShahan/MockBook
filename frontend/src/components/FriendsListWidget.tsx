@@ -1,11 +1,13 @@
 "use client"
 
+import { useEffect } from "react"
+import { Box, Typography, useTheme } from "@mui/material"
+
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { setFriends } from "@/state"
-import { useEffect } from "react"
-import WidgetWrapper from "./WidgetWrapper"
-import { Box, Typography, useTheme } from "@mui/material"
+
 import Friend from "./Friend"
+import WidgetWrapper from "./WidgetWrapper"
 
 type FriendsListWidgetProps = { userId: string }
 
@@ -37,12 +39,18 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
 
   return (
     <WidgetWrapper>
-      <Typography variant="h5" fontWeight="500" sx={{ mb: "1.5rem" }} color={theme.palette.neutral.dark}>
+      <Typography variant="h5" sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1.5rem" }}>
         List of Friends
       </Typography>
-      <Box display="flex" flexDirection="column" gap="1.5rem">
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {user?.friends.map((friend: any) => (
-          <Friend key={friend?.id} id={friend.id} name={`${friend?.firstName} ${friend?.lastName}`} subtitle={friend?.occupation} url={friend?.url} />
+          <Friend
+            key={friend?.id}
+            id={friend.id}
+            name={`${friend?.firstName} ${friend?.lastName}`}
+            subtitle={friend?.occupation}
+            url={friend?.url}
+          />
         ))}
       </Box>
     </WidgetWrapper>

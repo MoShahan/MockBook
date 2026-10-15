@@ -1,23 +1,23 @@
-import mongoose from "mongoose"
-import cors from "cors"
-import express from "express"
-import dotenv from "dotenv"
-import morgan from "morgan"
-import multer from "multer"
-import helmet from "helmet"
 import path from "path"
 import { fileURLToPath } from "url"
-import authRoutes from "./routes/auth.js"
-import userRoutes from "./routes/users.js"
-import postRoutes from "./routes/posts.js"
-import { verifyAccessToken } from "./middleware/auth.js"
+
+import cors from "cors"
+import dotenv from "dotenv"
+import express from "express"
+import helmet from "helmet"
+import mongoose from "mongoose"
+import morgan from "morgan"
+import multer from "multer"
+
 import { register } from "./controllers/auth.js"
 import { createPost } from "./controllers/posts.js"
+import { verifyAccessToken } from "./middleware/auth.js"
+import authRoutes from "./routes/auth.js"
+import postRoutes from "./routes/posts.js"
+import userRoutes from "./routes/users.js"
 
-const __filename = fileURLToPath(import.meta.url) // this file path
-// console.log(__filename)
-const __dirname = path.dirname(__filename) // this folder path
-// console.log(__dirname)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 dotenv.config()
 const app = express()
@@ -29,8 +29,6 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }))
 app.use(morgan("common"))
 app.use("/assets", express.static(path.join(__dirname, "public/assets")))
 
-// FILE STORAGE
-// arrow
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "public/assets")
@@ -41,7 +39,6 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage })
 
-// did not put this under route, because we need upload function
 app.post("/auth/register", upload.single("picture"), register)
 app.post("/post", verifyAccessToken, upload.single("picture"), createPost)
 
@@ -51,7 +48,7 @@ app.use("/posts", postRoutes)
 
 const PORT = process.env.PORT
 mongoose
-  .connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("mongo connected")
     app.listen(PORT, () => console.log(`listening from ${PORT}`))

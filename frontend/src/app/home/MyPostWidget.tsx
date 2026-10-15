@@ -1,14 +1,24 @@
 "use client"
 
-import { Box, Button, Divider, IconButton, InputBase, Typography, useMediaQuery, useTheme } from "@mui/material"
 import React, { useState } from "react"
+import {
+  AttachFileOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  GifBoxOutlined,
+  ImageOutlined,
+  MicOutlined,
+  MoreHorizOutlined,
+} from "@mui/icons-material"
+import { Box, Button, Divider, IconButton, InputBase, Typography, useMediaQuery, useTheme } from "@mui/material"
 import DropZone from "react-dropzone"
-import { useAppDispatch, useAppSelector } from "../hooks"
-import { setPosts } from "@/state"
-import WidgetWrapper from "@/components/WidgetWrapper"
+
 import FlexBetween from "@/components/FlexBetween"
 import UserImage from "@/components/UserImage"
-import { AttachFileOutlined, DeleteOutlined, EditOutlined, GifBoxOutlined, ImageOutlined, MicOutlined, MoreHorizOutlined } from "@mui/icons-material"
+import WidgetWrapper from "@/components/WidgetWrapper"
+import { setPosts } from "@/state"
+
+import { useAppDispatch, useAppSelector } from "../hooks"
 
 type MyPostWidgetProps = { url: string }
 
@@ -18,7 +28,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   const accessToken = useAppSelector(state => state?.accessToken)
   const dispatch = useAppDispatch()
   const { palette }: any = useTheme()
-  const medMain = palette.neutral.mediumMan
+  const medMain = palette.neutral.mediumMain
   const medium = palette.neutral.medium
 
   const [isImage, setIsImage] = useState<boolean>(false)
@@ -46,7 +56,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
 
   return (
     <WidgetWrapper>
-      <FlexBetween gap="1.5rem">
+      <FlexBetween sx={{ gap: "1.5rem" }}>
         <UserImage image={user?.picturePath} />
         <InputBase
           placeholder="What's on your mind?"
@@ -61,19 +71,17 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
         />
       </FlexBetween>
       {isImage && (
-        <Box border={`1px solid ${medium}`} borderRadius="4px" mt="1rem" p="1rem">
+        <Box sx={{ border: `1px solid ${medium}`, borderRadius: "4px", mt: "1rem", p: "1rem" }}>
           <DropZone multiple={false} onDrop={acceptedFiles => setImage(acceptedFiles[0])}>
             {({ getRootProps, getInputProps }) => (
               <FlexBetween>
                 <Box
                   {...getRootProps()}
-                  border={`2px dashed ${palette.primary.main}`}
-                  p="1rem"
-                  width="100%"
                   sx={{
-                    "&:hover": {
-                      cursor: "pointer",
-                    },
+                    border: `2px dashed ${palette.primary.main}`,
+                    p: "1rem",
+                    width: "100%",
+                    "&:hover": { cursor: "pointer" },
                   }}
                 >
                   <input {...getInputProps()} />
@@ -98,11 +106,11 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
       )}
       <Divider sx={{ margin: "1.25rem 0" }} />
       <FlexBetween>
-        <FlexBetween sx={{ cursor: "pointer" }} gap="0.25rem" onClick={() => setIsImage(prev => !prev)}>
+        <FlexBetween onClick={() => setIsImage(prev => !prev)} sx={{ gap: "0.25rem", cursor: "pointer" }}>
           <ImageOutlined sx={{ color: medMain }} />
           <Typography
-            color={medMain}
             sx={{
+              color: medMain,
               "&:hover": {
                 color: medium,
               },
@@ -113,33 +121,31 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
         </FlexBetween>
         {isNonMobileScreens ? (
           <>
-            <FlexBetween sx={{ cursor: "pointer" }} gap="0.25rem">
+            <FlexBetween sx={{ gap: "0.25rem", cursor: "pointer" }}>
               <GifBoxOutlined sx={{ color: medMain }} />
-              <Typography color={medMain} sx={{ "&:hover": { color: medium } }}>
-                Clip
-              </Typography>
+              <Typography sx={{ color: medMain, "&:hover": { color: medium } }}>Clip</Typography>
             </FlexBetween>
-            <FlexBetween sx={{ cursor: "pointer" }} gap="0.25rem">
+            <FlexBetween sx={{ gap: "0.25rem", cursor: "pointer" }}>
               <AttachFileOutlined sx={{ color: medMain }} />
-              <Typography color={medMain} sx={{ "&:hover": { color: medium } }}>
-                Attachment
-              </Typography>
+              <Typography sx={{ color: medMain, "&:hover": { color: medium } }}>Attachment</Typography>
             </FlexBetween>
-            <FlexBetween sx={{ cursor: "pointer" }} gap="0.25rem">
+            <FlexBetween sx={{ gap: "0.25rem", cursor: "pointer" }}>
               <MicOutlined sx={{ color: medMain }} />
-              <Typography color={medMain} sx={{ "&:hover": { color: medium } }}>
-                Audio
-              </Typography>
+              <Typography sx={{ color: medMain, "&:hover": { color: medium } }}>Audio</Typography>
             </FlexBetween>
           </>
         ) : (
-          <FlexBetween gap="0.25rem">
+          <FlexBetween sx={{ gap: "0.25rem" }}>
             <MoreHorizOutlined sx={{ color: medMain }} />
           </FlexBetween>
         )}
       </FlexBetween>
-      <Box display="flex" justifyContent="flex-end" mt="1rem">
-        <Button disabled={!postDesc} onClick={handlePost} sx={{ color: palette.background.alt, backgroundColor: palette.primary.main }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "1rem" }}>
+        <Button
+          disabled={!postDesc}
+          onClick={handlePost}
+          sx={{ color: palette.background.alt, backgroundColor: palette.primary.main }}
+        >
           POST
         </Button>
       </Box>

@@ -1,13 +1,15 @@
 "use client"
 
+import React, { useState } from "react"
+import { ChatBubbleOutlineOutlined, FavoriteBorderOutlined, FavoriteOutlined, ShareOutlined } from "@mui/icons-material"
+import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material"
+
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { setPost } from "@/state"
-import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material"
-import React, { useState } from "react"
-import WidgetWrapper from "./WidgetWrapper"
-import Friend from "./Friend"
+
 import FlexBetween from "./FlexBetween"
-import { ChatBubbleOutlineOutlined, FavoriteBorderOutlined, FavoriteOutlined, ShareOutlined } from "@mui/icons-material"
+import Friend from "./Friend"
+import WidgetWrapper from "./WidgetWrapper"
 
 type PostWidgetProps = { post: PostType }
 
@@ -39,10 +41,13 @@ const PostWidget = ({ post }: PostWidgetProps) => {
 
   return (
     <WidgetWrapper>
-      <Friend id={post?.userId} name={`${post?.user?.firstName} ${post?.user?.lastName}`} subtitle={post?.user?.location || ""} url={post?.user?.picturePath || ""} />
-      <Typography color={neutral} sx={{ mt: "1rem" }}>
-        {post?.description}
-      </Typography>
+      <Friend
+        id={post?.userId}
+        name={`${post?.user?.firstName} ${post?.user?.lastName}`}
+        subtitle={post?.user?.location || ""}
+        url={post?.user?.picturePath || ""}
+      />
+      <Typography sx={{ color: neutral, mt: "1rem" }}>{post?.description}</Typography>
       {post?.url && (
         <img
           width="100%"
@@ -55,14 +60,16 @@ const PostWidget = ({ post }: PostWidgetProps) => {
           src={`http://localhost:5000/assets/${post?.url}`}
         />
       )}
-      <FlexBetween mt="0.25rem">
-        <FlexBetween gap="1rem">
-          <FlexBetween gap="0.3rem">
-            <IconButton onClick={patchLike}>{isLiked ? <FavoriteOutlined sx={{ color: primary }} /> : <FavoriteBorderOutlined />}</IconButton>
+      <FlexBetween sx={{ mt: "0.25rem" }}>
+        <FlexBetween sx={{ gap: "1rem" }}>
+          <FlexBetween sx={{ gap: "0.3rem" }}>
+            <IconButton onClick={patchLike}>
+              {isLiked ? <FavoriteOutlined sx={{ color: primary }} /> : <FavoriteBorderOutlined />}
+            </IconButton>
             <Typography>{likesCount}</Typography>
           </FlexBetween>
 
-          <FlexBetween gap="0.3rem">
+          <FlexBetween sx={{ gap: "0.3rem" }}>
             <IconButton onClick={() => setIsComments(prev => !prev)}>
               <ChatBubbleOutlineOutlined />
             </IconButton>
@@ -74,7 +81,7 @@ const PostWidget = ({ post }: PostWidgetProps) => {
         </IconButton>
       </FlexBetween>
       {isComments && (
-        <Box mt="0.5rem">
+        <Box sx={{ mt: "0.5rem" }}>
           {post?.comments.map((comment, index) => (
             <Box key={`${post?._id} - ${index}`}>
               <Divider />

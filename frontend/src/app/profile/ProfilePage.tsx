@@ -1,12 +1,14 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { useAppSelector } from "../hooks"
 import { Box, useMediaQuery } from "@mui/material"
-import Navbar from "@/components/Navbar"
-import UserWidget from "@/components/UserWidget"
-import PostsWidget from "@/components/PostsWidget"
+
 import FriendsListWidget from "@/components/FriendsListWidget"
+import Navbar from "@/components/Navbar"
+import PostsWidget from "@/components/PostsWidget"
+import UserWidget from "@/components/UserWidget"
+
+import { useAppSelector } from "../hooks"
 
 type ProfilePageProps = { id: string }
 
@@ -49,13 +51,21 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
   return (
     <Box>
       <Navbar />
-      <Box gap="2rem" justifyContent="center" width="100%" padding="2rem 6%" display={isNonMobileScreens ? "flex" : "block"}>
-        <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
+      <Box
+        sx={{
+          gap: "2rem",
+          justifyContent: "center",
+          width: "100%",
+          padding: "2rem 6%",
+          display: isNonMobileScreens ? "flex" : "block",
+        }}
+      >
+        <Box sx={{ flexBasis: isNonMobileScreens ? "26%" : undefined }}>
           <UserWidget url={user?.picturePath} userId={id} />
-          <Box m="2rem 0" />
+          <Box sx={{ m: "2rem 0" }} />
           <FriendsListWidget userId={id} />
         </Box>
-        <Box flexBasis={isNonMobileScreens ? "42%" : undefined} mt={isNonMobileScreens ? undefined : "2rem"}>
+        <Box sx={{ flexBasis: isNonMobileScreens ? "42%" : undefined, mt: isNonMobileScreens ? undefined : "2rem" }}>
           <PostsWidget isProfile={false} userId={id}></PostsWidget>
         </Box>
       </Box>

@@ -1,12 +1,25 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import { Close, DarkMode, Help, LightMode, Menu, Message, Notifications, Search } from "@mui/icons-material"
+import {
+  Box,
+  FormControl,
+  IconButton,
+  InputBase,
+  MenuItem,
+  Select,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material"
 import { useRouter } from "next/navigation"
-import { Box, FormControl, IconButton, InputBase, MenuItem, Select, Typography, useMediaQuery, useTheme } from "@mui/material"
-import { DarkMode, Help, LightMode, Message, Menu, Notifications, Search, Close } from "@mui/icons-material"
-import { setLogout, toggleMode } from "../state"
-import FlexBetween from "./FlexBetween"
+
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
+
+import { setLogout, toggleMode } from "../state"
+
+import FlexBetween from "./FlexBetween"
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false)
@@ -29,13 +42,21 @@ const Navbar = () => {
   }
 
   return (
-    <FlexBetween padding="1rem 6%" bgcolor={alt}>
-      <FlexBetween gap="1.75rem">
-        <Typography fontWeight="bold" fontSize="clamp(1rem,2rem,2.25rem)" color="primary" onClick={() => handleGoToHome()} sx={{ "&:hover": { color: pLight, cursor: "pointer" } }}>
+    <FlexBetween sx={{ padding: "1rem 6%", bgcolor: alt }}>
+      <FlexBetween sx={{ gap: "1.75rem" }}>
+        <Typography
+          onClick={() => handleGoToHome()}
+          sx={{
+            fontWeight: "bold",
+            fontSize: "clamp(1rem,2rem,2.25rem)",
+            color: "primary",
+            "&:hover": { color: pLight, cursor: "pointer" },
+          }}
+        >
           MERN - Social Media
         </Typography>
         {isNonMobileScreens && (
-          <FlexBetween bgcolor={nLight} borderRadius="8px" gap="3rem" padding="0.1rem 1.5rem">
+          <FlexBetween sx={{ bgcolor: nLight, borderRadius: "8px", gap: "3rem", padding: "0.1rem 1.5rem" }}>
             <InputBase placeholder="Search..." />
             <IconButton>
               <Search />
@@ -45,9 +66,13 @@ const Navbar = () => {
       </FlexBetween>
 
       {isNonMobileScreens ? (
-        <FlexBetween gap="2rem">
+        <FlexBetween sx={{ gap: "2rem" }}>
           <IconButton onClick={() => dispatch(toggleMode())}>
-            {theme.palette.mode === "dark" ? <DarkMode sx={{ fontSize: "25px " }} /> : <LightMode sx={{ color: dark, fontSize: "25px " }} />}
+            {theme.palette.mode === "dark" ? (
+              <DarkMode sx={{ fontSize: "25px " }} />
+            ) : (
+              <LightMode sx={{ color: dark, fontSize: "25px " }} />
+            )}
           </IconButton>
           <Message sx={{ fontSize: "25px" }} />
           <Notifications sx={{ fontSize: "25px" }} />
@@ -83,16 +108,31 @@ const Navbar = () => {
       )}
 
       {!isNonMobileScreens && isMobileMenuToggled && (
-        <Box position="fixed" right="0" bottom="0" height="100%" zIndex="10" maxWidth="500px" minWidth="300px" bgcolor={nLight}>
-          <Box display="flex" justifyContent="flex-end" p="1rem">
+        <Box
+          sx={{
+            position: "fixed",
+            right: "0",
+            bottom: "0",
+            height: "100%",
+            zIndex: "10",
+            maxWidth: "500px",
+            minWidth: "300px",
+            bgcolor: nLight,
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "flex-end", p: "1rem" }}>
             <IconButton onClick={() => setIsMobileMenuToggled((prev: any) => !prev)}>
               <Close />
             </IconButton>
           </Box>
 
-          <FlexBetween gap="3rem" flexDirection="column" justifyContent="center" alignItems="center">
+          <FlexBetween sx={{ gap: "3rem", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
             <IconButton onClick={() => dispatch(toggleMode())}>
-              {theme.palette.mode === "dark" ? <DarkMode sx={{ fontSize: "25px " }} /> : <LightMode sx={{ color: dark, fontSize: "25px " }} />}
+              {theme.palette.mode === "dark" ? (
+                <DarkMode sx={{ fontSize: "25px " }} />
+              ) : (
+                <LightMode sx={{ color: dark, fontSize: "25px " }} />
+              )}
             </IconButton>
             <Message sx={{ fontSize: "25px" }} />
             <Notifications sx={{ fontSize: "25px" }} />

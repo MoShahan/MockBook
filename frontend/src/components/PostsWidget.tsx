@@ -1,9 +1,12 @@
 "use client"
 
 import React, { useEffect } from "react"
-import { useAppDispatch, useAppSelector } from "../app/hooks"
-import PostWidget from "./PostWidget"
+
 import { setPosts } from "@/state"
+
+import { useAppDispatch, useAppSelector } from "../app/hooks"
+
+import PostWidget from "./PostWidget"
 
 type PostsWidgetProps = {
   isProfile: boolean

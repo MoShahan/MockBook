@@ -1,13 +1,15 @@
 "use client"
 
-import { useAppSelector } from "@/app/hooks"
+import React, { useEffect, useState } from "react"
+import { EditOutlined, LocationOnOutlined, ManageAccountsOutlined, WorkOutlineOutlined } from "@mui/icons-material"
 import { Box, Divider, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
-import React, { useEffect, useState } from "react"
-import WidgetWrapper from "./WidgetWrapper"
+
+import { useAppSelector } from "@/app/hooks"
+
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
-import { EditOutlined, LocationOnOutlined, ManageAccountsOutlined, WorkOutlineOutlined } from "@mui/icons-material"
+import WidgetWrapper from "./WidgetWrapper"
 
 type UserWidgetProps = { userId: string; url: string }
 
@@ -44,15 +46,15 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
 
   return (
     <WidgetWrapper>
-      <FlexBetween gap="0.5rem" pb="1.1rem" onClick={handleGoToProfile}>
-        <FlexBetween gap="1rem">
+      <FlexBetween onClick={handleGoToProfile} sx={{ gap: "0.5rem", pb: "1.1rem" }}>
+        <FlexBetween sx={{ gap: "1rem" }}>
           <UserImage image={url}></UserImage>
           <Box>
             <Typography
               variant="h4"
-              color={dark}
-              fontWeight="500"
               sx={{
+                color: dark,
+                fontWeight: "500",
                 "&:hover": {
                   cursor: "pointer",
                   color: palette.primary.light,
@@ -61,7 +63,7 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
             >
               {user?.firstName} {user?.lastName}
             </Typography>
-            <Typography color={medium}>{user?.friends?.length || 0} friends</Typography>
+            <Typography sx={{ color: medium }}>{user?.friends?.length || 0} friends</Typography>
           </Box>
         </FlexBetween>
         <ManageAccountsOutlined />
@@ -69,64 +71,50 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
 
       <Divider />
 
-      <Box p="1rem 0">
-        <Box display="flex" alignItems="center" gap="1rem" mb="0.5rem">
-          <LocationOnOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{user?.location}</Typography>
+      <Box sx={{ p: "1rem 0" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "1rem", mb: "0.5rem" }}>
+          <LocationOnOutlined sx={{ fontSize: "large", color: main }} />
+          <Typography sx={{ color: medium }}>{user?.location}</Typography>
         </Box>
-        <Box display="flex" alignItems="center" gap="1rem">
-          <WorkOutlineOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{user?.occupation}</Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <WorkOutlineOutlined sx={{ fontSize: "large", color: main }} />
+          <Typography sx={{ color: medium }}>{user?.occupation}</Typography>
         </Box>
       </Box>
 
       <Divider />
 
-      <Box p="1rem 0">
-        <FlexBetween mb="0.5rem">
-          <Typography color={medium}>Number of profile visits</Typography>
-          <Typography color={main} fontWeight="500">
-            {user?.viewedProfile || 0}
-          </Typography>
+      <Box sx={{ p: "1rem 0" }}>
+        <FlexBetween sx={{ mb: "0.5rem" }}>
+          <Typography sx={{ color: medium }}>Number of profile visits</Typography>
+          <Typography sx={{ color: main, fontWeight: "500" }}>{user?.viewedProfile || 0}</Typography>
         </FlexBetween>
         <FlexBetween>
-          <Typography color={medium}>Impressions</Typography>
-          <Typography color={main} fontWeight="500">
-            {user?.impressions || 0}
-          </Typography>
+          <Typography sx={{ color: medium }}>Impressions</Typography>
+          <Typography sx={{ color: main, fontWeight: "500" }}>{user?.impressions || 0}</Typography>
         </FlexBetween>
       </Box>
 
       <Divider />
 
-      <Box p="1rem 0">
-        <Typography color={main} mb="1rem" fontSize="1rem" fontWeight="500">
-          Social Profiles
-        </Typography>
-        <FlexBetween gap="1rem" mb="0.5rem">
-          <FlexBetween gap="1rem">
+      <Box sx={{ p: "1rem 0" }}>
+        <Typography sx={{ color: main, mb: "1rem", fontSize: "1rem", fontWeight: "500" }}>Social Profiles</Typography>
+        <FlexBetween sx={{ gap: "1rem", mb: "0.5rem" }}>
+          <FlexBetween sx={{ gap: "1rem" }}>
             <img src="../assets/twitter.png" alt="twitter" />
             <Box>
-              <Typography color={main} fontWeight="500">
-                Twitter
-              </Typography>
-              <Typography color={medium} fontWeight="500">
-                Social Network
-              </Typography>
+              <Typography sx={{ color: main, fontWeight: "500" }}>Twitter</Typography>
+              <Typography sx={{ color: medium, fontWeight: "500" }}>Social Network</Typography>
             </Box>
           </FlexBetween>
           <EditOutlined sx={{ color: main }} />
         </FlexBetween>
-        <FlexBetween gap="1rem">
-          <FlexBetween gap="1rem">
+        <FlexBetween sx={{ gap: "1rem" }}>
+          <FlexBetween sx={{ gap: "1rem" }}>
             <img src="../assets/linkedin.png" alt="linkedin" />
             <Box>
-              <Typography color={main} fontWeight="500">
-                Likedin
-              </Typography>
-              <Typography color={medium} fontWeight="500">
-                Network Platform
-              </Typography>
+              <Typography sx={{ color: main, fontWeight: "500" }}>Likedin</Typography>
+              <Typography sx={{ color: medium, fontWeight: "500" }}>Network Platform</Typography>
             </Box>
           </FlexBetween>
           <EditOutlined sx={{ color: main }} />
