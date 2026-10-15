@@ -25,7 +25,7 @@ Find and prioritize actionable security issues. Do not change behavior silently 
 - Secrets are never hardcoded, logged, or committed.
 - Passwords use a suitable password hash and are never returned in API responses.
 - Login and registration have validation and appropriate abuse protection.
-- Token storage, logout, expiry, cookie flags, and CSRF implications are considered consistently.
+- Session strategy is **Bearer JWT** (not cookies unless the user explicitly requests a change). Review token storage (including current Redux Persist of `accessToken`), logout, expiry, and Authorization header handling. Do not recommend switching to HTTP-only cookies mid-review unless asked; note risks and hardening options instead.
 
 ### Authorization
 
@@ -56,7 +56,7 @@ Find and prioritize actionable security issues. Do not change behavior silently 
 
 - Restrict CORS to known frontend origins in production.
 - Configure security headers, rate limits, request size limits, and safe error responses.
-- Keep `.env` files, tokens, credentials, and user-uploaded content out of Git.
+- Keep `.env` files, tokens, credentials, and user-uploaded content out of Git. Align with actual env names: `MONGODB_URI`, `ACCESS_TOKEN_SECRET`, `PORT`, optional `MONGODB_USERNAME` / `MONGODB_PASSWORD`, frontend `NEXT_PUBLIC_API_URL`.
 - Ensure logs do not contain passwords, tokens, or unnecessary personal data.
 - Review dependencies for known vulnerabilities using the project's package manager.
 
