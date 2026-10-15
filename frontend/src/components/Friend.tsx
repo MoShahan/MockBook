@@ -24,19 +24,9 @@ type FriendProps = {
   showFriendButton?: boolean
   /** Optional trailing control (e.g. post ⋮ menu). */
   endAction?: React.ReactNode
-  /** When set, subtitle (e.g. post time) uses this instead of opening the profile. */
-  onSubtitleClick?: () => void
 }
 
-const Friend = ({
-  id,
-  name,
-  subtitle,
-  url,
-  showFriendButton = true,
-  endAction,
-  onSubtitleClick,
-}: FriendProps) => {
+const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }: FriendProps) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const user = useAppSelector(state => state.user)
@@ -79,10 +69,9 @@ const Friend = ({
         <Box onClick={handleGoToProfile} sx={{ cursor: id ? "pointer" : "default" }}>
           <UserImage image={url} name={name} size="55px" />
         </Box>
-        <Box>
+        <Box onClick={handleGoToProfile}>
           <Typography
             variant="h5"
-            onClick={handleGoToProfile}
             sx={{
               color: main,
               fontWeight: "500",
@@ -94,28 +83,7 @@ const Friend = ({
           >
             {name}
           </Typography>
-          {subtitle ? (
-            <Typography
-              onClick={() => {
-                if (onSubtitleClick) onSubtitleClick()
-                else handleGoToProfile()
-              }}
-              sx={{
-                color: medium,
-                fontSize: "0.75rem",
-                ...(onSubtitleClick
-                  ? {
-                      cursor: "pointer",
-                      "&:hover": { color: pLight, textDecoration: "underline" },
-                    }
-                  : id
-                    ? { cursor: "pointer" }
-                    : {}),
-              }}
-            >
-              {subtitle}
-            </Typography>
-          ) : null}
+          {subtitle ? <Typography sx={{ color: medium, fontSize: "0.75rem" }}>{subtitle}</Typography> : null}
         </Box>
       </FlexBetween>
       {showFriendButton && id && !isSelf && (

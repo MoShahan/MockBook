@@ -28,8 +28,6 @@ import {
   Typography,
   useTheme,
 } from "@mui/material"
-import { useRouter } from "next/navigation"
-
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api, mediaUrl } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
@@ -46,15 +44,12 @@ import WidgetWrapper from "./WidgetWrapper"
 
 type PostWidgetProps = {
   post: Post
-  /** When true (default), clicking the post timestamp opens `/post/[postId]`. */
-  linkToPost?: boolean
   /** Called after a successful delete (e.g. leave the single-post page). */
   onDeleted?: () => void
 }
 
-const PostWidget = ({ post, linkToPost = true, onDeleted }: PostWidgetProps) => {
+const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const dispatch = useAppDispatch()
-  const router = useRouter()
   const user = useAppSelector(state => state.user)
   const { success, error: toastError } = useToast()
   const likes = post.likes ?? {}
@@ -156,7 +151,6 @@ const PostWidget = ({ post, linkToPost = true, onDeleted }: PostWidgetProps) => 
         subtitle={formatPostTime(post.createdAt)}
         url={post.user?.picturePath || ""}
         showFriendButton={false}
-        onSubtitleClick={linkToPost ? () => router.push(`/post/${post._id}`) : undefined}
         endAction={
           isOwnPost ? (
             <>

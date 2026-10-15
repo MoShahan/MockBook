@@ -97,7 +97,7 @@ const PostPage = ({ params }: PostPageProps) => {
         )}
 
         {status === "ready" && post && (
-          <PostWidget post={post} linkToPost={false} onDeleted={() => router.push("/home")} />
+          <PostWidget post={post} onDeleted={() => router.push("/home")} />
         )}
       </Box>
     </Box>

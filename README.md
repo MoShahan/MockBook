@@ -53,7 +53,6 @@ MockBook/
 - Like / unlike comments (heart + count on each comment)
 - Delete **own** posts (⋮ menu + confirm dialog)
 - Single-post page at `/post/[postId]`; Share menu (copy link, X, Facebook, LinkedIn, WhatsApp)
-- Click post timestamp in the feed to open the single-post page
 - Profile feed shows that user’s posts only (`isProfile`)
 
 ### Friends & profiles
