@@ -1,15 +1,15 @@
-/** Friend list item as returned/formatted by the API / UI. */
+/** Friend list item as returned by the API (formatted objects, not raw ids). */
 export type Friend = {
-  /** Some API responses use `_id`; older UI code expects `id`. */
-  id?: string
-  _id?: string
+  _id: string
   firstName: string
   lastName: string
   occupation?: string
   location?: string
-  /** Avatar path or full asset URL field from API (`url` or `picturePath`). */
-  url?: string
   picturePath?: string
+  /** @deprecated Prefer `_id`; kept for older persisted Redux state. */
+  id?: string
+  /** @deprecated Prefer `picturePath`. */
+  url?: string
 }
 
 export type User = {
@@ -76,4 +76,11 @@ export type CreatePostFormValues = {
 export type ApiErrorBody = {
   msg?: string
   error?: string
+}
+
+/** Resolve a friend entry id whether it is a formatted object or a legacy string id. */
+export function friendIdOf(friend: Friend | string | null | undefined): string {
+  if (friend == null) return ""
+  if (typeof friend === "string") return friend
+  return String(friend._id ?? friend.id ?? "")
 }

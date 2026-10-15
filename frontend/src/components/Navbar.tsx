@@ -1,18 +1,8 @@
 "use client"
 
 import React, { useState } from "react"
-import { Close, DarkMode, Help, LightMode, Menu, Notifications, Search } from "@mui/icons-material"
-import {
-  Box,
-  FormControl,
-  IconButton,
-  InputBase,
-  MenuItem,
-  Select,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material"
+import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu, Notifications, Search } from "@mui/icons-material"
+import { Box, Button, IconButton, InputBase, Typography, useMediaQuery, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -35,17 +25,22 @@ const Navbar = () => {
   const theme = useTheme()
   const nLight = theme.palette.neutral.light
   const dark = theme.palette.neutral.dark
-  const bg = theme.palette.background.default
   const pLight = theme.palette.primary.light
   const alt = theme.palette.background.alt
 
-  const fullName = `${user?.firstName || "John"} ${user?.lastName || "Doe"}`
+  const fullName = user ? `${user.firstName} ${user.lastName}` : "Profile"
 
   const handleGoToHome = () => {
     router.push("/home")
   }
 
+  const handleGoToProfile = () => {
+    setIsMobileMenuToggled(false)
+    router.push("/profile")
+  }
+
   const handleLogout = () => {
+    setIsMobileMenuToggled(false)
     dispatch(setLogout())
     router.push("/login")
   }
@@ -53,6 +48,21 @@ const Navbar = () => {
   const showComingSoon = () => {
     info(COMING_SOON)
   }
+
+  const accountActions = (
+    <>
+      <Button onClick={handleGoToProfile} sx={{ color: dark, textTransform: "none", fontWeight: 500 }}>
+        {fullName}
+      </Button>
+      <Button
+        onClick={handleLogout}
+        startIcon={<LogoutOutlined />}
+        sx={{ color: dark, textTransform: "none" }}
+      >
+        Log Out
+      </Button>
+    </>
+  )
 
   return (
     <FlexBetween sx={{ padding: "1rem 6%", bgcolor: alt }}>
@@ -79,7 +89,7 @@ const Navbar = () => {
       </FlexBetween>
 
       {isNonMobileScreens ? (
-        <FlexBetween sx={{ gap: "2rem" }}>
+        <FlexBetween sx={{ gap: "1rem" }}>
           <IconButton onClick={() => dispatch(toggleMode())} aria-label="Toggle theme">
             {theme.palette.mode === "dark" ? (
               <DarkMode sx={{ fontSize: "25px" }} />
@@ -93,29 +103,7 @@ const Navbar = () => {
           <IconButton onClick={showComingSoon} aria-label="Help">
             <Help sx={{ fontSize: "25px" }} />
           </IconButton>
-          <FormControl variant="standard" defaultValue={fullName}>
-            <Select
-              defaultValue={fullName}
-              value={fullName}
-              sx={{
-                bgcolor: nLight,
-                width: "150px",
-                borderRadius: "0.25rem",
-                p: "0.25rem 1rem",
-                "& .MuiSvgIcon-root": {
-                  pr: "0.25rem",
-                  width: "3 rem",
-                },
-                "& .MuiSelect-select:focus": { bgcolor: nLight },
-              }}
-              input={<InputBase />}
-            >
-              <MenuItem value={fullName}>
-                <Typography>{fullName}</Typography>
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>Log Out</MenuItem>
-            </Select>
-          </FormControl>
+          {accountActions}
         </FlexBetween>
       ) : (
         <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)} aria-label="Open menu">
@@ -142,7 +130,7 @@ const Navbar = () => {
             </IconButton>
           </Box>
 
-          <FlexBetween sx={{ gap: "3rem", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+          <FlexBetween sx={{ gap: "2rem", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
             <IconButton onClick={() => dispatch(toggleMode())} aria-label="Toggle theme">
               {theme.palette.mode === "dark" ? (
                 <DarkMode sx={{ fontSize: "25px" }} />
@@ -156,31 +144,7 @@ const Navbar = () => {
             <IconButton onClick={showComingSoon} aria-label="Help">
               <Help sx={{ fontSize: "25px" }} />
             </IconButton>
-            <FormControl variant="standard" defaultValue={fullName}>
-              <Select
-                defaultValue={fullName}
-                value={fullName}
-                sx={{
-                  bgcolor: bg,
-                  width: "150px",
-                  borderRadius: "0.25rem",
-                  p: "0.25rem 1rem",
-                  "& .MuiSvgIcon-root": {
-                    pr: "0.25rem",
-                    width: "3 rem",
-                  },
-                  "& .MuiSelect-select:focus": {
-                    bgcolor: bg,
-                  },
-                }}
-                input={<InputBase />}
-              >
-                <MenuItem value={fullName}>
-                  <Typography>{fullName}</Typography>
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>Log Out</MenuItem>
-              </Select>
-            </FormControl>
+            {accountActions}
           </FlexBetween>
         </Box>
       )}

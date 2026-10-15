@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
+import { formatFriendsList } from "../lib/friends.js"
 import User from "../models/User.js"
 
 const toSafeUser = userDoc => {
@@ -58,7 +59,10 @@ export const login = async (req, res, next) => {
 
     const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET)
 
-    res.send({ user: toSafeUser(user), accessToken })
+    const safeUser = toSafeUser(user)
+    safeUser.friends = await formatFriendsList(user.friends)
+
+    res.send({ user: safeUser, accessToken })
   } catch (e) {
     res.status(500).json({ error: e.message })
   }

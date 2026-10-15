@@ -7,7 +7,10 @@ import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
+import { useToast } from "@/providers/ToastProvider"
 import { setFriends } from "@/state"
+import type { Friend as FriendData } from "@/types/models"
+import { friendIdOf } from "@/types/models"
 
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
@@ -27,13 +30,14 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
   const dispatch = useAppDispatch()
   const router = useRouter()
   const user = useAppSelector(state => state.user)
+  const { success, error: toastError } = useToast()
 
   const theme = useTheme()
   const pLight = theme.palette.primary.light
   const main = theme.palette.neutral.main
   const medium = theme.palette.neutral.medium
 
-  const isFriend = user?.friends.find(friend => (friend.id ?? friend._id) === id)
+  const isFriend = Boolean(user?.friends?.some(friend => friendIdOf(friend) === id))
 
   const handleGoToProfile = () => {
     if (!id) return
@@ -42,13 +46,20 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
     } else {
       router.push(`/profile/${id}`)
     }
-    router.refresh()
   }
 
   const patchFriend = async () => {
     if (!user?._id || !id || user._id === id) return
-    const { data } = await api.patch<{ friends: typeof user.friends }>(`/users/${user._id}/${id}`, {})
-    dispatch(setFriends({ friends: data.friends }))
+    try {
+      const { data } = await api.patch<{ message?: string; friends: FriendData[] }>(
+        `/users/${user._id}/${id}`,
+        {}
+      )
+      dispatch(setFriends({ friends: data.friends }))
+      success(data.message || (isFriend ? "Friend removed" : "Friend added"))
+    } catch {
+      toastError("Could not update friend")
+    }
   }
 
   return (
@@ -75,7 +86,11 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
         </Box>
       </FlexBetween>
       {showFriendButton && id && id !== user?._id && (
-        <IconButton sx={{ backgroundColor: pLight, p: "0.6rem" }} onClick={patchFriend} aria-label={isFriend ? "Remove friend" : "Add friend"}>
+        <IconButton
+          sx={{ backgroundColor: pLight, p: "0.6rem" }}
+          onClick={patchFriend}
+          aria-label={isFriend ? "Remove friend" : "Add friend"}
+        >
           {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
         </IconButton>
       )}

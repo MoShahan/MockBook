@@ -20,24 +20,27 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
 
   const [user, setUser] = useState<User | null>(null)
 
-  const getUser = async () => {
-    const { data } = await api.get<User>(`/users/${id}`)
-    setUser(data)
-  }
+  const profileId = id || loggedInUser?._id || ""
 
   useEffect(() => {
-    if (id) {
-      void getUser()
-    } else {
-      setUser(loggedInUser)
+    if (!profileId) return
+    let cancelled = false
+    void (async () => {
+      const { data } = await api.get<User>(`/users/${profileId}`)
+      if (!cancelled) setUser(data)
+    })()
+    return () => {
+      cancelled = true
     }
-  }, [])
+  }, [profileId])
 
-  if (!user) {
-    return null
+  if (!profileId || !user || user._id !== profileId) {
+    return (
+      <Box>
+        <Navbar />
+      </Box>
+    )
   }
-
-  const profileId = id || user._id
 
   return (
     <Box>
@@ -57,7 +60,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
           <FriendsListWidget userId={profileId} />
         </Box>
         <Box sx={{ flexBasis: isNonMobileScreens ? "42%" : undefined, mt: isNonMobileScreens ? undefined : "2rem" }}>
-          <PostsWidget isProfile={false} userId={profileId} />
+          <PostsWidget isProfile userId={profileId} />
         </Box>
       </Box>
     </Box>

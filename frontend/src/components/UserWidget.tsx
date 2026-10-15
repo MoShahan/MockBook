@@ -1,12 +1,23 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { EditOutlined, LocationOnOutlined, ManageAccountsOutlined, WorkOutlineOutlined } from "@mui/icons-material"
-import { Box, Divider, Typography, useTheme } from "@mui/material"
+import {
+  EditOutlined,
+  LocationOnOutlined,
+  ManageAccountsOutlined,
+  PersonAddOutlined,
+  PersonRemoveOutlined,
+  WorkOutlineOutlined,
+} from "@mui/icons-material"
+import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
+import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
-import type { User } from "@/types/models"
+import { useToast } from "@/providers/ToastProvider"
+import { setFriends } from "@/state"
+import type { Friend, User } from "@/types/models"
+import { friendIdOf } from "@/types/models"
 
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
@@ -16,35 +27,67 @@ type UserWidgetProps = { userId: string; url: string }
 
 const UserWidget = ({ userId, url }: UserWidgetProps) => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
+  const loggedInUser = useAppSelector(state => state.user)
+  const { success, error: toastError } = useToast()
   const { palette } = useTheme()
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
   const main = palette.neutral.main
+  const pLight = palette.primary.light
 
   const [user, setUser] = useState<User | null>(null)
 
-  const getUser = async () => {
-    const { data } = await api.get<User>(`/users/${userId}`)
-    setUser(data)
-  }
+  const isOwnProfile = Boolean(loggedInUser?._id && loggedInUser._id === userId)
+  const isFriend = Boolean(loggedInUser?.friends?.some(friend => friendIdOf(friend) === userId))
 
   useEffect(() => {
-    getUser()
-  }, [])
+    if (!userId) return
+    let cancelled = false
+    void (async () => {
+      const { data } = await api.get<User>(`/users/${userId}`)
+      if (!cancelled) setUser(data)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
 
   const handleGoToProfile = () => {
-    router.push("/profile")
+    if (!userId) return
+    if (isOwnProfile) {
+      router.push("/profile")
+    } else {
+      router.push(`/profile/${userId}`)
+    }
   }
 
-  if (!user) {
+  const patchFriend = async () => {
+    if (!loggedInUser?._id || !userId || isOwnProfile) return
+    try {
+      const { data } = await api.patch<{ message?: string; friends: Friend[] }>(
+        `/users/${loggedInUser._id}/${userId}`,
+        {}
+      )
+      dispatch(setFriends({ friends: data.friends }))
+      success(data.message || (isFriend ? "Friend removed" : "Friend added"))
+    } catch {
+      toastError("Could not update friend")
+    }
+  }
+
+  if (!user || user._id !== userId) {
     return null
   }
 
+  const displayUrl = url || user.picturePath || ""
+  const friendCount = Array.isArray(user.friends) ? user.friends.length : 0
+
   return (
     <WidgetWrapper>
-      <FlexBetween onClick={handleGoToProfile} sx={{ gap: "0.5rem", pb: "1.1rem" }}>
-        <FlexBetween sx={{ gap: "1rem" }}>
-          <UserImage image={url} name={`${user.firstName} ${user.lastName}`} />
+      <FlexBetween sx={{ gap: "0.5rem", pb: "1.1rem" }}>
+        <FlexBetween onClick={handleGoToProfile} sx={{ gap: "1rem", cursor: "pointer" }}>
+          <UserImage image={displayUrl} name={`${user.firstName} ${user.lastName}`} />
           <Box>
             <Typography
               variant="h4"
@@ -52,17 +95,26 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
                 color: dark,
                 fontWeight: "500",
                 "&:hover": {
-                  cursor: "pointer",
                   color: palette.primary.light,
                 },
               }}
             >
-              {user?.firstName} {user?.lastName}
+              {user.firstName} {user.lastName}
             </Typography>
-            <Typography sx={{ color: medium }}>{user?.friends?.length || 0} friends</Typography>
+            <Typography sx={{ color: medium }}>{friendCount} friends</Typography>
           </Box>
         </FlexBetween>
-        <ManageAccountsOutlined />
+        {isOwnProfile ? (
+          <ManageAccountsOutlined />
+        ) : (
+          <IconButton
+            sx={{ backgroundColor: pLight, p: "0.6rem" }}
+            onClick={patchFriend}
+            aria-label={isFriend ? "Remove friend" : "Add friend"}
+          >
+            {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
+          </IconButton>
+        )}
       </FlexBetween>
 
       <Divider />
@@ -70,11 +122,11 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
       <Box sx={{ p: "1rem 0" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: "1rem", mb: "0.5rem" }}>
           <LocationOnOutlined sx={{ fontSize: "large", color: main }} />
-          <Typography sx={{ color: medium }}>{user?.location}</Typography>
+          <Typography sx={{ color: medium }}>{user.location || "—"}</Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <WorkOutlineOutlined sx={{ fontSize: "large", color: main }} />
-          <Typography sx={{ color: medium }}>{user?.occupation}</Typography>
+          <Typography sx={{ color: medium }}>{user.occupation || "—"}</Typography>
         </Box>
       </Box>
 
@@ -83,11 +135,11 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
       <Box sx={{ p: "1rem 0" }}>
         <FlexBetween sx={{ mb: "0.5rem" }}>
           <Typography sx={{ color: medium }}>Number of profile visits</Typography>
-          <Typography sx={{ color: main, fontWeight: "500" }}>{user?.viewedProfile || 0}</Typography>
+          <Typography sx={{ color: main, fontWeight: "500" }}>{user.viewedProfile || 0}</Typography>
         </FlexBetween>
         <FlexBetween>
           <Typography sx={{ color: medium }}>Impressions</Typography>
-          <Typography sx={{ color: main, fontWeight: "500" }}>{user?.impressions || 0}</Typography>
+          <Typography sx={{ color: main, fontWeight: "500" }}>{user.impressions || 0}</Typography>
         </FlexBetween>
       </Box>
 
@@ -109,7 +161,7 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
           <FlexBetween sx={{ gap: "1rem" }}>
             <img src="../assets/linkedin.png" alt="linkedin" />
             <Box>
-              <Typography sx={{ color: main, fontWeight: "500" }}>Likedin</Typography>
+              <Typography sx={{ color: main, fontWeight: "500" }}>LinkedIn</Typography>
               <Typography sx={{ color: medium, fontWeight: "500" }}>Network Platform</Typography>
             </Box>
           </FlexBetween>
