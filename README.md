@@ -1,17 +1,17 @@
 # MockBook
 
-Social app built with the MERN stack: a Next.js frontend and an Express API backed by MongoDB. People can register, log in, write posts, like posts, and add or remove friends.
+Social app built with the MERN stack: a Next.js frontend and an Express API backed by MongoDB. Register, post (text + images), like, comment, friend others, and browse profiles — with light/dark mode and a hardened auth API.
 
 By Mohammed Shahan.
 
-> This project is being modernized. See [`PROJECT_PLAN.md`](./PROJECT_PLAN.md) for the step-by-step completion plan.
+> This project is being modernized. See [`PROJECT_PLAN.md`](./PROJECT_PLAN.md) for the step-by-step completion plan (and what’s still TODO).
 
 ## Stack
 
 | Layer    | Technologies                                                                                                     |
 | -------- | ---------------------------------------------------------------------------------------------------------------- |
 | Frontend | Next.js 16 (App Router), React 19, TypeScript, Material UI 9, Emotion, Formik, Yup, Redux Toolkit, redux-persist, axios |
-| Backend  | Node.js, Express 4.22, JWT, bcrypt 6, Multer 2                                                                   |
+| Backend  | Node.js, Express 4.22, JWT (access + refresh), bcrypt 6, Multer 2, Helmet, CORS allowlist, express-rate-limit, ImageKit |
 | Database | MongoDB with Mongoose 8                                                                                          |
 
 ## Project structure
@@ -30,20 +30,74 @@ MockBook/
 
 ## Features
 
-**Working or partially wired**
+### Auth & accounts
 
-- Register and log in
-- Create a post (with optional image)
-- Home feed and profile pages
-- Like / unlike a post
-- Add / remove friends
-- Light and dark mode
+- Register (slim form: first name, last name, email, password + confirm)
+- Auto-login after register (lands on home)
+- Log in / log out
+- Password show/hide on auth forms
+- Client + server password policy on register (8–24 chars; upper, lower, number, symbol)
+- Protected routes (`AuthProvider`); guests redirected to login
+- Bearer **access JWT** (default expiry **1 day**) + **refresh JWT** (default **7 days**)
+- Silent token refresh on API `401` (axios interceptor); logout if refresh fails
+- Password hashes never returned to the client (`select: false` + strip on responses)
+- Rate limiting on login / register / refresh
+- Consistent “Invalid credentials” login errors (no email enumeration)
 
-**Not finished yet** (see the plan)
+### Posts & feed
 
-- Comments, search, edit/delete posts, profile editing
-- Messages, notifications, share
-- Production deploy and hardened security
+- Create text and/or image posts
+- Home feed with author name, avatar, and relative time
+- Like / unlike posts (count updates in UI)
+- Comment on posts (add + list with author)
+- Delete **own** posts (⋮ menu + confirm dialog)
+- Profile feed shows that user’s posts only (`isProfile`)
+
+### Friends & profiles
+
+- Add / remove friends (both users’ lists update)
+- Friends list on profile pages (empty state when none)
+- Own profile (`/profile`) and other profiles (`/profile/[userId]`)
+- Click name/avatar to open the correct profile
+- Add/remove friend on another user’s profile header and in friends lists (not on post cards)
+- User details widget on profile only (not on home)
+- Manage-account control on own profile (coming-soon toast until profile edit ships)
+
+### Media & uploads
+
+- Image uploads via **Multer (memory) → ImageKit**
+- Image MIME whitelist (jpeg/png/gif/webp), **5MB** size limit
+- Server-generated unique filenames
+- Avatars fall back to initials when no photo
+
+### UX & client architecture
+
+- Light / dark mode (persisted)
+- Toast / snackbar feedback for key actions
+- Formik + Yup validation with visible field errors
+- Shared **axios** client + Bearer request interceptor
+- Redux Toolkit for auth, posts, theme (redux-persist)
+- TypeScript frontend (no `any` in `frontend/src`)
+- npm workspaces monorepo (`frontend` + `backend`)
+
+### API security & hygiene
+
+- CORS allowlist via `FRONTEND_URL`
+- Helmet security headers
+- Central error handler (no stack traces to clients)
+- ObjectId validation on route params
+- JWT identity for create post / like / comment / delete / friends (not body `userId` trust)
+- Auth secrets and token lifetimes configurable via env
+
+### Planned next (see `PROJECT_PLAN.md`)
+
+- Edit own posts; edit/delete own comments
+- Who liked a post; comment likes; save/bookmark posts
+- Home **Add people** rail (recent users + search); remove navbar search
+- Profile editing (location, occupation, avatar) + social links
+- Share (copy post link); Help/FAQ page
+- Infinite-scroll feed; UI overhaul; tests; production deploy
+- Messaging / DMs — **out of scope**
 
 ## Requirements
 
@@ -156,22 +210,26 @@ npm run start -w backend
 
 ## API overview
 
-| Method  | Path                   | Purpose                                                      |
-| ------- | ---------------------- | ------------------------------------------------------------ |
-| `POST`  | `/auth/register`       | Create an account (JSON: name, email, password)              |
-| `POST`  | `/auth/login`          | Log in; returns a JWT                                        |
-| `GET`   | `/users/:id`           | Get a user                                                   |
-| `GET`   | `/users/:id/friends`   | Get that user's friends                                      |
-| `PATCH` | `/users/:id/:friendId` | Add or remove a friend                                       |
-| `POST`  | `/posts`               | Create a post (multipart optional field `picture` → ImageKit)|
-| `GET`   | `/posts`               | Feed                                                         |
-| `GET`   | `/posts/:userId/posts` | One user's posts                                             |
-| `PATCH` | `/posts/:postId/like`  | Like or unlike                                               |
+| Method   | Path                         | Purpose                                                          |
+| -------- | ---------------------------- | ---------------------------------------------------------------- |
+| `POST`   | `/auth/register`             | Create account; returns user + access + refresh tokens           |
+| `POST`   | `/auth/login`                | Log in; returns user + access + refresh tokens                   |
+| `POST`   | `/auth/refresh`              | Exchange refresh token for a new access + refresh pair           |
+| `GET`    | `/users/:id`                 | Get a user (no password)                                         |
+| `GET`    | `/users/:id/friends`         | Get that user’s friends (formatted)                              |
+| `PATCH`  | `/users/friends/:friendId`   | Add or remove a friend (JWT user only)                           |
+| `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit)          |
+| `GET`    | `/posts`                     | Home feed                                                        |
+| `GET`    | `/posts/:userId/posts`       | One user’s posts                                                 |
+| `GET`    | `/posts/:postId`             | Single post                                                      |
+| `PATCH`  | `/posts/:postId/like`        | Like or unlike                                                   |
+| `POST`   | `/posts/:postId/comments`    | Add a comment                                                    |
+| `DELETE` | `/posts/:postId`             | Delete own post                                                  |
 
-Routes other than register and login expect:
+Routes other than register, login, and refresh expect:
 
 ```http
-Authorization: Bearer <token>
+Authorization: Bearer <accessToken>
 ```
 
 Post images are uploaded to **ImageKit** (Multer memory → ImageKit). MongoDB stores the returned HTTPS URL in `Post.url`. Configure `IMAGEKIT_*` in `backend/.env` (see `backend/.env.example`).
