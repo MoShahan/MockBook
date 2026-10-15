@@ -92,10 +92,10 @@ MockBook/
 ### Planned next (see `PROJECT_PLAN.md`)
 
 - Edit own posts; edit/delete own comments
-- Who liked a post; comment likes; save/bookmark posts
+- Who liked a post / comment (own + others’); comment likes; save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
 - Home **Add people** rail (recent users + search); remove navbar search
 - Profile editing (location, occupation, avatar) + social links
-- Share (copy post link); Help/FAQ page
+- Single-post page + Share menu (copy link, X, Facebook, LinkedIn, WhatsApp); Help/FAQ page
 - Infinite-scroll feed; UI overhaul; tests; production deploy
 - Messaging / DMs — **out of scope**
 
