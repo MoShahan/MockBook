@@ -4,7 +4,21 @@ import storage from "redux-persist/lib/storage"
 
 import authReducer from "@/state"
 
-const persistConfig = { key: "root", storage, version: 1 }
+const persistConfig = {
+  key: "root",
+  storage,
+  // v2: refreshToken added; rehydrate may leave refreshToken null until next login
+  version: 2,
+  migrate: async (state: unknown) => {
+    if (!state || typeof state !== "object") return state as never
+    const s = state as Record<string, unknown>
+    return {
+      ...s,
+      refreshToken: (s.refreshToken as string | null | undefined) ?? null,
+    } as never
+  },
+}
+
 const persistedReducer = persistReducer(persistConfig, authReducer)
 
 export const store = configureStore({

@@ -1,15 +1,15 @@
 import express from "express"
 
 import { addRemoveFriend, getUser, getUserFriends } from "../controllers/users.js"
+import { requireObjectId } from "../lib/objectId.js"
 import { verifyAccessToken } from "../middleware/auth.js"
 
 const router = express.Router()
 
-// Specific paths before `/:id`
-router.patch("/friends/:friendId", verifyAccessToken, addRemoveFriend)
+router.patch("/friends/:friendId", verifyAccessToken, requireObjectId("friendId"), addRemoveFriend)
 
-router.get("/:id/friends", verifyAccessToken, getUserFriends)
+router.get("/:id/friends", verifyAccessToken, requireObjectId("id"), getUserFriends)
 
-router.get("/:id", verifyAccessToken, getUser)
+router.get("/:id", verifyAccessToken, requireObjectId("id"), getUser)
 
 export default router

@@ -7,6 +7,14 @@ const initialState: AuthState = {
   user: null,
   posts: [],
   accessToken: null,
+  refreshToken: null,
+}
+
+/** Never persist a password if a buggy API response included one. */
+function sanitizeUser(user: User): User {
+  const { ...safe } = user as User & { password?: unknown }
+  delete (safe as { password?: unknown }).password
+  return safe
 }
 
 export const authSlice = createSlice({
@@ -16,13 +24,23 @@ export const authSlice = createSlice({
     toggleMode: state => {
       state.mode = state.mode === "light" ? "dark" : "light"
     },
-    setLogin: (state, action: PayloadAction<{ user: User; accessToken: string }>) => {
-      state.user = action.payload.user
+    setLogin: (
+      state,
+      action: PayloadAction<{ user: User; accessToken: string; refreshToken: string }>
+    ) => {
+      state.user = sanitizeUser(action.payload.user)
       state.accessToken = action.payload.accessToken
+      state.refreshToken = action.payload.refreshToken
+    },
+    setTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string }>) => {
+      state.accessToken = action.payload.accessToken
+      state.refreshToken = action.payload.refreshToken
     },
     setLogout: state => {
       state.user = null
       state.accessToken = null
+      state.refreshToken = null
+      state.posts = []
     },
     setFriends: (state, action: PayloadAction<{ friends: Friend[] }>) => {
       if (state.user) {
@@ -36,7 +54,6 @@ export const authSlice = createSlice({
     },
     setPost: (state, action: PayloadAction<{ post: Post }>) => {
       const updated = action.payload.post
-      // Match Mongo `_id` (not `id` / postId)
       state.posts = state.posts.map(post =>
         String(post._id) === String(updated._id) ? { ...post, ...updated } : post
       )
@@ -48,6 +65,15 @@ export const authSlice = createSlice({
   },
 })
 
-export const { toggleMode, setFriends, setLogin, setPost, setPosts, removePost, setLogout } = authSlice.actions
+export const {
+  toggleMode,
+  setFriends,
+  setLogin,
+  setTokens,
+  setPost,
+  setPosts,
+  removePost,
+  setLogout,
+} = authSlice.actions
 
 export default authSlice.reducer

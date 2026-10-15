@@ -53,6 +53,7 @@ export type AuthState = {
   user: User | null
   posts: Post[]
   accessToken: string | null
+  refreshToken: string | null
 }
 
 export type LoginFormValues = {

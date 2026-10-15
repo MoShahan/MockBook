@@ -4,15 +4,15 @@ import express from "express"
 import helmet from "helmet"
 import mongoose from "mongoose"
 import morgan from "morgan"
-import multer from "multer"
 
+import { errorHandler } from "./middleware/errorHandler.js"
 import authRoutes from "./routes/auth.js"
 import postRoutes from "./routes/posts.js"
 import userRoutes from "./routes/users.js"
 
 dotenv.config()
 const app = express()
-app.use(express.json())
+app.use(express.json({ limit: "1mb" }))
 
 /** Comma-separated browser origins allowed to call this API (e.g. http://localhost:3000). */
 const frontendOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
@@ -23,7 +23,6 @@ const frontendOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
 app.use(
   cors({
     origin(origin, callback) {
-      // Non-browser clients (curl, server-to-server) often send no Origin
       if (!origin || frontendOrigins.includes(origin)) {
         return callback(null, true)
       }
@@ -32,7 +31,7 @@ app.use(
     credentials: true,
   })
 )
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true, limit: "1mb" }))
 app.use(helmet())
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }))
 app.use(morgan("common"))
@@ -41,19 +40,18 @@ app.use("/auth", authRoutes)
 app.use("/users", userRoutes)
 app.use("/posts", postRoutes)
 
-// Multer rejects (file type / size) surface as errors from the upload middleware
-app.use((err, _req, res, next) => {
-  if (err instanceof multer.MulterError) {
-    const msg = err.code === "LIMIT_FILE_SIZE" ? "Image must be 5MB or smaller" : err.message
-    return res.status(400).json({ error: msg })
-  }
-  if (err instanceof Error && err.message === "Only image uploads are allowed") {
-    return res.status(400).json({ error: err.message })
-  }
-  return next(err)
-})
+app.use(errorHandler)
 
 const PORT = process.env.PORT
+if (!process.env.MONGODB_URI) {
+  console.error("MONGODB_URI is required")
+  process.exit(1)
+}
+if (!process.env.ACCESS_TOKEN_SECRET) {
+  console.error("ACCESS_TOKEN_SECRET is required")
+  process.exit(1)
+}
+
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
@@ -63,6 +61,7 @@ mongoose
   .catch(e => {
     console.log("mongo could not be connected")
     console.log(e.message)
+    process.exit(1)
   })
 
 process.on("SIGINT", async () => {

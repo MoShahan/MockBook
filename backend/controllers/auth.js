@@ -1,13 +1,20 @@
 import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
 
 import { formatFriendsList } from "../lib/friends.js"
+import { isValidPassword, PASSWORD_POLICY_MESSAGE } from "../lib/password.js"
+import { issueAuthTokens, verifyRefreshTokenString } from "../lib/tokens.js"
 import User from "../models/User.js"
 
 const toSafeUser = userDoc => {
   const user = userDoc.toObject ? userDoc.toObject() : { ...userDoc }
   delete user.password
   return user
+}
+
+const withFormattedFriends = async userDoc => {
+  const safeUser = toSafeUser(userDoc)
+  safeUser.friends = await formatFriendsList(userDoc.friends)
+  return safeUser
 }
 
 export const register = async (req, res, next) => {
@@ -18,6 +25,10 @@ export const register = async (req, res, next) => {
       return res.status(400).json({ error: "Missing required fields" })
     }
 
+    if (!isValidPassword(password)) {
+      return res.status(400).json({ error: PASSWORD_POLICY_MESSAGE })
+    }
+
     const existing = await User.findOne({ email })
     if (existing) {
       return res.status(409).json({ error: "Email already registered" })
@@ -26,7 +37,6 @@ export const register = async (req, res, next) => {
     const salt = await bcrypt.genSalt()
     const hashedPass = await bcrypt.hash(password, salt)
 
-    // Profile fields (location, occupation, avatar) are set later in profile edit (Step 4.5 / ImageKit).
     const newUser = new User({
       firstName,
       lastName,
@@ -41,32 +51,69 @@ export const register = async (req, res, next) => {
     })
 
     const savedUser = await newUser.save()
-    const accessToken = jwt.sign({ id: savedUser._id }, process.env.ACCESS_TOKEN_SECRET)
-    const safeUser = toSafeUser(savedUser)
-    safeUser.friends = await formatFriendsList(savedUser.friends)
+    const tokens = issueAuthTokens(savedUser._id)
+    const user = await withFormattedFriends(savedUser)
 
-    res.status(201).json({ user: safeUser, accessToken })
+    res.status(201).json({ user, ...tokens })
   } catch (e) {
-    res.status(500).json({ error: e.message })
+    next(e)
   }
 }
 
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
-    const user = await User.findOne({ email })
-    if (!user) return res.status(400).json({ msg: "Invalid credentials" })
+    if (!email || !password) {
+      return res.status(400).json({ error: "Invalid credentials" })
+    }
+
+    const user = await User.findOne({ email }).select("+password")
+    if (!user) {
+      return res.status(400).json({ error: "Invalid credentials" })
+    }
 
     const passMatch = await bcrypt.compare(password, user.password)
-    if (!passMatch) return res.status(400).json({ msg: "Invalid credentials" })
+    if (!passMatch) {
+      return res.status(400).json({ error: "Invalid credentials" })
+    }
 
-    const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET)
+    const tokens = issueAuthTokens(user._id)
+    const safeUser = await withFormattedFriends(user)
 
-    const safeUser = toSafeUser(user)
-    safeUser.friends = await formatFriendsList(user.friends)
-
-    res.send({ user: safeUser, accessToken })
+    res.status(200).json({ user: safeUser, ...tokens })
   } catch (e) {
-    res.status(500).json({ error: e.message })
+    next(e)
+  }
+}
+
+/** Exchange a valid refresh token for a new access + refresh pair. */
+export const refresh = async (req, res, next) => {
+  try {
+    const refreshToken =
+      (typeof req.body?.refreshToken === "string" && req.body.refreshToken.trim()) ||
+      (req.header("Authorization")?.startsWith("Bearer ")
+        ? req.header("Authorization").slice(7).trim()
+        : "")
+
+    if (!refreshToken) {
+      return res.status(401).json({ error: "Refresh token required" })
+    }
+
+    let payload
+    try {
+      payload = verifyRefreshTokenString(refreshToken)
+    } catch {
+      return res.status(401).json({ error: "Invalid or expired refresh token" })
+    }
+
+    const user = await User.findById(payload.id)
+    if (!user) {
+      return res.status(401).json({ error: "Invalid or expired refresh token" })
+    }
+
+    const tokens = issueAuthTokens(user._id)
+    res.status(200).json(tokens)
+  } catch (e) {
+    next(e)
   }
 }

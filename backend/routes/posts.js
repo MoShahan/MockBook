@@ -9,6 +9,7 @@ import {
   getUserPosts,
   likePost,
 } from "../controllers/posts.js"
+import { requireObjectId } from "../lib/objectId.js"
 import { verifyAccessToken } from "../middleware/auth.js"
 import { uploadPicture } from "../middleware/upload.js"
 
@@ -18,14 +19,14 @@ router.get("/", verifyAccessToken, getFeed)
 
 router.post("/", verifyAccessToken, uploadPicture, createPost)
 
-router.get("/:userId/posts", verifyAccessToken, getUserPosts)
+router.get("/:userId/posts", verifyAccessToken, requireObjectId("userId"), getUserPosts)
 
-router.get("/:postId", verifyAccessToken, getPost)
+router.get("/:postId", verifyAccessToken, requireObjectId("postId"), getPost)
 
-router.patch("/:postId/like", verifyAccessToken, likePost)
+router.patch("/:postId/like", verifyAccessToken, requireObjectId("postId"), likePost)
 
-router.post("/:postId/comments", verifyAccessToken, addComment)
+router.post("/:postId/comments", verifyAccessToken, requireObjectId("postId"), addComment)
 
-router.delete("/:postId", verifyAccessToken, deletePost)
+router.delete("/:postId", verifyAccessToken, requireObjectId("postId"), deletePost)
 
 export default router

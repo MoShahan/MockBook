@@ -78,19 +78,26 @@ MONGODB_USERNAME=your_atlas_db_user
 MONGODB_PASSWORD=your_atlas_db_password
 MONGODB_URI=mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/mockbook?retryWrites=true&w=majority
 ACCESS_TOKEN_SECRET=a-long-random-string
+REFRESH_TOKEN_SECRET=another-long-random-string
+ACCESS_TOKEN_EXPIRES=1d
+REFRESH_TOKEN_EXPIRES=7d
 FRONTEND_URL=http://localhost:3000
 ```
 
-| Variable              | Required by app | Purpose                                                                 |
-| --------------------- | --------------- | ----------------------------------------------------------------------- |
-| `PORT`                | Yes             | API listen port (local default `5000`)                                  |
-| `MONGODB_URI`         | Yes             | Full MongoDB connection string (Atlas or local)                         |
-| `ACCESS_TOKEN_SECRET` | Yes             | Secret used to sign JWTs                                                |
-| `FRONTEND_URL`        | No*             | Comma-separated browser origins allowed by CORS (default `http://localhost:3000`) |
-| `MONGODB_USERNAME`    | No              | Optional reference; credentials must still be inside `MONGODB_URI`      |
-| `MONGODB_PASSWORD`    | No              | Optional reference; credentials must still be inside `MONGODB_URI`      |
+| Variable               | Required by app | Purpose                                                                 |
+| ---------------------- | --------------- | ----------------------------------------------------------------------- |
+| `PORT`                 | Yes             | API listen port (local default `5000`)                                  |
+| `MONGODB_URI`          | Yes             | Full MongoDB connection string (Atlas or local)                         |
+| `ACCESS_TOKEN_SECRET`  | Yes             | Secret for access JWTs                                                  |
+| `REFRESH_TOKEN_SECRET` | No*             | Secret for refresh JWTs; falls back to access secret if unset           |
+| `ACCESS_TOKEN_EXPIRES` | No              | Access JWT lifetime (default `1d`; jsonwebtoken format e.g. `15m`, `1h`) |
+| `REFRESH_TOKEN_EXPIRES`| No              | Refresh JWT lifetime (default `7d`)                                     |
+| `FRONTEND_URL`         | No†             | Comma-separated browser origins allowed by CORS (default `http://localhost:3000`) |
+| `MONGODB_USERNAME`     | No              | Optional reference; credentials must still be inside `MONGODB_URI`      |
+| `MONGODB_PASSWORD`     | No              | Optional reference; credentials must still be inside `MONGODB_URI`      |
 
-\*Defaults to `http://localhost:3000` if unset. Set explicitly when the Next.js app runs on another origin.
+\*Set a distinct `REFRESH_TOKEN_SECRET` in production.  
+†Defaults to `http://localhost:3000` if unset. Set explicitly when the Next.js app runs on another origin.
 
 The backend currently connects with `process.env.MONGODB_URI` only. Username/password env vars are handy notes; they are not read by the code unless you wire them in later.
 

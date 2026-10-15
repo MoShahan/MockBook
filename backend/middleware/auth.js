@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken"
+import { verifyAccessTokenString } from "../lib/tokens.js"
 
 export const verifyAccessToken = (req, res, next) => {
   try {
@@ -16,15 +16,10 @@ export const verifyAccessToken = (req, res, next) => {
       return res.status(500).json({ error: "Server auth is not configured" })
     }
 
-    const verified = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    if (!verified?.id) {
-      return res.status(401).json({ error: "Invalid or expired token" })
-    }
-
+    const verified = verifyAccessTokenString(token)
     req.user = verified
     next()
   } catch {
-    // Invalid signature, malformed token, expired, etc. — never 500 for bad client tokens
     return res.status(401).json({ error: "Invalid or expired token" })
   }
 }

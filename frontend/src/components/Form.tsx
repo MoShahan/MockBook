@@ -62,29 +62,47 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
   const login = async (vals: LoginFormValues, onSubmitProps: FormikHelpers<LoginFormValues>) => {
     try {
       onSubmitProps.setStatus(undefined)
-      const { data } = await api.post<{ user: User; accessToken: string }>("/auth/login", {
-        email: vals.email,
-        password: vals.password,
-      })
+      const { data } = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
+        "/auth/login",
+        {
+          email: vals.email,
+          password: vals.password,
+        }
+      )
       onSubmitProps.resetForm()
-      dispatch(setLogin({ user: data.user, accessToken: data.accessToken }))
+      dispatch(
+        setLogin({
+          user: data.user,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        })
+      )
       handleGoToHome()
     } catch (e: unknown) {
-      onSubmitProps.setStatus(getErrorMessage(e, "Login failed"))
+      onSubmitProps.setStatus(getErrorMessage(e, "Invalid credentials"))
     }
   }
 
   const register = async (vals: RegisterFormValues, onSubmitProps: FormikHelpers<RegisterFormValues>) => {
     try {
       onSubmitProps.setStatus(undefined)
-      const { data } = await api.post<{ user: User; accessToken: string }>("/auth/register", {
-        firstName: vals.firstName,
-        lastName: vals.lastName,
-        email: vals.email,
-        password: vals.password,
-      })
+      const { data } = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
+        "/auth/register",
+        {
+          firstName: vals.firstName,
+          lastName: vals.lastName,
+          email: vals.email,
+          password: vals.password,
+        }
+      )
       onSubmitProps.resetForm()
-      dispatch(setLogin({ user: data.user, accessToken: data.accessToken }))
+      dispatch(
+        setLogin({
+          user: data.user,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        })
+      )
       handleGoToHome()
     } catch (e: unknown) {
       onSubmitProps.setStatus(getErrorMessage(e, "Registration failed"))
