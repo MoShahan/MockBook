@@ -17,7 +17,7 @@ MockBook is a full-stack social networking application being revived from an old
 
 ## Technology decisions
 
-- Preserve the existing architecture unless the user explicitly approves a redesign: Next.js/React/TypeScript frontend, Node.js/Express REST API, MongoDB with Mongoose, Material UI, Redux Toolkit, Formik, Yup, and the existing libraries where appropriate.
+- Preserve the existing architecture unless the user explicitly approves a redesign: Next.js/React/TypeScript frontend, Node.js/Express REST API, MongoDB with Mongoose, Material UI, Redux Toolkit, Formik, Yup, **axios** for frontend HTTP, and the existing libraries where appropriate.
 - Prefer TypeScript for new frontend code and for backend code only if the existing backend setup supports it cleanly. Do not convert the entire backend to TypeScript as part of an unrelated feature.
 - Upgrade dependencies deliberately, one compatibility group at a time. Read official migration notes for major-version upgrades and run relevant checks after each step.
 - Do not invent exact package versions. Inspect current package files and official compatibility information before recommending or installing versions.
@@ -43,7 +43,7 @@ If a check cannot run, say why. Never claim tests passed unless they were actual
 - Use functional React components and hooks. Avoid class components for new code.
 - Keep components focused. Separate reusable UI, feature-level components, API access, hooks, and types where doing so improves clarity.
 - Reuse the project's Material UI theme, design tokens, and existing component patterns. Avoid one-off styling values when a shared theme token is appropriate.
-- Keep API calls out of presentational components when a shared API helper is appropriate. Prefer the current `fetch` + Redux patterns unless RTK Query is already in use; do not introduce RTK Query mid-feature without explicit approval.
+- Keep API calls out of presentational components when a shared API helper is appropriate. Use the shared **axios** client in `frontend/src/lib/api.ts` (base URL from `NEXT_PUBLIC_API_URL`) for all Express API calls — do not use raw `fetch` for the API once Step 2.0 is done. Prefer an axios **request interceptor** to attach `Authorization: Bearer <token>` from Redux (Step 2.0b) instead of repeating auth headers at every call site. Do not introduce RTK Query mid-feature without explicit approval.
 - Use Redux Toolkit for genuinely shared client state (auth user, token, posts, theme).
 - Keep **Formik + Yup** for forms unless the user explicitly approves a different form/validation library.
 - Auth today uses a **Bearer JWT** stored in Redux (and currently persisted via redux-persist). Do not casually change token storage or break login during unrelated features. Improving persistence/expiry belongs in a dedicated auth-hardening task (see `PROJECT_PLAN.md` Part 3). Never persist password hashes. Prefer not to widen what is persisted.
@@ -51,7 +51,7 @@ If a check cannot run, say why. Never claim tests passed unless they were actual
 - Handle loading, empty, success, and error states for asynchronous screens.
 - Use semantic HTML, accessible labels, keyboard interaction, and visible focus states.
 - Keep forms validated on both client and server. Client validation is for UX, not a security boundary.
-- Do not introduce a new state-management, form, styling, or data-fetching library without explaining the benefit and getting approval.
+- Do not introduce a new state-management, form, styling, or data-fetching library (beyond axios, which is the planned FE HTTP client) without explaining the benefit and getting approval.
 
 ### Backend
 

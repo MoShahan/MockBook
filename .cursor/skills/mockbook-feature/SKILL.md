@@ -32,7 +32,7 @@ Deliver the smallest complete, tested vertical slice that fits MockBook's existi
    - Add tests for success, invalid input, unauthenticated requests, forbidden access, and missing resources.
 5. **Implement frontend**
    - Reuse the current Next.js routing, Material UI theme, shared components, and API conventions.
-   - Prefer the current `fetch` + Redux Toolkit patterns. Do **not** introduce RTK Query unless it is already in use or the user explicitly approves it.
+   - Use the shared **axios** client (`frontend/src/lib/api.ts` + `NEXT_PUBLIC_API_URL`) for all Express API calls. Do **not** use raw `fetch` for the API or introduce RTK Query unless the user explicitly approves it.
    - Keep **Formik + Yup** for forms unless the user approves a change.
    - Auth uses Bearer tokens in Redux (currently persisted). Do not casually change session storage or switch to cookies during an unrelated feature.
    - Use `NEXT_PUBLIC_API_URL` when wiring API base URLs; align with `backend` env (`MONGODB_URI`, etc.).
