@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react"
 
-import { api, authHeaders } from "@/lib/api"
+import { api } from "@/lib/api"
 import { setPosts } from "@/state"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
@@ -17,12 +17,9 @@ type PostsWidgetProps = {
 const PostsWidget = ({ isProfile = false, userId }: PostsWidgetProps) => {
   const dispatch = useAppDispatch()
   const posts = useAppSelector((state: any) => state.posts)
-  const accessToken = useAppSelector(state => state?.accessToken)
 
   const getPosts = async () => {
-    const { data } = await api.get(`/posts${isProfile ? `/${userId}/posts` : ""}`, {
-      headers: authHeaders(accessToken),
-    })
+    const { data } = await api.get(`/posts${isProfile ? `/${userId}/posts` : ""}`)
     dispatch(setPosts({ posts: data }))
   }
 

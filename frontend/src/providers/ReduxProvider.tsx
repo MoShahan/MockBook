@@ -1,25 +1,10 @@
 "use client"
 
 import React, { ReactNode } from "react"
-import { configureStore } from "@reduxjs/toolkit"
 import { Provider } from "react-redux"
-import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from "redux-persist"
 import { PersistGate } from "redux-persist/integration/react"
-import storage from "redux-persist/lib/storage"
 
-import authReducer from "@/state"
-
-const persistConfig = { key: "root", storage, version: 1 }
-const persistedReducer = persistReducer(persistConfig, authReducer)
-const store = configureStore({
-  reducer: persistedReducer,
-  middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({
-      serializableCheck: { ignoredActions: [FLUSH, PURGE, REGISTER, REHYDRATE, PAUSE, PERSIST] },
-    }),
-})
-
-const persistor = persistStore(store)
+import { persistor, store } from "@/state/store"
 
 // redux-persist types lag React 19; cast keeps PersistGate usable
 const Gate = PersistGate as unknown as React.ComponentType<{
@@ -40,5 +25,4 @@ const ReduxProvider = ({ children }: { children: ReactNode }) => {
 
 export default ReduxProvider
 
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = typeof store.dispatch
+export type { AppDispatch, RootState } from "@/state/store"

@@ -5,8 +5,7 @@ import { EditOutlined, LocationOnOutlined, ManageAccountsOutlined, WorkOutlineOu
 import { Box, Divider, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
-import { useAppSelector } from "@/app/hooks"
-import { api, authHeaders } from "@/lib/api"
+import { api } from "@/lib/api"
 
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
@@ -20,14 +19,11 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
   const main = palette.neutral.main
-  const accessToken = useAppSelector(state => state.accessToken)
 
   const [user, setUser] = useState<UserType>(null)
 
   const getUser = async () => {
-    const { data } = await api.get(`/users/${userId}`, {
-      headers: authHeaders(accessToken),
-    })
+    const { data } = await api.get(`/users/${userId}`)
     setUser(data)
   }
 

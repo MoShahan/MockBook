@@ -5,7 +5,7 @@ import { ChatBubbleOutlineOutlined, FavoriteBorderOutlined, FavoriteOutlined, Sh
 import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { api, assetUrl, authHeaders } from "@/lib/api"
+import { api, assetUrl } from "@/lib/api"
 import { setPost } from "@/state"
 
 import FlexBetween from "./FlexBetween"
@@ -16,7 +16,6 @@ type PostWidgetProps = { post: PostType }
 
 const PostWidget = ({ post }: PostWidgetProps) => {
   const dispatch = useAppDispatch()
-  const accessToken = useAppSelector(state => state.accessToken)
   const user = useAppSelector((state: any) => state?.user)
   const isLiked = Boolean(post?.likes[user?._id])
   const likesCount = Object.keys(post?.likes).length
@@ -28,11 +27,7 @@ const PostWidget = ({ post }: PostWidgetProps) => {
   const [isComments, setIsComments] = useState<boolean>(false)
 
   const patchLike = async () => {
-    const { data } = await api.patch(
-      `/posts/${post?._id}/like`,
-      { userId: user?._id },
-      { headers: authHeaders(accessToken) },
-    )
+    const { data } = await api.patch(`/posts/${post?._id}/like`, { userId: user?._id })
     dispatch(setPost({ post: data.updatedPost }))
   }
 

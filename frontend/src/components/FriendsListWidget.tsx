@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { Box, Typography, useTheme } from "@mui/material"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { api, authHeaders } from "@/lib/api"
+import { api } from "@/lib/api"
 import { setFriends } from "@/state"
 
 import Friend from "./Friend"
@@ -14,14 +14,11 @@ type FriendsListWidgetProps = { userId: string }
 
 const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
   const dispatch = useAppDispatch()
-  const accessToken = useAppSelector((state: any) => state.accessToken)
   const user = useAppSelector((state: any) => state?.user)
   const theme: any = useTheme()
 
   const getFriends = async () => {
-    const { data } = await api.get(`/${userId}/friends`, {
-      headers: authHeaders(accessToken),
-    })
+    const { data } = await api.get(`/${userId}/friends`)
     dispatch(setFriends({ friends: data }))
   }
 

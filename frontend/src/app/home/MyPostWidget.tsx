@@ -16,7 +16,7 @@ import DropZone from "react-dropzone"
 import FlexBetween from "@/components/FlexBetween"
 import UserImage from "@/components/UserImage"
 import WidgetWrapper from "@/components/WidgetWrapper"
-import { api, authHeaders } from "@/lib/api"
+import { api } from "@/lib/api"
 import { setPosts } from "@/state"
 
 import { useAppDispatch, useAppSelector } from "../hooks"
@@ -26,7 +26,6 @@ type MyPostWidgetProps = { url: string }
 const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
   const user = useAppSelector((state: any) => state?.user)
-  const accessToken = useAppSelector(state => state?.accessToken)
   const dispatch = useAppDispatch()
   const { palette }: any = useTheme()
   const medMain = palette.neutral.mediumMain
@@ -44,9 +43,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
       formData.append("picture", image)
       formData.append("url", image?.name)
     }
-    const { data } = await api.post("/posts", formData, {
-      headers: authHeaders(accessToken),
-    })
+    const { data } = await api.post("/posts", formData)
     dispatch(setPosts({ res: data }))
     setPostDesc("")
     setImage(null)

@@ -6,7 +6,7 @@ import { Box, IconButton, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { api, authHeaders } from "@/lib/api"
+import { api } from "@/lib/api"
 import { setFriends } from "@/state"
 
 import FlexBetween from "./FlexBetween"
@@ -17,7 +17,6 @@ type FriendProps = { id: string; subtitle: string; url: string; name: string }
 const Friend = ({ id, name, subtitle, url }: FriendProps) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const accessToken = useAppSelector((state: any) => state.accessToken)
   const user = useAppSelector((state: any) => state?.user)
 
   const theme: any = useTheme()
@@ -37,9 +36,7 @@ const Friend = ({ id, name, subtitle, url }: FriendProps) => {
   }
 
   const patchFriend = async () => {
-    const { data } = await api.patch(`/users/${user?._id}/${id}`, {}, {
-      headers: authHeaders(accessToken),
-    })
+    const { data } = await api.patch(`/users/${user?._id}/${id}`, {})
     dispatch(setFriends({ friends: data.friends }))
   }
 

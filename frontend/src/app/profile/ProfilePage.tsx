@@ -7,30 +7,25 @@ import FriendsListWidget from "@/components/FriendsListWidget"
 import Navbar from "@/components/Navbar"
 import PostsWidget from "@/components/PostsWidget"
 import UserWidget from "@/components/UserWidget"
-import { api, authHeaders } from "@/lib/api"
+import { api } from "@/lib/api"
 
 import { useAppSelector } from "../hooks"
 
 type ProfilePageProps = { id: string }
 
 const ProfilePage = ({ id }: ProfilePageProps) => {
-  const accessToken = useAppSelector(state => state.accessToken)
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
   const loggedInUser = useAppSelector((state: any) => state?.user)
 
   const [user, setUser] = useState<UserType>(null)
 
   const getUser = async () => {
-    const { data } = await api.get(`/users/${id}`, {
-      headers: authHeaders(accessToken),
-    })
+    const { data } = await api.get(`/users/${id}`)
     setUser(data)
   }
 
   const getUserPosts = async () => {
-    await api.get(`/users/${id}`, {
-      headers: authHeaders(accessToken),
-    })
+    await api.get(`/users/${id}`)
   }
 
   useEffect(() => {

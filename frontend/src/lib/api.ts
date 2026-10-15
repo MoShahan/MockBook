@@ -3,9 +3,13 @@
  *
  * Set `NEXT_PUBLIC_API_URL` in `frontend/.env.local` (see `.env.example`).
  * Falls back to http://localhost:5000 for local dev if unset.
+ *
+ * Bearer JWT is attached via a request interceptor from the Redux store.
  */
 
 import axios from "axios"
+
+import { store } from "@/state/store"
 
 const DEFAULT_API_URL = "http://localhost:5000"
 
@@ -43,7 +47,10 @@ export const api = axios.create({
   },
 })
 
-/** Authorization header helper for Bearer JWT. */
-export function authHeaders(accessToken: string | null | undefined) {
-  return accessToken ? { Authorization: `Bearer ${accessToken}` } : {}
-}
+api.interceptors.request.use(config => {
+  const token = store.getState().accessToken
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
