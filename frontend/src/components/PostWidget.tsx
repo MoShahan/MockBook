@@ -7,27 +7,31 @@ import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api, assetUrl } from "@/lib/api"
 import { setPost } from "@/state"
+import type { Post } from "@/types/models"
 
 import FlexBetween from "./FlexBetween"
 import Friend from "./Friend"
 import WidgetWrapper from "./WidgetWrapper"
 
-type PostWidgetProps = { post: PostType }
+type PostWidgetProps = { post: Post }
 
 const PostWidget = ({ post }: PostWidgetProps) => {
   const dispatch = useAppDispatch()
-  const user = useAppSelector((state: any) => state?.user)
-  const isLiked = Boolean(post?.likes[user?._id])
-  const likesCount = Object.keys(post?.likes).length
+  const user = useAppSelector(state => state.user)
+  const likes = post.likes ?? {}
+  const isLiked = Boolean(user?._id && likes[user._id])
+  const likesCount = Object.keys(likes).length
 
-  const theme: any = useTheme()
+  const theme = useTheme()
   const primary = theme.palette.primary.main
   const neutral = theme.palette.neutral.main
 
-  const [isComments, setIsComments] = useState<boolean>(false)
+  const [isComments, setIsComments] = useState(false)
 
   const patchLike = async () => {
-    const { data } = await api.patch(`/posts/${post?._id}/like`, { userId: user?._id })
+    const { data } = await api.patch<{ message: string; updatedPost: Post }>(`/posts/${post._id}/like`, {
+      userId: user?._id,
+    })
     dispatch(setPost({ post: data.updatedPost }))
   }
 

@@ -1,7 +1,5 @@
 "use client"
 
-import { useAppSelector } from "../hooks"
-
 import ProfilePage from "./ProfilePage"
 
 const MyProfilePage = () => {

@@ -17,14 +17,14 @@ type FriendProps = { id: string; subtitle: string; url: string; name: string }
 const Friend = ({ id, name, subtitle, url }: FriendProps) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const user = useAppSelector((state: any) => state?.user)
+  const user = useAppSelector(state => state.user)
 
-  const theme: any = useTheme()
+  const theme = useTheme()
   const pLight = theme.palette.primary.light
   const main = theme.palette.neutral.main
   const medium = theme.palette.neutral.medium
 
-  const isFriend = user?.friends.find((friend: any) => friend.id === id)
+  const isFriend = user?.friends.find(friend => (friend.id ?? friend._id) === id)
 
   const handleGoToProfile = () => {
     if (id === user?._id) {

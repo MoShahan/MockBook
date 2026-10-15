@@ -9,7 +9,7 @@ import FlexBetween from "./FlexBetween"
 import WidgetWrapper from "./WidgetWrapper"
 
 const AdvertWidget = () => {
-  const theme: any = useTheme()
+  const theme = useTheme()
   const dark = theme.palette.neutral.dark
   const main = theme.palette.neutral.main
   const medium = theme.palette.neutral.medium

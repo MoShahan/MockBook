@@ -15,7 +15,7 @@ import MyPostWidget from "./MyPostWidget"
 
 const HomePage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
-  const user = useAppSelector((state: any) => state?.user)
+  const user = useAppSelector(state => state.user)
 
   return (
     <Box>
@@ -30,18 +30,18 @@ const HomePage = () => {
         }}
       >
         <Box sx={{ flexBasis: isNonMobileScreens ? "26%" : undefined }}>
-          <UserWidget url={user?.picturePath} userId={user?._id} />
+          <UserWidget url={user?.picturePath ?? ""} userId={user?._id ?? ""} />
         </Box>
         <Box sx={{ flexBasis: isNonMobileScreens ? "42%" : undefined, mt: isNonMobileScreens ? undefined : "2rem" }}>
-          <MyPostWidget url={user?.picturePath} />
+          <MyPostWidget url={user?.picturePath ?? ""} />
           <Divider sx={{ margin: "1rem" }} />
-          <PostsWidget isProfile={false} userId={user?._id}></PostsWidget>
+          <PostsWidget isProfile={false} userId={user?._id ?? ""} />
         </Box>
         {isNonMobileScreens && (
           <Box sx={{ flexBasis: "26%" }}>
             <AdvertWidget />
             <Box sx={{ m: "2rem 0" }} />
-            <FriendsListWidget userId={user?._id} />
+            <FriendsListWidget userId={user?._id ?? ""} />
           </Box>
         )}
       </Box>

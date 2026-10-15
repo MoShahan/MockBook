@@ -4,6 +4,7 @@ import React, { useEffect } from "react"
 
 import { api } from "@/lib/api"
 import { setPosts } from "@/state"
+import type { Post } from "@/types/models"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 
@@ -16,10 +17,10 @@ type PostsWidgetProps = {
 
 const PostsWidget = ({ isProfile = false, userId }: PostsWidgetProps) => {
   const dispatch = useAppDispatch()
-  const posts = useAppSelector((state: any) => state.posts)
+  const posts = useAppSelector(state => state.posts)
 
   const getPosts = async () => {
-    const { data } = await api.get(`/posts${isProfile ? `/${userId}/posts` : ""}`)
+    const { data } = await api.get<Post[]>(`/posts${isProfile ? `/${userId}/posts` : ""}`)
     dispatch(setPosts({ posts: data }))
   }
 
@@ -29,8 +30,8 @@ const PostsWidget = ({ isProfile = false, userId }: PostsWidgetProps) => {
 
   return (
     <>
-      {posts.map((post: PostType) => (
-        <PostWidget key={post?._id} post={post}></PostWidget>
+      {posts.map(post => (
+        <PostWidget key={post._id} post={post} />
       ))}
     </>
   )

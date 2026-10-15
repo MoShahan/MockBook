@@ -2,38 +2,39 @@
 
 import React from "react"
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material"
+import type { ObjectSchema } from "yup"
 import * as yup from "yup"
 
 import Form from "@/components/Form"
+import type { RegisterFormValues } from "@/types/models"
 
-const registerSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
+const registerSchema: ObjectSchema<RegisterFormValues> = yup.object({
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
+  email: yup.string().email("Enter a valid email").required("Email is required"),
+  password: yup.string().required("Password is required"),
   cPassword: yup
     .string()
-    .required("required")
+    .required("Please confirm your password")
     .oneOf([yup.ref("password")], "Passwords must match"),
-  location: yup.string().required("required"),
-  // Optional profile photo: File when chosen, otherwise empty string
-  picture: yup.mixed().nullable(),
-  occupation: yup.string().required("required"),
+  location: yup.string().required("Location is required"),
+  picture: yup.mixed<File>().nullable().defined(),
+  occupation: yup.string().required("Occupation is required"),
 })
 
-const registerInitVals = {
+const registerInitVals: RegisterFormValues = {
   firstName: "",
   lastName: "",
   email: "",
   password: "",
   cPassword: "",
   location: "",
-  picture: null as File | null,
+  picture: null,
   occupation: "",
 }
 
 const RegisterPage = () => {
-  const theme: any = useTheme()
+  const theme = useTheme()
   const alt = theme.palette.background.alt
 
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")

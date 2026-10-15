@@ -2,22 +2,24 @@
 
 import React from "react"
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material"
+import type { ObjectSchema } from "yup"
 import * as yup from "yup"
 
 import Form from "@/components/Form"
+import type { LoginFormValues } from "@/types/models"
 
-const loginSchema = yup.object().shape({
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
+const loginSchema: ObjectSchema<LoginFormValues> = yup.object({
+  email: yup.string().email("Enter a valid email").required("Email is required"),
+  password: yup.string().required("Password is required"),
 })
 
-const loginInitVals = {
+const loginInitVals: LoginFormValues = {
   email: "",
   password: "",
 }
 
 const LoginPage = () => {
-  const theme: any = useTheme()
+  const theme = useTheme()
   const alt = theme.palette.background.alt
 
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")

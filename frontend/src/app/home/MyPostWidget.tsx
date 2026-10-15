@@ -18,6 +18,7 @@ import UserImage from "@/components/UserImage"
 import WidgetWrapper from "@/components/WidgetWrapper"
 import { api } from "@/lib/api"
 import { setPosts } from "@/state"
+import type { Post } from "@/types/models"
 
 import { useAppDispatch, useAppSelector } from "../hooks"
 
@@ -25,26 +26,27 @@ type MyPostWidgetProps = { url: string }
 
 const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
-  const user = useAppSelector((state: any) => state?.user)
+  const user = useAppSelector(state => state.user)
   const dispatch = useAppDispatch()
-  const { palette }: any = useTheme()
+  const { palette } = useTheme()
   const medMain = palette.neutral.mediumMain
   const medium = palette.neutral.medium
 
-  const [isImage, setIsImage] = useState<boolean>(false)
-  const [image, setImage] = useState<any>(null)
-  const [postDesc, setPostDesc] = useState<string>("")
+  const [isImage, setIsImage] = useState(false)
+  const [image, setImage] = useState<File | null>(null)
+  const [postDesc, setPostDesc] = useState("")
 
   const handlePost = async () => {
+    if (!user?._id) return
     const formData = new FormData()
     formData.append("description", postDesc)
-    formData.append("userId", user?._id)
+    formData.append("userId", user._id)
     if (image) {
       formData.append("picture", image)
-      formData.append("url", image?.name)
+      formData.append("url", image.name)
     }
-    const { data } = await api.post("/posts", formData)
-    dispatch(setPosts({ res: data }))
+    const { data } = await api.post<Post[]>("/posts", formData)
+    dispatch(setPosts({ posts: data }))
     setPostDesc("")
     setImage(null)
   }
@@ -52,7 +54,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   return (
     <WidgetWrapper>
       <FlexBetween sx={{ gap: "1.5rem" }}>
-        <UserImage image={user?.picturePath} />
+        <UserImage image={url} />
         <InputBase
           placeholder="What's on your mind?"
           sx={{
@@ -67,7 +69,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
       </FlexBetween>
       {isImage && (
         <Box sx={{ border: `1px solid ${medium}`, borderRadius: "4px", mt: "1rem", p: "1rem" }}>
-          <DropZone multiple={false} onDrop={acceptedFiles => setImage(acceptedFiles[0])}>
+          <DropZone multiple={false} onDrop={acceptedFiles => setImage(acceptedFiles[0] ?? null)}>
             {({ getRootProps, getInputProps }) => (
               <FlexBetween>
                 <Box

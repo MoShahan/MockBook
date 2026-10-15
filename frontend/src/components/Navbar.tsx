@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { Close, DarkMode, Help, LightMode, Menu, Message, Notifications, Search } from "@mui/icons-material"
 import {
   Box,
@@ -25,10 +25,10 @@ const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false)
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const user = useAppSelector((state: any) => state?.user)
+  const user = useAppSelector(state => state.user)
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
 
-  const theme: any = useTheme()
+  const theme = useTheme()
   const nLight = theme.palette.neutral.light
   const dark = theme.palette.neutral.dark
   const bg = theme.palette.background.default
@@ -39,6 +39,11 @@ const Navbar = () => {
 
   const handleGoToHome = () => {
     router.push("/home")
+  }
+
+  const handleLogout = () => {
+    dispatch(setLogout())
+    router.push("/login")
   }
 
   return (
@@ -97,12 +102,12 @@ const Navbar = () => {
               <MenuItem value={fullName}>
                 <Typography>{fullName}</Typography>
               </MenuItem>
-              <MenuItem onClick={() => dispatch(setLogout())}>Log Out</MenuItem>
+              <MenuItem onClick={handleLogout}>Log Out</MenuItem>
             </Select>
           </FormControl>
         </FlexBetween>
       ) : (
-        <IconButton onClick={() => setIsMobileMenuToggled((prev: any) => !prev)}>
+        <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)}>
           <Menu />
         </IconButton>
       )}
@@ -121,7 +126,7 @@ const Navbar = () => {
           }}
         >
           <Box sx={{ display: "flex", justifyContent: "flex-end", p: "1rem" }}>
-            <IconButton onClick={() => setIsMobileMenuToggled((prev: any) => !prev)}>
+            <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)}>
               <Close />
             </IconButton>
           </Box>
@@ -159,7 +164,7 @@ const Navbar = () => {
                 <MenuItem value={fullName}>
                   <Typography>{fullName}</Typography>
                 </MenuItem>
-                <MenuItem onClick={() => dispatch(setLogout())}>Log Out</MenuItem>
+                <MenuItem onClick={handleLogout}>Log Out</MenuItem>
               </Select>
             </FormControl>
           </FlexBetween>

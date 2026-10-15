@@ -1,13 +1,13 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { type ReactNode, useMemo } from "react"
 import { createTheme, ThemeProvider } from "@mui/material"
-import { useSelector } from "react-redux"
 
+import { useAppSelector } from "@/app/hooks"
 import { themeSettings } from "@/theme"
 
-const ThemeProviderComp = ({ children }: any) => {
-  const mode = useSelector((state: any) => state?.mode)
+const ThemeProviderComp = ({ children }: { children: ReactNode }) => {
+  const mode = useAppSelector(state => state.mode)
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode])
 
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>

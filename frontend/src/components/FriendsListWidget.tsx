@@ -6,6 +6,7 @@ import { Box, Typography, useTheme } from "@mui/material"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { setFriends } from "@/state"
+import type { Friend as FriendData } from "@/types/models"
 
 import Friend from "./Friend"
 import WidgetWrapper from "./WidgetWrapper"
@@ -14,11 +15,11 @@ type FriendsListWidgetProps = { userId: string }
 
 const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
   const dispatch = useAppDispatch()
-  const user = useAppSelector((state: any) => state?.user)
-  const theme: any = useTheme()
+  const user = useAppSelector(state => state.user)
+  const theme = useTheme()
 
   const getFriends = async () => {
-    const { data } = await api.get(`/${userId}/friends`)
+    const { data } = await api.get<FriendData[]>(`/${userId}/friends`)
     dispatch(setFriends({ friends: data }))
   }
 
@@ -36,15 +37,18 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
         List of Friends
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        {user?.friends.map((friend: any) => (
-          <Friend
-            key={friend?.id}
-            id={friend.id}
-            name={`${friend?.firstName} ${friend?.lastName}`}
-            subtitle={friend?.occupation}
-            url={friend?.url}
-          />
-        ))}
+        {user.friends.map(friend => {
+          const friendId = friend.id ?? friend._id ?? ""
+          return (
+            <Friend
+              key={friendId}
+              id={friendId}
+              name={`${friend.firstName} ${friend.lastName}`}
+              subtitle={friend.occupation ?? ""}
+              url={friend.url ?? friend.picturePath ?? ""}
+            />
+          )
+        })}
       </Box>
     </WidgetWrapper>
   )

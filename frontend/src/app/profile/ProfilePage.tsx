@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar"
 import PostsWidget from "@/components/PostsWidget"
 import UserWidget from "@/components/UserWidget"
 import { api } from "@/lib/api"
+import type { User } from "@/types/models"
 
 import { useAppSelector } from "../hooks"
 
@@ -15,22 +16,18 @@ type ProfilePageProps = { id: string }
 
 const ProfilePage = ({ id }: ProfilePageProps) => {
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
-  const loggedInUser = useAppSelector((state: any) => state?.user)
+  const loggedInUser = useAppSelector(state => state.user)
 
-  const [user, setUser] = useState<UserType>(null)
+  const [user, setUser] = useState<User | null>(null)
 
   const getUser = async () => {
-    const { data } = await api.get(`/users/${id}`)
+    const { data } = await api.get<User>(`/users/${id}`)
     setUser(data)
-  }
-
-  const getUserPosts = async () => {
-    await api.get(`/users/${id}`)
   }
 
   useEffect(() => {
     if (id) {
-      getUser()
+      void getUser()
     } else {
       setUser(loggedInUser)
     }
@@ -39,6 +36,8 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
   if (!user) {
     return null
   }
+
+  const profileId = id || user._id
 
   return (
     <Box>
@@ -53,12 +52,12 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
         }}
       >
         <Box sx={{ flexBasis: isNonMobileScreens ? "26%" : undefined }}>
-          <UserWidget url={user?.picturePath} userId={id} />
+          <UserWidget url={user.picturePath} userId={profileId} />
           <Box sx={{ m: "2rem 0" }} />
-          <FriendsListWidget userId={id} />
+          <FriendsListWidget userId={profileId} />
         </Box>
         <Box sx={{ flexBasis: isNonMobileScreens ? "42%" : undefined, mt: isNonMobileScreens ? undefined : "2rem" }}>
-          <PostsWidget isProfile={false} userId={id}></PostsWidget>
+          <PostsWidget isProfile={false} userId={profileId} />
         </Box>
       </Box>
     </Box>

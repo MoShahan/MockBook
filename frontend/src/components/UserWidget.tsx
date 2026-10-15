@@ -6,6 +6,7 @@ import { Box, Divider, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { api } from "@/lib/api"
+import type { User } from "@/types/models"
 
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
@@ -15,15 +16,15 @@ type UserWidgetProps = { userId: string; url: string }
 
 const UserWidget = ({ userId, url }: UserWidgetProps) => {
   const router = useRouter()
-  const { palette }: any = useTheme()
+  const { palette } = useTheme()
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
   const main = palette.neutral.main
 
-  const [user, setUser] = useState<UserType>(null)
+  const [user, setUser] = useState<User | null>(null)
 
   const getUser = async () => {
-    const { data } = await api.get(`/users/${userId}`)
+    const { data } = await api.get<User>(`/users/${userId}`)
     setUser(data)
   }
 
