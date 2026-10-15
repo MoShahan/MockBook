@@ -17,3 +17,8 @@ backend/node_modules/
 !**/.env.example
 backend/.env
 frontend/.env.local
+
+# Local test accounts (never commit real passwords)
+TEST_ACCOUNTS.local.md
+TEST_ACCOUNTS.local.txt
+
