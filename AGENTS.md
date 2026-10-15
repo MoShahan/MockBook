@@ -100,7 +100,7 @@ If a check cannot run, say why. Never claim tests passed unless they were actual
 
 - Follow the existing formatting and naming conventions unless they are inconsistent enough to warrant a focused change.
 - Prefer explicit, readable code over clever abstractions.
-- Avoid `any` in TypeScript unless justified and isolated. Model API request/response types where practical.
+- Frontend goal (see `PROJECT_PLAN.md` Step 6.1b): **no `any`** in `frontend/src`. Model API request/response and Redux types properly; do not silence type errors with `@ts-ignore`, broad casts, or eslint disables for `no-explicit-any`.
 - Avoid duplicate API logic and duplicate validation rules when a shared implementation is reasonable.
 - Remove dead code only when it is clearly in scope. Do not perform broad drive-by refactors.
 - Do not add dependencies for trivial functionality that can be handled by the existing stack.
