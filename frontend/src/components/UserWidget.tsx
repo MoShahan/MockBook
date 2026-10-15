@@ -73,7 +73,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     if (!loggedInUser?._id || !userId || isOwnProfile) return
     try {
       const { data } = await api.patch<{ message?: string; friends: Friend[] }>(
-        `/users/${loggedInUser._id}/${userId}`,
+        `/users/friends/${userId}`,
         {}
       )
       dispatch(setFriends({ friends: data.friends }))

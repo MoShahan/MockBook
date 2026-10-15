@@ -13,7 +13,25 @@ import userRoutes from "./routes/users.js"
 dotenv.config()
 const app = express()
 app.use(express.json())
-app.use(cors())
+
+/** Comma-separated browser origins allowed to call this API (e.g. http://localhost:3000). */
+const frontendOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean)
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Non-browser clients (curl, server-to-server) often send no Origin
+      if (!origin || frontendOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+      return callback(null, false)
+    },
+    credentials: true,
+  })
+)
 app.use(express.urlencoded({ extended: true }))
 app.use(helmet())
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }))

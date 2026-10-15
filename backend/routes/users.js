@@ -5,10 +5,11 @@ import { verifyAccessToken } from "../middleware/auth.js"
 
 const router = express.Router()
 
-router.get("/:id", verifyAccessToken, getUser)
+// Specific paths before `/:id`
+router.patch("/friends/:friendId", verifyAccessToken, addRemoveFriend)
 
 router.get("/:id/friends", verifyAccessToken, getUserFriends)
 
-router.patch("/:id/:friendId", verifyAccessToken, addRemoveFriend)
+router.get("/:id", verifyAccessToken, getUser)
 
 export default router

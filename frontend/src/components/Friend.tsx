@@ -53,7 +53,7 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
     if (!user?._id || !id || isSelf) return
     try {
       const { data } = await api.patch<{ message?: string; friends: FriendData[] }>(
-        `/users/${user._id}/${id}`,
+        `/users/friends/${id}`,
         {}
       )
       dispatch(setFriends({ friends: data.friends }))

@@ -28,6 +28,7 @@ export const getUserFriends = async (req, res, next) => {
   }
 }
 
+/** Toggle friendship for the authenticated user (JWT) and `:friendId`. */
 export const addRemoveFriend = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
@@ -35,17 +36,16 @@ export const addRemoveFriend = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthenticated" })
     }
 
-    const { id, friendId } = req.params
-
-    if (String(authUserId) !== String(id)) {
-      return res.status(403).json({ error: "You can only modify your own friends list" })
+    const { friendId } = req.params
+    if (!friendId) {
+      return res.status(400).json({ error: "Friend id is required" })
     }
 
-    if (String(id) === String(friendId)) {
+    if (String(authUserId) === String(friendId)) {
       return res.status(400).json({ error: "Cannot add yourself as a friend" })
     }
 
-    const user = await User.findById(id)
+    const user = await User.findById(authUserId)
     const friend = await User.findById(friendId)
     if (!user || !friend) {
       return res.status(404).json({ msg: "User not found" })
@@ -56,11 +56,11 @@ export const addRemoveFriend = async (req, res, next) => {
 
     if (alreadyFriend) {
       user.friends = user.friends.filter(fid => toFriendId(fid) !== String(friendId))
-      friend.friends = friend.friends.filter(fid => toFriendId(fid) !== String(id))
+      friend.friends = friend.friends.filter(fid => toFriendId(fid) !== String(authUserId))
       message = "Friend removed"
     } else {
-      user.friends.push(friendId)
-      friend.friends.push(id)
+      user.friends.push(friend._id)
+      friend.friends.push(user._id)
       message = "Friend added"
     }
 

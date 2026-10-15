@@ -4,12 +4,15 @@ const Schema = mongoose.Schema
 
 const UserSchema = new Schema(
   {
-    firstName: { type: String, required: true, min: 2, max: 50 },
-    lastName: { type: String, required: true, min: 2, max: 50 },
-    email: { type: String, required: true, max: 50, unique: true },
-    password: { type: String, required: true, min: 5 },
+    firstName: { type: String, required: true, minlength: 2, maxlength: 50 },
+    lastName: { type: String, required: true, minlength: 2, maxlength: 50 },
+    email: { type: String, required: true, maxlength: 50, unique: true },
+    password: { type: String, required: true, minlength: 5 },
     picturePath: { type: String, default: "" },
-    friends: { type: Array, default: [] },
+    friends: {
+      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+      default: [],
+    },
     location: { type: String, default: "" },
     occupation: { type: String, default: "" },
     viewedProfile: Number,
