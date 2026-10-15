@@ -56,9 +56,6 @@ export type RegisterFormValues = {
   email: string
   password: string
   cPassword: string
-  location: string
-  occupation: string
-  picture: File | null
 }
 
 export type ApiErrorBody = {

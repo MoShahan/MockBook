@@ -11,7 +11,7 @@ const toSafeUser = userDoc => {
 
 export const register = async (req, res, next) => {
   try {
-    const { firstName, lastName, email, password, friends, location, occupation } = req.body
+    const { firstName, lastName, email, password } = req.body
 
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({ error: "Missing required fields" })
@@ -25,8 +25,9 @@ export const register = async (req, res, next) => {
     const salt = await bcrypt.genSalt()
     const hashedPass = await bcrypt.hash(password, salt)
 
-    // Prefer Multer file name; fall back to empty string when no photo uploaded
-    const picturePath = req.file?.filename || req.body.picturePath || ""
+    // Profile fields (location, occupation, avatar) are set later in profile edit (Step 4.5).
+    // Keep Multer file support if a future route reuses this with upload.single("picture").
+    const picturePath = req.file?.filename || ""
 
     const newUser = new User({
       firstName,
@@ -34,9 +35,9 @@ export const register = async (req, res, next) => {
       email,
       password: hashedPass,
       picturePath,
-      friends: friends || [],
-      location,
-      occupation,
+      friends: [],
+      location: "",
+      occupation: "",
       viewedProfile: 0,
       impressions: 0,
     })

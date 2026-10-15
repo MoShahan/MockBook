@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { EditOutlined, Visibility, VisibilityOff } from "@mui/icons-material"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
 import {
   Box,
   Button,
@@ -14,7 +14,6 @@ import {
 } from "@mui/material"
 import { Formik, type FormikHelpers } from "formik"
 import { useRouter } from "next/navigation"
-import Dropzone from "react-dropzone"
 import type { ObjectSchema } from "yup"
 
 import { useAppDispatch } from "@/app/hooks"
@@ -22,8 +21,6 @@ import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 import { setLogin } from "@/state"
 import type { LoginFormValues, RegisterFormValues, User } from "@/types/models"
-
-import FlexBetween from "./FlexBetween"
 
 type AuthFormValues = LoginFormValues | RegisterFormValues
 
@@ -80,19 +77,12 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
   const register = async (vals: RegisterFormValues, onSubmitProps: FormikHelpers<RegisterFormValues>) => {
     try {
       onSubmitProps.setStatus(undefined)
-      const formData = new FormData()
-      formData.append("firstName", vals.firstName)
-      formData.append("lastName", vals.lastName)
-      formData.append("email", vals.email)
-      formData.append("password", vals.password)
-      formData.append("location", vals.location)
-      formData.append("occupation", vals.occupation)
-
-      if (vals.picture instanceof File) {
-        formData.append("picture", vals.picture)
-      }
-
-      await api.post("/auth/register", formData)
+      await api.post("/auth/register", {
+        firstName: vals.firstName,
+        lastName: vals.lastName,
+        email: vals.email,
+        password: vals.password,
+      })
       onSubmitProps.resetForm()
       handleGoToLogin()
     } catch (e: unknown) {
@@ -117,7 +107,7 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
       validateOnBlur
       validateOnChange={false}
     >
-      {({ values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue, status, submitCount }) => {
+      {({ values, errors, touched, handleBlur, handleChange, handleSubmit, status, submitCount }) => {
         // AuthFormValues is a union; register-only keys are not on LoginFormValues.
         const touchedFields = touched as Record<string, boolean | undefined>
         const errorFields = errors as Record<string, string | undefined>
@@ -144,6 +134,7 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
                   <TextField
                     label="First Name"
                     name="firstName"
+                    autoComplete="given-name"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     value={registerValues.firstName}
@@ -154,6 +145,7 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
                   <TextField
                     label="Last Name"
                     name="lastName"
+                    autoComplete="family-name"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     value={registerValues.lastName}
@@ -161,66 +153,6 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
                     helperText={fieldHelper("lastName")}
                     sx={{ gridColumn: "span 2" }}
                   />
-                  <TextField
-                    label="Location"
-                    name="location"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={registerValues.location}
-                    error={fieldError("location")}
-                    helperText={fieldHelper("location")}
-                    sx={{ gridColumn: "span 4" }}
-                  />
-                  <TextField
-                    label="Occupation"
-                    name="occupation"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={registerValues.occupation}
-                    error={fieldError("occupation")}
-                    helperText={fieldHelper("occupation")}
-                    sx={{ gridColumn: "span 4" }}
-                  />
-                  <Box
-                    sx={{
-                      gridColumn: "span 4",
-                      p: "1rem",
-                      borderRadius: "4px",
-                      border: `1px solid ${palette.neutral.medium}`,
-                    }}
-                  >
-                    <Dropzone
-                      multiple={false}
-                      accept={{ "image/*": [] }}
-                      onDrop={acceptedFiles => setFieldValue("picture", acceptedFiles[0] ?? null)}
-                    >
-                      {({ getRootProps, getInputProps }) => (
-                        <Box
-                          {...getRootProps()}
-                          sx={{
-                            border: `2px dashed ${palette.primary.main}`,
-                            p: "1rem",
-                            "&:hover": { cursor: "pointer" },
-                          }}
-                        >
-                          <input {...getInputProps()} />
-                          {!registerValues.picture ? (
-                            <p>Add photo here (optional)</p>
-                          ) : (
-                            <FlexBetween>
-                              <Typography>{registerValues.picture.name}</Typography>
-                              <EditOutlined />
-                            </FlexBetween>
-                          )}
-                        </Box>
-                      )}
-                    </Dropzone>
-                    {(touchedFields.picture || submitCount > 0) && errorFields.picture && (
-                      <Typography sx={{ color: "error.main", mt: "0.5rem", fontSize: "0.75rem" }}>
-                        {String(errorFields.picture)}
-                      </Typography>
-                    )}
-                  </Box>
                 </>
               )}
               <TextField

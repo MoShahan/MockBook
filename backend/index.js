@@ -1,3 +1,5 @@
+import crypto from "crypto"
+import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 
@@ -9,7 +11,6 @@ import mongoose from "mongoose"
 import morgan from "morgan"
 import multer from "multer"
 
-import { register } from "./controllers/auth.js"
 import { createPost } from "./controllers/posts.js"
 import { verifyAccessToken } from "./middleware/auth.js"
 import authRoutes from "./routes/auth.js"
@@ -27,19 +28,22 @@ app.use(express.urlencoded({ extended: true }))
 app.use(helmet())
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }))
 app.use(morgan("common"))
-app.use("/assets", express.static(path.join(__dirname, "public/assets")))
+
+const assetsDir = path.join(__dirname, "public/assets")
+fs.mkdirSync(assetsDir, { recursive: true })
+app.use("/assets", express.static(assetsDir))
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/assets")
+  destination: (_req, _file, cb) => {
+    cb(null, assetsDir)
   },
-  filename: (req, file, cb) => {
-    cb(null, file.originalname)
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname)
+    cb(null, `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${ext}`)
   },
 })
 const upload = multer({ storage })
 
-app.post("/auth/register", upload.single("picture"), register)
 app.post("/post", verifyAccessToken, upload.single("picture"), createPost)
 
 app.use("/auth", authRoutes)

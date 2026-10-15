@@ -17,9 +17,6 @@ const registerSchema: ObjectSchema<RegisterFormValues> = yup.object({
     .string()
     .required("Please confirm your password")
     .oneOf([yup.ref("password")], "Passwords must match"),
-  location: yup.string().required("Location is required"),
-  picture: yup.mixed<File>().nullable().defined(),
-  occupation: yup.string().required("Occupation is required"),
 })
 
 const registerInitVals: RegisterFormValues = {
@@ -28,9 +25,6 @@ const registerInitVals: RegisterFormValues = {
   email: "",
   password: "",
   cPassword: "",
-  location: "",
-  picture: null,
-  occupation: "",
 }
 
 const RegisterPage = () => {
