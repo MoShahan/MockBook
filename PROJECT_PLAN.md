@@ -1,6 +1,6 @@
 # MockBook — Project Completion Plan
 
-A step-by-step plan to turn this tutorial MERN social app into a finished, hosted product. Keep the existing stack (Next.js, React, Material UI, Redux, Formik/Yup, Express, Mongoose, MongoDB, JWT, Multer). Do not switch databases or UI libraries.
+A step-by-step plan to turn this tutorial MERN social app into a finished, hosted product. Keep the existing stack (Next.js, React, Material UI, Redux, Formik/Yup, **axios** for frontend HTTP, Express, Mongoose, MongoDB, JWT, Multer). Do not switch databases or UI libraries.
 
 Work through the parts in order. Finish a part before starting the next unless a note says otherwise. Tick items as you go.
 
@@ -25,7 +25,7 @@ Work through the parts in order. Finish a part before starting the next unless a
 - UI shells exist: login, register, home, profile, navbar, widgets.
 - Many flows are broken (wrong URLs, wrong Redux shapes, auth redirect blocks register, etc.).
 - Placeholders: search, messages, notifications, share, clip/audio, writing comments.
-- Hardcoded `http://localhost:5000` everywhere.
+- ~~Hardcoded `http://localhost:5000` everywhere.~~ _(Step 1.5: `frontend/src/lib/api.ts` + `NEXT_PUBLIC_API_URL`)_
 - Frontend upgraded (Step 1.4): Next 16 + React 19 + MUI 9; backend upgraded (Step 1.3): Express 4.22, Multer 2, Mongoose 8.
 - Unused packages removed (Step 1.1 done).
 - Almost no tests; four CI workflows under `.github/workflows/` (`backend-lint`, `backend-test`, `frontend-lint`, `frontend-test`).
@@ -52,7 +52,6 @@ Work through the parts in order. Finish a part before starting the next unless a
 
 - [x] Note current Node version; standardize on **Node 20 LTS** for local and CI.
 - [x] Confirm MongoDB (local or Atlas) connects with the current app once.
-- [ ] Snapshot what currently fails (register redirect, create post, friends list, likes, profile) so you can verify Part 2 fixes later.
 
 ---
 
@@ -78,7 +77,7 @@ Remove from **frontend**:
 Also:
 
 - [x] Delete commented-out dead code that confuses upgrades (optional but recommended).
-- [x] Do **not** remove Material UI, Emotion, Redux, Formik, Yup, Multer, Mongoose, JWT, bcrypt, helmet, cors, morgan.
+- [x] Do **not** remove Material UI, Emotion, Redux, Formik, Yup, Multer, Mongoose, JWT, bcrypt, helmet, cors, morgan. _(After Step 2.0: also keep `axios`.)_
 
 ### Step 1.2 — Add missing npm scripts (needed for CI and later work)
 
@@ -127,7 +126,7 @@ Upgrade carefully; expect API/theme churn with MUI and Next:
 
 ### Step 1.5 — Environment and config modernization (still Part 1)
 
-- [ ] Introduce `NEXT_PUBLIC_API_URL` (or equivalent) and stop hardcoding `localhost:5000` in a shared API helper (create the helper; wire call sites in Part 2 if needed, but define the pattern now).
+- [x] Introduce `NEXT_PUBLIC_API_URL` (or equivalent) and stop hardcoding `localhost:5000` in a shared API helper (create the helper; wire call sites in Part 2 if needed, but define the pattern now). _(`frontend/src/lib/api.ts`: `apiUrl` / `assetUrl` / `apiFetch`; all call sites wired — migrate `apiFetch` → axios in Step 2.0)_
 - [x] Document required env vars in README.
 - [x] Ensure `backend/public/assets` exists (or document that Multer destination must exist).
 - [x] Align CI Node version with local (Node 20) in lint/test workflows if needed.
@@ -137,7 +136,7 @@ Upgrade carefully; expect API/theme churn with MUI and Next:
 
 - [x] Unused packages removed.
 - [x] `npm ci` works from the **repo root** (workspaces; single root `package-lock.json`).
-- [ ] Backend starts and connects to MongoDB.
+- [x] Backend starts and connects to MongoDB. _(verified locally: Mongo connected + listening on PORT)_
 - [x] Frontend `npm run build` succeeds (even if some features still broken).
 - [x] GitHub lint/test workflows can run without missing-script failures (or scripts intentionally temporary).
 - [x] No stack swaps (still MUI + Mongoose + Express + Next).
@@ -148,23 +147,78 @@ Upgrade carefully; expect API/theme churn with MUI and Next:
 
 **Goal:** Every feature that the UI already promises for core social use works correctly. No new major features yet—fix the broken tutorial wiring.
 
+### Step 2.0 — Adopt axios for all frontend HTTP (do this first)
+
+Replace browser `fetch` with **axios** everywhere in the frontend. Keep `NEXT_PUBLIC_API_URL` and the shared helper.
+
+- [x] Add `axios` to the frontend workspace (`npm install axios -w frontend`).
+- [x] Refactor `frontend/src/lib/api.ts` into a shared axios instance:
+  - `baseURL` from `NEXT_PUBLIC_API_URL` (fallback `http://localhost:5000` for local only).
+  - Helpers: `api` (axios instance), `apiUrl` / `assetUrl` for image `src` strings (assets can stay as plain URLs).
+  - Optional interceptor deferred to Step 2.0b. _(`authHeaders` helper; headers still passed at call sites)_
+- [x] Migrate **every** FE API call site from `apiFetch` / `fetch` to axios (`api.get` / `api.post` / `api.patch`, etc.): Form, PostsWidget, PostWidget, MyPostWidget, FriendsListWidget, Friend, UserWidget, ProfilePage, and any later call sites.
+- [x] Remove `apiFetch` (and any remaining raw `fetch` to the API). Do not mix axios and fetch for the same REST API.
+- [x] Do **not** introduce RTK Query as part of this step; axios + Redux remains the pattern.
+- [x] Confirm TypeScript builds; smoke login / a GET that hits the API. _(typecheck/lint run; manual smoke left to you)_
+
+### Step 2.0b — Axios request interceptor for Bearer JWT
+
+Centralize attaching `Authorization: Bearer <token>` so call sites do not pass `authHeaders(...)` every time.
+
+- [ ] Add an axios **request interceptor** on the shared `api` instance in `frontend/src/lib/api.ts`.
+- [ ] Read `accessToken` from the Redux store inside the interceptor (avoid circular imports: e.g. export store from a small module, or inject `getAccessToken` after store creation).
+- [ ] If a token exists, set `config.headers.Authorization = \`Bearer ${token}\``. If not, leave the header unset (login/register stay public).
+- [ ] Remove per-call `authHeaders(accessToken)` / manual `Authorization` headers from FE API call sites.
+- [ ] Optionally remove the `authHeaders` helper once unused.
+- [ ] Optional later (Part 3): response interceptor for `401` → clear auth / redirect to `/login`.
+- [ ] Confirm protected GETs still send the Bearer header; login/register still work without one.
+
 ### Step 2.1 — Auth and routing
 
-- [ ] Fix `AuthProvider` so `/login` and `/register` are public; protect only authenticated app routes (`/home`, `/profile`, etc.).
+- [x] Fix `AuthProvider` so `/login` and `/register` are public; protect only authenticated app routes (`/home`, `/profile`, etc.). _(public paths + `useEffect` redirect; no redirect loop on `/login`)_
 - [ ] After successful login → go to `/home`.
 - [ ] After successful register → go to `/login` (or auto-login if you prefer; pick one and stick to it).
 - [ ] Logout clears state **and** navigates to `/login`.
 - [ ] Root `/` redirects to `/home` if logged in, else `/login`.
-- [ ] Login/register must check `response.ok` (or status); do not treat error JSON as success.
-- [ ] Never persist or return password hashes to the client (strip on every auth/user response).
+- [x] Login/register must check `response.ok` (or status); do not treat error JSON as success. _(axios throws on error; Formik `status` shows message)_
+- [x] Never persist or return password hashes to the client (strip on every auth/user response). _(`toSafeUser` on register/login)_
+- [ ] Password fields (login + register): add show/hide toggle (eye / eye-off icon) so users can reveal the password while typing.
+- [x] Register Yup: allow optional photo as `File` (was `yup.string().required`, which blocked submit with no API call).
+- [ ] **Show clear FE validation errors** on login/register (and later other forms): when Yup/Formik validation fails, the user must see why submit did not run—not a silent no-op.
+  - [ ] Every invalid field shows a visible message (`helperText` / under-field error), including after submit when the field was not blurred.
+  - [ ] Dropzone / non-TextField fields show their own error text when invalid.
+  - [ ] Prefer readable copy (“Email is required”, “Passwords must match”) over bare `"required"` where easy.
+  - [ ] Keep Formik `status` (or equivalent) for **API** errors (network, 409 email taken, 400 credentials); do not confuse those with field validation.
+  - [ ] Apply the same pattern to other Formik forms as they are fixed (e.g. create post) so validation failures always surface in the UI.
 
-### Step 2.2 — Register + profile photo
+### Step 2.2 — Slim register (account only)
 
-- [ ] Map uploaded file to `picturePath` on the User model (schema field vs form field mismatch).
-- [ ] Fix double-append of `picture` in FormData.
-- [ ] Ensure Multer destination folder exists; unique filenames (no overwrite by original name).
-- [ ] Serve images from `/assets/...` and load them in `UserImage` via env-based API URL.
-- [ ] Validate email uniqueness with a clear UI error.
+**Product decision:** Keep signup short. Collect only what is needed to create an account; put profile details in Part 4 profile editing.
+
+**Register fields (required):**
+
+| Field | Notes |
+| ----- | ----- |
+| First name | Required (User schema) |
+| Last name | Required (User schema) |
+| Email | Unique login identity |
+| Password | + confirm password on FE only |
+
+**Defer to profile settings (Step 4.5) — not on register:**
+
+| Field | Notes |
+| ----- | ----- |
+| Location | Optional in User schema |
+| Occupation | Optional in User schema |
+| Profile photo / avatar | `picturePath` defaults to `""` |
+
+- [ ] Slim the register UI + Yup schema to **first name, last name, email, password, confirm password** only (remove location, occupation, and photo dropzone from register).
+- [ ] Backend register accepts those fields; set `location` / `occupation` / `picturePath` to empty defaults when omitted.
+- [x] Map uploaded file to `picturePath` when a file is present (profile edit / later uploads). _(`req.file.filename` in register controller — keep for when avatar moves to profile edit)_
+- [x] Fix double-append of `picture` in FormData. _(append File once when used)_
+- [ ] Ensure Multer destination folder exists; unique filenames (no overwrite by original name). _(`public/assets` exists; unique names still TODO)_
+- [x] Serve images from `/assets/...` and load them in `UserImage` via env-based API URL. _(`assetUrl` in Step 1.5)_
+- [x] Validate email uniqueness with a clear UI error. _(409 + Formik `status`)_
 
 ### Step 2.3 — Create post
 
@@ -208,6 +262,8 @@ Upgrade carefully; expect API/theme churn with MUI and Next:
 
 ### Step 2.8 — Part 2 exit criteria
 
+- [x] No remaining `fetch(` / `apiFetch` calls to the Express API; all use the shared axios client.
+
 Manual smoke test:
 
 - [ ] Register → login → see home.
@@ -228,7 +284,10 @@ Manual smoke test:
 
 - [ ] JWT expiration (e.g. access token hours/days).
 - [ ] Optional later: refresh tokens (can defer to post-MVP if access expiry + re-login is acceptable).
-- [ ] Password rules (min length, basic strength) on register schema + Yup.
+- [ ] **Password policy** (enforce on **register** Yup + backend; login only checks credentials):
+  - Minimum **8** characters, maximum **24** characters.
+  - At least **1 uppercase** letter, **1 lowercase** letter, **1 number**, and **1 symbol** (special character).
+  - Shared clear error message when the password does not meet the policy (do not invent weaker rules on one side).
 - [ ] Consistent error messages for invalid login (no user enumeration if possible).
 - [ ] Rate-limit login/register (express-rate-limit or host-level).
 
@@ -294,9 +353,13 @@ Manual smoke test:
 
 ### Step 4.5 — Profile editing (required)
 
-- [ ] Edit first/last name, location, occupation.
-- [ ] Change profile picture.
+Where users complete what register intentionally skipped:
+
+- [ ] Edit **location** and **occupation** (add/update after signup).
+- [ ] Upload / change **profile picture** (avatar).
+- [ ] Optionally edit first/last name.
 - [ ] Persist to MongoDB; update Redux user.
+- [ ] Empty/default UI when location, occupation, or avatar are still blank.
 
 ### Step 4.6 — Search users (required for navbar usefulness)
 
@@ -520,6 +583,23 @@ Do these only after Parts 1–7. Still same core stack.
 - [ ] Uptime check on API health route (`GET /health`).
 - [ ] Backup strategy for Atlas.
 
+### Step 8.5 — OAuth social login (Discord, Google, GitHub)
+
+Additive to email/password auth. After OAuth, still issue the app’s **Bearer JWT** (do not switch the session strategy to cookies unless explicitly decided later).
+
+- [ ] Choose a small OAuth approach (e.g. Passport strategies, or a dedicated OAuth library) that fits Express + Next.js; keep secrets in env only.
+- [ ] Extend User model for linked providers (e.g. `providers: [{ provider, providerId }]`, optional email when the provider gives one; allow account linking by email when safe).
+- [ ] Backend routes (example shapes):
+  - `GET /auth/google` + `GET /auth/google/callback`
+  - `GET /auth/github` + `GET /auth/github/callback`
+  - `GET /auth/discord` + `GET /auth/discord/callback`
+- [ ] On successful callback: find-or-create user, sign MockBook JWT (`ACCESS_TOKEN_SECRET`), redirect to frontend with a safe handoff (e.g. one-time code exchange or fragment/query the frontend then stores token in Redux—document the chosen pattern).
+- [ ] Frontend login/register: “Continue with Google / GitHub / Discord” buttons that start the OAuth redirect.
+- [ ] Env vars (placeholders only in `.env.example`): Google client id/secret + redirect URI; GitHub client id/secret + redirect URI; Discord client id/secret + redirect URI; shared `FRONTEND_URL` / callback base as needed.
+- [ ] Handle edge cases: email already registered with password (link or clear error), missing email from provider, revoke/unlink provider (optional).
+- [ ] Do not log OAuth tokens or client secrets; restrict callback URLs to known origins in each provider’s console.
+- [ ] Tests: mock provider callback → user created → JWT returned; existing email/password login still works.
+
 ---
 
 # Suggested order of work (summary)
@@ -528,13 +608,13 @@ Do these only after Parts 1–7. Still same core stack.
 | ---- | --------------- | ------------------------------------------------------------ |
 | 0    | Prep            | Secrets safe, branch ready                                   |
 | 1    | Clean + upgrade | Unused modules gone; modern Next/MUI/Mongoose/Multer; builds |
-| 2    | Fix core flows  | Auth, posts, likes, friends, profiles actually work          |
+| 2    | Fix core flows  | Axios + Bearer interceptor, then auth, posts, likes, friends, profiles |
 | 3    | Security        | Tokens, passwords, uploads, authorization                    |
 | 4    | MVP features    | Comments, comment likes, saved posts, edit/delete, search, infinite scroll |
 | 5    | UI overhaul     | Beautiful modern MUI UI; strong light + dark                 |
 | 6    | Lint & tests    | CI meaningful and green                                      |
 | 7    | Deploy          | Live URL                                                     |
-| 8    | Post-MVP        | Chat, notifications, extras                                  |
+| 8    | Post-MVP        | Chat, notifications, OAuth (Google/GitHub/Discord), extras   |
 
 **Recommended focus rule:**  
 Part 1 → Part 2 → Part 5 (partial theme fixes as you go) → Part 3 → Part 4 → finish Part 5 → Part 6 → Part 7.  
@@ -547,6 +627,10 @@ You may do light UI fixes during Part 2 so debugging is pleasant, but save the f
 ### Must have for “finished MVP”
 
 - [ ] Register / Login / Logout
+- [ ] Slim register (name, email, password only) _(Step 2.2)_
+- [ ] Password show/hide toggle on auth forms _(Step 2.1)_
+- [ ] Visible FE validation error messages on forms _(Step 2.1)_
+- [ ] Password policy (8–24 chars; upper, lower, number, symbol) on register _(Step 3.1)_
 - [ ] Protected routes
 - [ ] Create post (text + image)
 - [ ] Home feed (infinite scroll)
@@ -557,11 +641,13 @@ You may do light UI fixes during Part 2 so debugging is pleasant, but save the f
 - [ ] Edit / delete own posts
 - [ ] Friends add/remove + friends list
 - [ ] Own profile + other user profile
-- [ ] Edit profile + avatar
+- [ ] Edit profile (location, occupation, avatar; optional name) _(Step 4.5)_
 - [ ] User search
 - [ ] Light + dark theme (polished)
 - [ ] Modern UI across all main screens
-- [ ] Env-based API URL
+- [x] Env-based API URL _(`NEXT_PUBLIC_API_URL` + `lib/api.ts`)_
+- [x] Axios for all frontend API calls _(Step 2.0)_
+- [ ] Axios Bearer request interceptor _(Step 2.0b)_
 - [ ] Production deploy
 
 ### Nice to have (after MVP)
@@ -569,6 +655,7 @@ You may do light UI fixes during Part 2 so debugging is pleasant, but save the f
 - [ ] Notifications
 - [ ] Messaging
 - [ ] Friend requests
+- [ ] OAuth login: Google, GitHub, Discord _(Part 8.5)_
 - [ ] Share
 - [ ] Ads / sponsored content
 - [ ] Social links editing
@@ -590,6 +677,11 @@ You may do light UI fixes during Part 2 so debugging is pleasant, but save the f
 | Unused packages installed              | Part 1         |
 | Outdated Next/MUI/Multer/Mongoose      | Part 1         |
 | AuthProvider blocks register           | Part 2         |
+| No password show/hide (eye) on forms   | Part 2         |
+| FE validation fails with no visible error | Part 2      |
+| Register asks for location/occupation/photo | Part 2.2 (slim) |
+| Weak / missing password regex policy   | Part 3         |
+| ~~FE still on `fetch` / `apiFetch`~~   | Part 2.0 done  |
 | Create post wrong URL / Redux dispatch | Part 2         |
 | Like reducer `_id` mismatch            | Part 2         |
 | Friends list wrong URL / shape         | Part 2         |
