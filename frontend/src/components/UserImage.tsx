@@ -1,11 +1,35 @@
-import { Box } from "@mui/material"
+"use client"
+
+import { useState } from "react"
+import { Box, Typography } from "@mui/material"
 
 import { mediaUrl } from "@/lib/api"
 
-type UserImageProps = { image: string; size?: string }
+type UserImageProps = {
+  image: string
+  /** Full name or "First Last" — used for initials when there is no photo. */
+  name?: string
+  size?: string
+}
 
-const UserImage = ({ image, size = "60px" }: UserImageProps) => {
+export function getInitials(name?: string): string {
+  if (!name?.trim()) return "?"
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase()
+  }
+  const first = parts[0][0] ?? ""
+  const last = parts[parts.length - 1][0] ?? ""
+  return `${first}${last}`.toUpperCase()
+}
+
+const UserImage = ({ image, name, size = "60px" }: UserImageProps) => {
   const src = mediaUrl(image)
+  const [imgFailed, setImgFailed] = useState(false)
+  const showImage = Boolean(src) && !imgFailed
+  const initials = getInitials(name)
+
+  const fontSize = `calc(${size} * 0.36)`
 
   return (
     <Box
@@ -17,14 +41,19 @@ const UserImage = ({ image, size = "60px" }: UserImageProps) => {
         flexShrink: 0,
         borderRadius: "50%",
         overflow: "hidden",
-        bgcolor: "neutral.light",
+        bgcolor: "primary.light",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
+      aria-label={name ? `${name} avatar` : "User avatar"}
     >
-      {src ? (
+      {showImage ? (
         <Box
           component="img"
           src={src}
-          alt="User avatar"
+          alt={name ? `${name} avatar` : "User avatar"}
+          onError={() => setImgFailed(true)}
           sx={{
             width: "100%",
             height: "100%",
@@ -32,7 +61,20 @@ const UserImage = ({ image, size = "60px" }: UserImageProps) => {
             display: "block",
           }}
         />
-      ) : null}
+      ) : (
+        <Typography
+          component="span"
+          sx={{
+            color: "background.alt",
+            fontWeight: 600,
+            fontSize,
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          {initials}
+        </Typography>
+      )}
     </Box>
   )
 }

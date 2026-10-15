@@ -97,7 +97,10 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
           return (
             <form onSubmit={handleSubmit} noValidate>
               <FlexBetween sx={{ gap: "1.5rem", alignItems: "center" }}>
-                <UserImage image={url} />
+                <UserImage
+                  image={url}
+                  name={[user?.firstName, user?.lastName].filter(Boolean).join(" ")}
+                />
                 <InputBase
                   name="description"
                   placeholder="What's on your mind?"

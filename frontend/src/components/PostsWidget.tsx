@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect } from "react"
+import { Box } from "@mui/material"
 
 import { api } from "@/lib/api"
 import { setPosts } from "@/state"
@@ -29,11 +30,11 @@ const PostsWidget = ({ isProfile = false, userId }: PostsWidgetProps) => {
   }, [])
 
   return (
-    <>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
       {posts.map(post => (
         <PostWidget key={post._id} post={post} />
       ))}
-    </>
+    </Box>
   )
 }
 

@@ -44,7 +44,7 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
     <WidgetWrapper>
       <FlexBetween onClick={handleGoToProfile} sx={{ gap: "0.5rem", pb: "1.1rem" }}>
         <FlexBetween sx={{ gap: "1rem" }}>
-          <UserImage image={url}></UserImage>
+          <UserImage image={url} name={`${user.firstName} ${user.lastName}`} />
           <Box>
             <Typography
               variant="h4"

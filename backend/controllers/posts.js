@@ -128,3 +128,27 @@ export const addComment = async (req, res, next) => {
     res.status(409).json({ msg: e.message })
   }
 }
+
+export const deletePost = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const { postId } = req.params
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    if (String(post.userId) !== String(userId)) {
+      return res.status(403).json({ error: "You can only delete your own posts" })
+    }
+
+    await Post.findByIdAndDelete(postId)
+    res.status(200).json({ message: "Post deleted", postId })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}

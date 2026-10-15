@@ -41,9 +41,13 @@ export const authSlice = createSlice({
         String(post._id) === String(updated._id) ? { ...post, ...updated } : post
       )
     },
+    removePost: (state, action: PayloadAction<{ postId: string }>) => {
+      const id = String(action.payload.postId)
+      state.posts = state.posts.filter(post => String(post._id) !== id)
+    },
   },
 })
 
-export const { toggleMode, setFriends, setLogin, setPost, setPosts, setLogout } = authSlice.actions
+export const { toggleMode, setFriends, setLogin, setPost, setPosts, removePost, setLogout } = authSlice.actions
 
 export default authSlice.reducer

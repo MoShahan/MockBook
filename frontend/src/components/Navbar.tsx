@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Close, DarkMode, Help, LightMode, Menu, Message, Notifications, Search } from "@mui/icons-material"
+import { Close, DarkMode, Help, LightMode, Menu, Notifications, Search } from "@mui/icons-material"
 import {
   Box,
   FormControl,
@@ -16,10 +16,13 @@ import {
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { useToast } from "@/providers/ToastProvider"
 
 import { setLogout, toggleMode } from "../state"
 
 import FlexBetween from "./FlexBetween"
+
+const COMING_SOON = "This feature is coming soon"
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false)
@@ -27,6 +30,7 @@ const Navbar = () => {
   const router = useRouter()
   const user = useAppSelector(state => state.user)
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
+  const { info } = useToast()
 
   const theme = useTheme()
   const nLight = theme.palette.neutral.light
@@ -46,6 +50,10 @@ const Navbar = () => {
     router.push("/login")
   }
 
+  const showComingSoon = () => {
+    info(COMING_SOON)
+  }
+
   return (
     <FlexBetween sx={{ padding: "1rem 6%", bgcolor: alt }}>
       <FlexBetween sx={{ gap: "1.75rem" }}>
@@ -63,7 +71,7 @@ const Navbar = () => {
         {isNonMobileScreens && (
           <FlexBetween sx={{ bgcolor: nLight, borderRadius: "8px", gap: "3rem", padding: "0.1rem 1.5rem" }}>
             <InputBase placeholder="Search..." />
-            <IconButton>
+            <IconButton onClick={showComingSoon} aria-label="Search">
               <Search />
             </IconButton>
           </FlexBetween>
@@ -72,16 +80,19 @@ const Navbar = () => {
 
       {isNonMobileScreens ? (
         <FlexBetween sx={{ gap: "2rem" }}>
-          <IconButton onClick={() => dispatch(toggleMode())}>
+          <IconButton onClick={() => dispatch(toggleMode())} aria-label="Toggle theme">
             {theme.palette.mode === "dark" ? (
-              <DarkMode sx={{ fontSize: "25px " }} />
+              <DarkMode sx={{ fontSize: "25px" }} />
             ) : (
-              <LightMode sx={{ color: dark, fontSize: "25px " }} />
+              <LightMode sx={{ color: dark, fontSize: "25px" }} />
             )}
           </IconButton>
-          <Message sx={{ fontSize: "25px" }} />
-          <Notifications sx={{ fontSize: "25px" }} />
-          <Help sx={{ fontSize: "25px" }} />
+          <IconButton onClick={showComingSoon} aria-label="Notifications">
+            <Notifications sx={{ fontSize: "25px" }} />
+          </IconButton>
+          <IconButton onClick={showComingSoon} aria-label="Help">
+            <Help sx={{ fontSize: "25px" }} />
+          </IconButton>
           <FormControl variant="standard" defaultValue={fullName}>
             <Select
               defaultValue={fullName}
@@ -107,7 +118,7 @@ const Navbar = () => {
           </FormControl>
         </FlexBetween>
       ) : (
-        <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)}>
+        <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)} aria-label="Open menu">
           <Menu />
         </IconButton>
       )}
@@ -126,22 +137,25 @@ const Navbar = () => {
           }}
         >
           <Box sx={{ display: "flex", justifyContent: "flex-end", p: "1rem" }}>
-            <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)}>
+            <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)} aria-label="Close menu">
               <Close />
             </IconButton>
           </Box>
 
           <FlexBetween sx={{ gap: "3rem", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-            <IconButton onClick={() => dispatch(toggleMode())}>
+            <IconButton onClick={() => dispatch(toggleMode())} aria-label="Toggle theme">
               {theme.palette.mode === "dark" ? (
-                <DarkMode sx={{ fontSize: "25px " }} />
+                <DarkMode sx={{ fontSize: "25px" }} />
               ) : (
-                <LightMode sx={{ color: dark, fontSize: "25px " }} />
+                <LightMode sx={{ color: dark, fontSize: "25px" }} />
               )}
             </IconButton>
-            <Message sx={{ fontSize: "25px" }} />
-            <Notifications sx={{ fontSize: "25px" }} />
-            <Help sx={{ fontSize: "25px" }} />
+            <IconButton onClick={showComingSoon} aria-label="Notifications">
+              <Notifications sx={{ fontSize: "25px" }} />
+            </IconButton>
+            <IconButton onClick={showComingSoon} aria-label="Help">
+              <Help sx={{ fontSize: "25px" }} />
+            </IconButton>
             <FormControl variant="standard" defaultValue={fullName}>
               <Select
                 defaultValue={fullName}

@@ -6,6 +6,7 @@ import { Inter } from "next/font/google"
 import AuthProvider from "@/providers/AuthProvider"
 import ReduxProvider from "@/providers/ReduxProvider"
 import ThemeProviderComp from "@/providers/ThemeProvider"
+import ToastProvider from "@/providers/ToastProvider"
 
 import "./globals.css"
 
@@ -24,8 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ReduxProvider>
             <AuthProvider>
               <ThemeProviderComp>
-                <CssBaseline />
-                {children}
+                <ToastProvider>
+                  <CssBaseline />
+                  {children}
+                </ToastProvider>
               </ThemeProviderComp>
             </AuthProvider>
           </ReduxProvider>
