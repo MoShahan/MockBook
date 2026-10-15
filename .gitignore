@@ -1,5 +1,8 @@
 node_modules/
 
+# Local revamp checklist (not shared via git)
+PROJECT_PLAN.md
+
 frontend/node_modules/
 frontend/.next/
 frontend/next-env.d.ts
