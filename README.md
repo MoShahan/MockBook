@@ -10,7 +10,7 @@ By Mohammed Shahan.
 
 | Layer    | Technologies                                                                                                     |
 | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| Frontend | Next.js 16 (App Router), React 19, TypeScript, Material UI 9, Emotion, Formik, Yup, Redux Toolkit, redux-persist |
+| Frontend | Next.js 16 (App Router), React 19, TypeScript, Material UI 9, Emotion, Formik, Yup, Redux Toolkit, redux-persist, axios |
 | Backend  | Node.js, Express 4.22, JWT, bcrypt 6, Multer 2                                                                   |
 | Database | MongoDB with Mongoose 8                                                                                          |
 
@@ -92,9 +92,11 @@ The backend currently connects with `process.env.MONGODB_URI` only. Username/pas
 
 **Frontend** (`frontend/.env.local`) — see also `frontend/.env.example`:
 
-| Variable              | Required now | Purpose                                                                   |
-| --------------------- | ------------ | ------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_URL` | Later        | API base URL; calls are still hardcoded to `:5000` until Part 1.5         |
+| Variable              | Required | Purpose                                                                 |
+| --------------------- | -------- | ----------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | Yes*     | API base URL used by `frontend/src/lib/api.ts` (no trailing slash)      |
+
+\*Falls back to `http://localhost:5000` if unset so local `npm run dev` still works. Set it explicitly for deploy and non-default ports.
 
 ### 3. Run locally
 
