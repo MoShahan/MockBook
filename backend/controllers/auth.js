@@ -3,11 +3,30 @@ import jwt from "jsonwebtoken"
 
 import User from "../models/User.js"
 
+const toSafeUser = userDoc => {
+  const user = userDoc.toObject ? userDoc.toObject() : { ...userDoc }
+  delete user.password
+  return user
+}
+
 export const register = async (req, res, next) => {
   try {
-    const { firstName, lastName, email, password, picturePath, friends, location, occupation } = req.body
+    const { firstName, lastName, email, password, friends, location, occupation } = req.body
+
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ error: "Missing required fields" })
+    }
+
+    const existing = await User.findOne({ email })
+    if (existing) {
+      return res.status(409).json({ error: "Email already registered" })
+    }
+
     const salt = await bcrypt.genSalt()
     const hashedPass = await bcrypt.hash(password, salt)
+
+    // Prefer Multer file name; fall back to empty string when no photo uploaded
+    const picturePath = req.file?.filename || req.body.picturePath || ""
 
     const newUser = new User({
       firstName,
@@ -15,7 +34,7 @@ export const register = async (req, res, next) => {
       email,
       password: hashedPass,
       picturePath,
-      friends,
+      friends: friends || [],
       location,
       occupation,
       viewedProfile: 0,
@@ -24,7 +43,7 @@ export const register = async (req, res, next) => {
 
     const savedUser = await newUser.save()
 
-    res.status(201).json(savedUser)
+    res.status(201).json(toSafeUser(savedUser))
   } catch (e) {
     res.status(500).json({ error: e.message })
   }
@@ -41,9 +60,7 @@ export const login = async (req, res, next) => {
 
     const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET)
 
-    delete user.password
-
-    res.send({ user, accessToken })
+    res.send({ user: toSafeUser(user), accessToken })
   } catch (e) {
     res.status(500).json({ error: e.message })
   }
