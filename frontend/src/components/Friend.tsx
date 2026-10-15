@@ -2,7 +2,7 @@
 
 import React from "react"
 import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material"
-import { Box, IconButton, Typography, useTheme } from "@mui/material"
+import { Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -10,7 +10,7 @@ import { api } from "@/lib/api"
 import { useToast } from "@/providers/ToastProvider"
 import { setFriends } from "@/state"
 import type { Friend as FriendData } from "@/types/models"
-import { friendIdOf } from "@/types/models"
+import { friendIdOf, sameUserId } from "@/types/models"
 
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
@@ -37,11 +37,12 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
   const main = theme.palette.neutral.main
   const medium = theme.palette.neutral.medium
 
-  const isFriend = Boolean(user?.friends?.some(friend => friendIdOf(friend) === id))
+  const isSelf = sameUserId(user?._id, id)
+  const isFriend = Boolean(user?.friends?.some(friend => sameUserId(friendIdOf(friend), id)))
 
   const handleGoToProfile = () => {
     if (!id) return
-    if (id === user?._id) {
+    if (isSelf) {
       router.push("/profile")
     } else {
       router.push(`/profile/${id}`)
@@ -49,7 +50,7 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
   }
 
   const patchFriend = async () => {
-    if (!user?._id || !id || user._id === id) return
+    if (!user?._id || !id || isSelf) return
     try {
       const { data } = await api.patch<{ message?: string; friends: FriendData[] }>(
         `/users/${user._id}/${id}`,
@@ -85,14 +86,16 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
           {subtitle ? <Typography sx={{ color: medium, fontSize: "0.75rem" }}>{subtitle}</Typography> : null}
         </Box>
       </FlexBetween>
-      {showFriendButton && id && id !== user?._id && (
-        <IconButton
-          sx={{ backgroundColor: pLight, p: "0.6rem" }}
-          onClick={patchFriend}
-          aria-label={isFriend ? "Remove friend" : "Add friend"}
-        >
-          {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
-        </IconButton>
+      {showFriendButton && id && !isSelf && (
+        <Tooltip title={isFriend ? "Remove friend" : "Add friend"}>
+          <IconButton
+            sx={{ backgroundColor: pLight, p: "0.6rem" }}
+            onClick={patchFriend}
+            aria-label={isFriend ? "Remove friend" : "Add friend"}
+          >
+            {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
+          </IconButton>
+        </Tooltip>
       )}
       {endAction}
     </FlexBetween>

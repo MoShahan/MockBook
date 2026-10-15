@@ -9,6 +9,7 @@ import PostsWidget from "@/components/PostsWidget"
 import UserWidget from "@/components/UserWidget"
 import { api } from "@/lib/api"
 import type { User } from "@/types/models"
+import { sameUserId } from "@/types/models"
 
 import { useAppSelector } from "../hooks"
 
@@ -21,6 +22,8 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
   const [user, setUser] = useState<User | null>(null)
 
   const profileId = id || loggedInUser?._id || ""
+  // `/profile` (empty id) is always own; `/profile/:id` is own when ids match.
+  const isOwnProfile = !id || sameUserId(id, loggedInUser?._id)
 
   useEffect(() => {
     if (!profileId) return
@@ -34,7 +37,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
     }
   }, [profileId])
 
-  if (!profileId || !user || user._id !== profileId) {
+  if (!profileId || !user || !sameUserId(user._id, profileId)) {
     return (
       <Box>
         <Navbar />
@@ -55,7 +58,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
         }}
       >
         <Box sx={{ flexBasis: isNonMobileScreens ? "26%" : undefined }}>
-          <UserWidget url={user.picturePath} userId={profileId} />
+          <UserWidget url={user.picturePath} userId={profileId} isOwnProfile={isOwnProfile} />
           <Box sx={{ m: "2rem 0" }} />
           <FriendsListWidget userId={profileId} />
         </Box>

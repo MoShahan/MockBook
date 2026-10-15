@@ -9,7 +9,7 @@ import {
   PersonRemoveOutlined,
   WorkOutlineOutlined,
 } from "@mui/icons-material"
-import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material"
+import { Box, Divider, IconButton, Tooltip, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -17,19 +17,24 @@ import { api } from "@/lib/api"
 import { useToast } from "@/providers/ToastProvider"
 import { setFriends } from "@/state"
 import type { Friend, User } from "@/types/models"
-import { friendIdOf } from "@/types/models"
+import { friendIdOf, sameUserId } from "@/types/models"
 
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
 import WidgetWrapper from "./WidgetWrapper"
 
-type UserWidgetProps = { userId: string; url: string }
+type UserWidgetProps = {
+  userId: string
+  url: string
+  /** When set by the profile page, preferred over id comparison. */
+  isOwnProfile?: boolean
+}
 
-const UserWidget = ({ userId, url }: UserWidgetProps) => {
+const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetProps) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const loggedInUser = useAppSelector(state => state.user)
-  const { success, error: toastError } = useToast()
+  const { success, error: toastError, info } = useToast()
   const { palette } = useTheme()
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
@@ -38,8 +43,10 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
 
   const [user, setUser] = useState<User | null>(null)
 
-  const isOwnProfile = Boolean(loggedInUser?._id && loggedInUser._id === userId)
-  const isFriend = Boolean(loggedInUser?.friends?.some(friend => friendIdOf(friend) === userId))
+  const isOwnProfile = isOwnProfileProp ?? sameUserId(loggedInUser?._id, userId)
+  const isFriend = Boolean(
+    loggedInUser?.friends?.some(friend => sameUserId(friendIdOf(friend), userId))
+  )
 
   useEffect(() => {
     if (!userId) return
@@ -76,7 +83,7 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
     }
   }
 
-  if (!user || user._id !== userId) {
+  if (!user || !sameUserId(user._id, userId)) {
     return null
   }
 
@@ -105,15 +112,25 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
           </Box>
         </FlexBetween>
         {isOwnProfile ? (
-          <ManageAccountsOutlined />
+          <Tooltip title="Manage account">
+            <IconButton
+              sx={{ p: "0.6rem" }}
+              onClick={() => info("This feature is coming soon")}
+              aria-label="Manage account"
+            >
+              <ManageAccountsOutlined />
+            </IconButton>
+          </Tooltip>
         ) : (
-          <IconButton
-            sx={{ backgroundColor: pLight, p: "0.6rem" }}
-            onClick={patchFriend}
-            aria-label={isFriend ? "Remove friend" : "Add friend"}
-          >
-            {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
-          </IconButton>
+          <Tooltip title={isFriend ? "Remove friend" : "Add friend"}>
+            <IconButton
+              sx={{ backgroundColor: pLight, p: "0.6rem" }}
+              onClick={patchFriend}
+              aria-label={isFriend ? "Remove friend" : "Add friend"}
+            >
+              {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
+            </IconButton>
+          </Tooltip>
         )}
       </FlexBetween>
 

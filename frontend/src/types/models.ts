@@ -84,3 +84,9 @@ export function friendIdOf(friend: Friend | string | null | undefined): string {
   if (typeof friend === "string") return friend
   return String(friend._id ?? friend.id ?? "")
 }
+
+/** Compare Mongo user ids safely (string / ObjectId / undefined). */
+export function sameUserId(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (a == null || b == null || a === "" || b === "") return false
+  return String(a) === String(b)
+}

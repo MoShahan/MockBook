@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { setFriends } from "@/state"
 import type { Friend as FriendData } from "@/types/models"
-import { friendIdOf } from "@/types/models"
+import { friendIdOf, sameUserId } from "@/types/models"
 
 import Friend from "./Friend"
 import WidgetWrapper from "./WidgetWrapper"
@@ -22,7 +22,7 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
     null
   )
 
-  const isOwnList = Boolean(loggedInUser?._id && loggedInUser._id === userId)
+  const isOwnList = sameUserId(loggedInUser?._id, userId)
 
   useEffect(() => {
     if (!userId) return
@@ -30,7 +30,7 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
     void (async () => {
       const { data } = await api.get<FriendData[]>(`/users/${userId}/friends`)
       if (cancelled) return
-      if (loggedInUser?._id === userId) {
+      if (sameUserId(loggedInUser?._id, userId)) {
         dispatch(setFriends({ friends: data }))
       } else {
         setOtherFriends({ forUserId: userId, friends: data })
@@ -43,8 +43,8 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
 
   const friends: FriendData[] | null = isOwnList
     ? (loggedInUser?.friends ?? [])
-    : otherFriends?.forUserId === userId
-      ? otherFriends.friends
+    : sameUserId(otherFriends?.forUserId, userId)
+      ? otherFriends!.friends
       : null
 
   if (friends == null) {
