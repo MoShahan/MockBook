@@ -40,10 +40,8 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
     if (!user?._id) return
     const formData = new FormData()
     formData.append("description", postDesc)
-    formData.append("userId", user._id)
     if (image) {
       formData.append("picture", image)
-      formData.append("url", image.name)
     }
     const { data } = await api.post<Post[]>("/posts", formData)
     dispatch(setPosts({ posts: data }))

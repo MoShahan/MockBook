@@ -1,15 +1,20 @@
 import { Box } from "@mui/material"
 
-import { assetUrl } from "@/lib/api"
+import { mediaUrl } from "@/lib/api"
 
 type UserImageProps = { image: string; size?: string }
 
 const UserImage = ({ image, size = "60px" }: UserImageProps) => {
+  const src = mediaUrl(image)
+  if (!src) {
+    return <Box sx={{ width: size, height: size, borderRadius: "50%", bgcolor: "neutral.light" }} />
+  }
+
   return (
     <Box sx={{ width: size, height: size }}>
       <img
-        src={assetUrl(image)}
-        alt={`user - ${image}`}
+        src={src}
+        alt="User avatar"
         style={{
           objectFit: "cover",
           borderRadius: "50%",

@@ -5,7 +5,7 @@ import { ChatBubbleOutlineOutlined, FavoriteBorderOutlined, FavoriteOutlined, Sh
 import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { api, assetUrl } from "@/lib/api"
+import { api, mediaUrl } from "@/lib/api"
 import { setPost } from "@/state"
 import type { Post } from "@/types/models"
 
@@ -53,7 +53,7 @@ const PostWidget = ({ post }: PostWidgetProps) => {
             borderRadius: "0.75rem",
             marginTop: "0.75rem",
           }}
-          src={assetUrl(post.url)}
+          src={mediaUrl(post.url)}
         />
       )}
       <FlexBetween sx={{ mt: "0.25rem" }}>

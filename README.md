@@ -147,12 +147,12 @@ npm run start -w backend
 
 | Method  | Path                   | Purpose                                                      |
 | ------- | ---------------------- | ------------------------------------------------------------ |
-| `POST`  | `/auth/register`       | Create an account (multipart; profile photo field `picture`) |
+| `POST`  | `/auth/register`       | Create an account (JSON: name, email, password)              |
 | `POST`  | `/auth/login`          | Log in; returns a JWT                                        |
 | `GET`   | `/users/:id`           | Get a user                                                   |
 | `GET`   | `/users/:id/friends`   | Get that user's friends                                      |
 | `PATCH` | `/users/:id/:friendId` | Add or remove a friend                                       |
-| `POST`  | `/post`                | Create a post                                                |
+| `POST`  | `/posts`               | Create a post (multipart optional field `picture` → ImageKit)|
 | `GET`   | `/posts`               | Feed                                                         |
 | `GET`   | `/posts/:userId/posts` | One user's posts                                             |
 | `PATCH` | `/posts/:postId/like`  | Like or unlike                                               |
@@ -163,7 +163,7 @@ Routes other than register and login expect:
 Authorization: Bearer <token>
 ```
 
-Static uploads are served from `/assets/...` (Multer writes under `backend/public/assets`).
+Post images are uploaded to **ImageKit** (Multer memory → ImageKit). MongoDB stores the returned HTTPS URL in `Post.url`. Configure `IMAGEKIT_*` in `backend/.env` (see `backend/.env.example`).
 
 ## CI
 

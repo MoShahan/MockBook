@@ -25,16 +25,13 @@ export const register = async (req, res, next) => {
     const salt = await bcrypt.genSalt()
     const hashedPass = await bcrypt.hash(password, salt)
 
-    // Profile fields (location, occupation, avatar) are set later in profile edit (Step 4.5).
-    // Keep Multer file support if a future route reuses this with upload.single("picture").
-    const picturePath = req.file?.filename || ""
-
+    // Profile fields (location, occupation, avatar) are set later in profile edit (Step 4.5 / ImageKit).
     const newUser = new User({
       firstName,
       lastName,
       email,
       password: hashedPass,
-      picturePath,
+      picturePath: "",
       friends: [],
       location: "",
       occupation: "",

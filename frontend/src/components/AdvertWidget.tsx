@@ -3,8 +3,6 @@
 import React from "react"
 import { Typography, useTheme } from "@mui/material"
 
-import { assetUrl } from "@/lib/api"
-
 import FlexBetween from "./FlexBetween"
 import WidgetWrapper from "./WidgetWrapper"
 
@@ -22,14 +20,7 @@ const AdvertWidget = () => {
         </Typography>
         <Typography sx={{ color: medium }}>Create Ad</Typography>
       </FlexBetween>
-      <img
-        width="100%"
-        height="auto"
-        alt="ad"
-        style={{ borderRadius: "0.75rem", margin: "0.75rem 0" }}
-        src={assetUrl("flash.png")}
-      />
-      <FlexBetween>
+      <FlexBetween sx={{ mt: "0.75rem" }}>
         <Typography sx={{ color: main }}>DC Comics</Typography>
         <Typography sx={{ color: medium }}>www.dccomics.com</Typography>
       </FlexBetween>
