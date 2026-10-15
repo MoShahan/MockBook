@@ -7,6 +7,7 @@ import FriendsListWidget from "@/components/FriendsListWidget"
 import Navbar from "@/components/Navbar"
 import PostsWidget from "@/components/PostsWidget"
 import UserWidget from "@/components/UserWidget"
+import { api, authHeaders } from "@/lib/api"
 
 import { useAppSelector } from "../hooks"
 
@@ -20,20 +21,16 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
   const [user, setUser] = useState<UserType>(null)
 
   const getUser = async () => {
-    const response = await fetch(`http://localhost:5000/users/${id}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
+    const { data } = await api.get(`/users/${id}`, {
+      headers: authHeaders(accessToken),
     })
-    const res = await response.json()
-    setUser(res)
+    setUser(data)
   }
 
   const getUserPosts = async () => {
-    const response = await fetch(`http://localhost:5000/users/${id}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
+    await api.get(`/users/${id}`, {
+      headers: authHeaders(accessToken),
     })
-    const res = await response.json()
   }
 
   useEffect(() => {

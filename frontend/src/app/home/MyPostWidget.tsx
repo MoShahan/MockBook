@@ -16,6 +16,7 @@ import DropZone from "react-dropzone"
 import FlexBetween from "@/components/FlexBetween"
 import UserImage from "@/components/UserImage"
 import WidgetWrapper from "@/components/WidgetWrapper"
+import { api, authHeaders } from "@/lib/api"
 import { setPosts } from "@/state"
 
 import { useAppDispatch, useAppSelector } from "../hooks"
@@ -43,13 +44,10 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
       formData.append("picture", image)
       formData.append("url", image?.name)
     }
-    const response = await fetch(`http://localhost:5000/posts`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      body: formData,
+    const { data } = await api.post("/posts", formData, {
+      headers: authHeaders(accessToken),
     })
-    const res = response.json()
-    dispatch(setPosts({ res }))
+    dispatch(setPosts({ res: data }))
     setPostDesc("")
     setImage(null)
   }

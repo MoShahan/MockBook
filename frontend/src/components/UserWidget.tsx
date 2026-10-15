@@ -6,6 +6,7 @@ import { Box, Divider, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppSelector } from "@/app/hooks"
+import { api, authHeaders } from "@/lib/api"
 
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
@@ -24,12 +25,10 @@ const UserWidget = ({ userId, url }: UserWidgetProps) => {
   const [user, setUser] = useState<UserType>(null)
 
   const getUser = async () => {
-    const response = await fetch(`http://localhost:5000/users/${userId}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
+    const { data } = await api.get(`/users/${userId}`, {
+      headers: authHeaders(accessToken),
     })
-    const res = await response.json()
-    setUser(res)
+    setUser(data)
   }
 
   useEffect(() => {

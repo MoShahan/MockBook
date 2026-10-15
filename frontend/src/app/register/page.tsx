@@ -11,9 +11,13 @@ const registerSchema = yup.object().shape({
   lastName: yup.string().required("required"),
   email: yup.string().email("invalid email").required("required"),
   password: yup.string().required("required"),
-  cPassword: yup.string().oneOf([yup.ref("password"), ""], "Passwords must match"),
+  cPassword: yup
+    .string()
+    .required("required")
+    .oneOf([yup.ref("password")], "Passwords must match"),
   location: yup.string().required("required"),
-  picture: yup.string().required("required"),
+  // Optional profile photo: File when chosen, otherwise empty string
+  picture: yup.mixed().nullable(),
   occupation: yup.string().required("required"),
 })
 
@@ -24,7 +28,7 @@ const registerInitVals = {
   password: "",
   cPassword: "",
   location: "",
-  picture: "",
+  picture: null as File | null,
   occupation: "",
 }
 

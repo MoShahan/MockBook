@@ -5,6 +5,7 @@ import { ChatBubbleOutlineOutlined, FavoriteBorderOutlined, FavoriteOutlined, Sh
 import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { api, assetUrl, authHeaders } from "@/lib/api"
 import { setPost } from "@/state"
 
 import FlexBetween from "./FlexBetween"
@@ -27,16 +28,12 @@ const PostWidget = ({ post }: PostWidgetProps) => {
   const [isComments, setIsComments] = useState<boolean>(false)
 
   const patchLike = async () => {
-    const response = await fetch(`http://localhost:5000/posts/${post?._id}/like`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: user?._id }),
-    })
-    const res = await response.json()
-    dispatch(setPost({ post: res.updatedPost }))
+    const { data } = await api.patch(
+      `/posts/${post?._id}/like`,
+      { userId: user?._id },
+      { headers: authHeaders(accessToken) },
+    )
+    dispatch(setPost({ post: data.updatedPost }))
   }
 
   return (
@@ -57,7 +54,7 @@ const PostWidget = ({ post }: PostWidgetProps) => {
             borderRadius: "0.75rem",
             marginTop: "0.75rem",
           }}
-          src={`http://localhost:5000/assets/${post?.url}`}
+          src={assetUrl(post.url)}
         />
       )}
       <FlexBetween sx={{ mt: "0.25rem" }}>

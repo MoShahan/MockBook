@@ -9,6 +9,7 @@ import Dropzone from "react-dropzone"
 import * as yup from "yup"
 
 import { useAppDispatch } from "@/app/hooks"
+import { api } from "@/lib/api"
 import { setLogin } from "@/state"
 
 import FlexBetween from "./FlexBetween"
@@ -36,34 +37,43 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
   }
 
   const login = async (vals: any, onSubmitProps: FormikHelpers<any>) => {
-    const response = await fetch("http://localhost:5000/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(vals),
-    })
-    const res = await response.json()
-    onSubmitProps.resetForm()
-
-    if (res) {
-      dispatch(setLogin({ user: res.user, accessToken: res.accessToken }))
+    try {
+      onSubmitProps.setStatus(undefined)
+      const { data } = await api.post("/auth/login", {
+        email: vals.email,
+        password: vals.password,
+      })
+      onSubmitProps.resetForm()
+      dispatch(setLogin({ user: data.user, accessToken: data.accessToken }))
       handleGoToHome()
+    } catch (e: any) {
+      const message = e?.response?.data?.msg || e?.response?.data?.error || e?.message || "Login failed"
+      onSubmitProps.setStatus(message)
     }
   }
 
   const register = async (vals: any, onSubmitProps: FormikHelpers<any>) => {
-    const formData = new FormData() // to send image also
-    for (let value in vals) {
-      formData.append(value, vals[value])
-    }
-    formData.append("picture", vals.picture.name)
-    // formData.append("url", vals.picture.name)
+    try {
+      onSubmitProps.setStatus(undefined)
+      const formData = new FormData()
+      formData.append("firstName", vals.firstName)
+      formData.append("lastName", vals.lastName)
+      formData.append("email", vals.email)
+      formData.append("password", vals.password)
+      formData.append("location", vals.location)
+      formData.append("occupation", vals.occupation)
 
-    const response = await fetch("http://localhost:5000/auth/register", { method: "POST", body: formData })
-    const res = await response.json()
-    onSubmitProps.resetForm()
+      // Multer field name is "picture"; do not append the filename as a second "picture" string
+      if (vals.picture instanceof File) {
+        formData.append("picture", vals.picture)
+      }
 
-    if (res) {
+      await api.post("/auth/register", formData)
+      onSubmitProps.resetForm()
       handleGoToLogin()
+    } catch (e: any) {
+      const message = e?.response?.data?.error || e?.response?.data?.msg || e?.message || "Registration failed"
+      onSubmitProps.setStatus(message)
     }
   }
 
@@ -74,7 +84,7 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
 
   return (
     <Formik onSubmit={handleFormSubmit} initialValues={initVals} validationSchema={validationSchema}>
-      {({ values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue }: any) => (
+      {({ values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue, status }: any) => (
         <form onSubmit={handleSubmit}>
           <Box
             sx={{
@@ -136,7 +146,11 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
                     border: `1px solid ${palette.neutral.medium}`,
                   }}
                 >
-                  <Dropzone multiple={false} onDrop={acceptedFiles => setFieldValue("picture", acceptedFiles[0])}>
+                  <Dropzone
+                    multiple={false}
+                    accept={{ "image/*": [] }}
+                    onDrop={acceptedFiles => setFieldValue("picture", acceptedFiles[0] ?? null)}
+                  >
                     {({ getRootProps, getInputProps }) => (
                       <Box
                         {...getRootProps()}
@@ -148,7 +162,7 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
                       >
                         <input {...getInputProps()} />
                         {!values.picture ? (
-                          <p>Add photo here</p>
+                          <p>Add photo here (optional)</p>
                         ) : (
                           <FlexBetween>
                             <Typography>{values.picture.name}</Typography>
@@ -158,6 +172,11 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
                       </Box>
                     )}
                   </Dropzone>
+                  {touched.picture && errors.picture && (
+                    <Typography sx={{ color: "error.main", mt: "0.5rem", fontSize: "0.75rem" }}>
+                      {errors.picture}
+                    </Typography>
+                  )}
                 </Box>
               </>
             )}
@@ -198,6 +217,11 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
             )}
           </Box>
           <Box>
+            {status && (
+              <Typography sx={{ color: "error.main", mt: "1rem", textAlign: "center" }} role="alert">
+                {String(status)}
+              </Typography>
+            )}
             <Button
               fullWidth
               type="submit"

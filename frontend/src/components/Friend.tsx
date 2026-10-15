@@ -6,6 +6,7 @@ import { Box, IconButton, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { api, authHeaders } from "@/lib/api"
 import { setFriends } from "@/state"
 
 import FlexBetween from "./FlexBetween"
@@ -36,15 +37,10 @@ const Friend = ({ id, name, subtitle, url }: FriendProps) => {
   }
 
   const patchFriend = async () => {
-    const response = await fetch(`http://localhost:5000/users/${user?._id}/${id}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
+    const { data } = await api.patch(`/users/${user?._id}/${id}`, {}, {
+      headers: authHeaders(accessToken),
     })
-    const res = await response.json()
-    dispatch(setFriends({ friends: res.friends }))
+    dispatch(setFriends({ friends: data.friends }))
   }
 
   return (

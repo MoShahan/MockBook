@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react"
 
+import { api, authHeaders } from "@/lib/api"
 import { setPosts } from "@/state"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
@@ -19,12 +20,10 @@ const PostsWidget = ({ isProfile = false, userId }: PostsWidgetProps) => {
   const accessToken = useAppSelector(state => state?.accessToken)
 
   const getPosts = async () => {
-    const response = await fetch(`http://localhost:5000/posts${isProfile ? `/${userId}/posts` : ""}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
+    const { data } = await api.get(`/posts${isProfile ? `/${userId}/posts` : ""}`, {
+      headers: authHeaders(accessToken),
     })
-    const res = await response.json()
-    dispatch(setPosts({ posts: res }))
+    dispatch(setPosts({ posts: data }))
   }
 
   useEffect(() => {

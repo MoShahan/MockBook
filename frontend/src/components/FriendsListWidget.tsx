@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { Box, Typography, useTheme } from "@mui/material"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { api, authHeaders } from "@/lib/api"
 import { setFriends } from "@/state"
 
 import Friend from "./Friend"
@@ -18,15 +19,10 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
   const theme: any = useTheme()
 
   const getFriends = async () => {
-    const response = await fetch(`http://localhost:5000/${userId}/friends`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
+    const { data } = await api.get(`/${userId}/friends`, {
+      headers: authHeaders(accessToken),
     })
-    const res = await response.json()
-    dispatch(setFriends({ friends: res }))
+    dispatch(setFriends({ friends: data }))
   }
 
   useEffect(() => {
