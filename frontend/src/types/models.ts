@@ -33,6 +33,8 @@ export type PostComment = {
   userId: string
   text: string
   createdAt?: string
+  /** Comment likes keyed by user id (same shape as post likes). */
+  likes?: PostLikes
   user?: Pick<User, "firstName" | "lastName" | "picturePath"> | null
 }
 

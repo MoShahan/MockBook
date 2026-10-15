@@ -7,6 +7,7 @@ import {
   getFeed,
   getPost,
   getUserPosts,
+  likeComment,
   likePost,
 } from "../controllers/posts.js"
 import { requireObjectId } from "../lib/objectId.js"
@@ -26,6 +27,14 @@ router.get("/:postId", verifyAccessToken, requireObjectId("postId"), getPost)
 router.patch("/:postId/like", verifyAccessToken, requireObjectId("postId"), likePost)
 
 router.post("/:postId/comments", verifyAccessToken, requireObjectId("postId"), addComment)
+
+router.patch(
+  "/:postId/comments/:commentId/like",
+  verifyAccessToken,
+  requireObjectId("postId"),
+  requireObjectId("commentId"),
+  likeComment
+)
 
 router.delete("/:postId", verifyAccessToken, requireObjectId("postId"), deletePost)
 

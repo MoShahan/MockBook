@@ -6,6 +6,7 @@ const CommentSchema = new Schema(
   {
     userId: { type: String, required: true },
     text: { type: String, required: true, trim: true },
+    likes: { type: Map, of: Boolean, default: {} },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 )

@@ -34,6 +34,7 @@ function formatComment(comment, byId) {
       userId: "",
       text: comment,
       createdAt: undefined,
+      likes: {},
       user: null,
     }
   }
@@ -44,6 +45,7 @@ function formatComment(comment, byId) {
     userId: raw.userId ? String(raw.userId) : "",
     text: raw.text || "",
     createdAt: raw.createdAt,
+    likes: serializeLikes(raw.likes),
     user: authorSnapshot(byId[String(raw.userId)]),
   }
 }

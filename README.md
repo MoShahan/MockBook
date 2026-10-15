@@ -50,6 +50,7 @@ MockBook/
 - Home feed with author name, avatar, and relative time
 - Like / unlike posts (count updates in UI)
 - Comment on posts (add + list with author)
+- Like / unlike comments (heart + count on each comment)
 - Delete **own** posts (⋮ menu + confirm dialog)
 - Profile feed shows that user’s posts only (`isProfile`)
 
@@ -92,7 +93,7 @@ MockBook/
 ### Planned next (see `PROJECT_PLAN.md`)
 
 - Edit own posts; edit/delete own comments
-- Who liked a post / comment (own + others’); comment likes; save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
+- Who liked a post / comment (own + others’); save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
 - Home **Add people** rail (recent users + search); remove navbar search
 - Profile editing (location, occupation, avatar) + social links
 - Single-post page + Share menu (copy link, X, Facebook, LinkedIn, WhatsApp); Help/FAQ page
@@ -224,6 +225,7 @@ npm run start -w backend
 | `GET`    | `/posts/:postId`             | Single post                                                      |
 | `PATCH`  | `/posts/:postId/like`        | Like or unlike                                                   |
 | `POST`   | `/posts/:postId/comments`    | Add a comment                                                    |
+| `PATCH`  | `/posts/:postId/comments/:commentId/like` | Like or unlike a comment                                |
 | `DELETE` | `/posts/:postId`             | Delete own post                                                  |
 
 Routes other than register, login, and refresh expect:

@@ -119,13 +119,54 @@ export const addComment = async (req, res, next) => {
       return res.status(404).json({ msg: "Post not found" })
     }
 
-    post.comments.push({ userId, text })
+    post.comments.push({ userId, text, likes: {} })
     await post.save()
 
     const [formatted] = await withAuthors([post])
     res.status(201).json({ updatedPost: formatted })
   } catch (e) {
     res.status(409).json({ msg: e.message })
+  }
+}
+
+export const likeComment = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const { postId, commentId } = req.params
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    const comment = post.comments.id(commentId)
+    if (!comment) {
+      return res.status(404).json({ error: "Comment not found" })
+    }
+
+    if (!comment.likes) {
+      comment.likes = new Map()
+    }
+
+    let message = ""
+    if (comment.likes.get(userId)) {
+      comment.likes.delete(userId)
+      message = "Comment like removed"
+    } else {
+      comment.likes.set(userId, true)
+      message = "Comment liked"
+    }
+
+    post.markModified("comments")
+    await post.save()
+
+    const [formatted] = await withAuthors([post])
+    res.status(200).json({ message, updatedPost: formatted })
+  } catch (e) {
+    next(e)
   }
 }
 

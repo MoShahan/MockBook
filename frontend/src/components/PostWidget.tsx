@@ -74,6 +74,17 @@ const PostWidget = ({ post }: PostWidgetProps) => {
     dispatch(setPost({ post: data.updatedPost }))
   }
 
+  const patchCommentLike = async (commentId: string) => {
+    try {
+      const { data } = await api.patch<{ message: string; updatedPost: Post }>(
+        `/posts/${post._id}/comments/${commentId}/like`
+      )
+      dispatch(setPost({ post: data.updatedPost }))
+    } catch (err: unknown) {
+      toastError(getErrorMessage(err, "Failed to update comment like"))
+    }
+  }
+
   const submitComment = async (e: React.FormEvent) => {
     e.preventDefault()
     const text = commentText.trim()
@@ -199,6 +210,9 @@ const PostWidget = ({ post }: PostWidgetProps) => {
           {comments.map((comment, index) => {
             const name =
               [comment.user?.firstName, comment.user?.lastName].filter(Boolean).join(" ").trim() || "User"
+            const commentLikes = comment.likes ?? {}
+            const isCommentLiked = Boolean(user?._id && commentLikes[user._id])
+            const commentLikesCount = Object.keys(commentLikes).length
             return (
               <Box key={comment._id || `${post._id}-c-${index}`}>
                 <Divider />
@@ -226,11 +240,32 @@ const PostWidget = ({ post }: PostWidgetProps) => {
                     >
                       {comment.text}
                     </Typography>
-                    {comment.createdAt && (
-                      <Typography sx={{ color: medium, fontSize: "0.75rem", mt: "0.2rem" }}>
-                        {formatPostTime(comment.createdAt)}
-                      </Typography>
-                    )}
+                    <FlexBetween sx={{ mt: "0.2rem", justifyContent: "flex-start", gap: "0.75rem" }}>
+                      {comment.createdAt && (
+                        <Typography sx={{ color: medium, fontSize: "0.75rem" }}>
+                          {formatPostTime(comment.createdAt)}
+                        </Typography>
+                      )}
+                      {comment._id && (
+                        <FlexBetween sx={{ gap: "0.15rem" }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => patchCommentLike(comment._id!)}
+                            aria-label={isCommentLiked ? "Unlike comment" : "Like comment"}
+                            sx={{ p: "0.15rem" }}
+                          >
+                            {isCommentLiked ? (
+                              <FavoriteOutlined sx={{ fontSize: "0.95rem", color: primary }} />
+                            ) : (
+                              <FavoriteBorderOutlined sx={{ fontSize: "0.95rem", color: medium }} />
+                            )}
+                          </IconButton>
+                          {commentLikesCount > 0 && (
+                            <Typography sx={{ color: medium, fontSize: "0.75rem" }}>{commentLikesCount}</Typography>
+                          )}
+                        </FlexBetween>
+                      )}
+                    </FlexBetween>
                   </Box>
                 </Box>
               </Box>
