@@ -94,7 +94,7 @@ MockBook/
 
 - Edit own posts; edit/delete own comments
 - Who liked a post / comment (own + others’); save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
-- Home **Add people** rail (recent users + search); remove navbar search
+- Home **Add people** rail (recent users + search; search lives in that widget, not the navbar)
 - Profile editing (location, occupation, avatar) + social links
 - Single-post page + Share menu (copy link, X, Facebook, LinkedIn, WhatsApp); Help/FAQ page
 - Infinite-scroll feed; UI overhaul; tests; production deploy

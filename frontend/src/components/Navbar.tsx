@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState } from "react"
-import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu, Notifications, Search } from "@mui/icons-material"
-import { Box, Button, IconButton, InputBase, Typography, useMediaQuery, useTheme } from "@mui/material"
+import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu, Notifications } from "@mui/icons-material"
+import { Box, Button, IconButton, Typography, useMediaQuery, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -66,27 +66,17 @@ const Navbar = () => {
 
   return (
     <FlexBetween sx={{ padding: "1rem 6%", bgcolor: alt }}>
-      <FlexBetween sx={{ gap: "1.75rem" }}>
-        <Typography
-          onClick={() => handleGoToHome()}
-          sx={{
-            fontWeight: "bold",
-            fontSize: "clamp(1rem,2rem,2.25rem)",
-            color: "primary",
-            "&:hover": { color: pLight, cursor: "pointer" },
-          }}
-        >
-          MERN - Social Media
-        </Typography>
-        {isNonMobileScreens && (
-          <FlexBetween sx={{ bgcolor: nLight, borderRadius: "8px", gap: "3rem", padding: "0.1rem 1.5rem" }}>
-            <InputBase placeholder="Search..." />
-            <IconButton onClick={showComingSoon} aria-label="Search">
-              <Search />
-            </IconButton>
-          </FlexBetween>
-        )}
-      </FlexBetween>
+      <Typography
+        onClick={() => handleGoToHome()}
+        sx={{
+          fontWeight: "bold",
+          fontSize: "clamp(1rem,2rem,2.25rem)",
+          color: "primary",
+          "&:hover": { color: pLight, cursor: "pointer" },
+        }}
+      >
+        MERN - Social Media
+      </Typography>
 
       {isNonMobileScreens ? (
         <FlexBetween sx={{ gap: "1rem" }}>
