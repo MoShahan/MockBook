@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
+  alpha,
   Box,
   Button,
   CircularProgress,
@@ -179,11 +180,29 @@ const NotificationsPage = () => {
                   key={n._id}
                   onClick={() => void handleClickItem(n)}
                   sx={{
-                    borderRadius: 1,
+                    position: "relative",
+                    borderRadius: 2,
                     mb: 0.5,
-                    bgcolor: n.read ? undefined : theme.palette.action.hover,
+                    bgcolor: n.read
+                      ? undefined
+                      : alpha(
+                          theme.palette.primary.main,
+                          theme.palette.mode === "dark" ? 0.12 : 0.07
+                        ),
                     alignItems: "flex-start",
                     gap: 1,
+                    ...(!n.read && {
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        left: 0,
+                        top: 10,
+                        bottom: 10,
+                        width: 3,
+                        borderRadius: "0 2px 2px 0",
+                        bgcolor: "primary.main",
+                      },
+                    }),
                   }}
                 >
                   <ListItemAvatar sx={{ minWidth: 56, mt: 0.5 }}>

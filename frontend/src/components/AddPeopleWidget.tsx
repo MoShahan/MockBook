@@ -82,7 +82,7 @@ const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
           }
         />
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "0.85rem", width: "100%", minWidth: 0 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "0.35rem", width: "100%", minWidth: 0 }}>
           {users.map(u => (
             <Friend
               key={u._id}
@@ -92,6 +92,7 @@ const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
               url={u.picturePath || ""}
               avatarColor={u.avatarColor}
               showFriendButton
+              listHover
             />
           ))}
         </Box>

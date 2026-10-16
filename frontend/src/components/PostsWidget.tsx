@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Box, CircularProgress, Typography, useTheme } from "@mui/material"
+import { useRouter } from "next/navigation"
 
 import { api } from "@/lib/api"
 import { appendPosts, setPosts } from "@/state"
@@ -85,6 +86,7 @@ function pathForList(kind: PostsListKind, userId: string, cursor?: string | null
 
 const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps) => {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const posts = useAppSelector(state => state.posts)
   const theme = useTheme()
   const kind = resolveList(list, isProfile)
@@ -202,11 +204,26 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
 
   if (!posts.length) {
     const copy = EMPTY_COPY[kind]
-    return <EmptyState title={copy.title} description={copy.description} />
+    const cta =
+      kind === "friends"
+        ? { actionLabel: "Browse Everyone", onAction: () => router.push("/home") }
+        : kind === "authored"
+          ? { actionLabel: "Go to Home", onAction: () => router.push("/home") }
+          : kind === "feed"
+            ? undefined
+            : { actionLabel: "Browse feed", onAction: () => router.push("/home") }
+    return (
+      <EmptyState
+        title={copy.title}
+        description={copy.description}
+        actionLabel={cta?.actionLabel}
+        onAction={cta?.onAction}
+      />
+    )
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       {posts.map((post, index) => (
         <Box
           key={post._id}

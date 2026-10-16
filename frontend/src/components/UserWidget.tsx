@@ -40,10 +40,10 @@ type UserWidgetProps = {
 }
 
 const SOCIAL_ICONS: Record<SocialNetwork, React.ReactNode> = {
-  facebook: <Facebook />,
-  x: <X />,
-  linkedin: <LinkedIn />,
-  instagram: <Instagram />,
+  facebook: <Facebook fontSize="small" />,
+  x: <X fontSize="small" />,
+  linkedin: <LinkedIn fontSize="small" />,
+  instagram: <Instagram fontSize="small" />,
 }
 
 const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetProps) => {
@@ -160,14 +160,16 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     <WidgetWrapper sx={{ p: 0, overflow: "visible" }}>
       <Box
         sx={{
-          height: { xs: 72, sm: 84 },
+          height: { xs: 96, sm: 112 },
           bgcolor: coverColor,
           position: "relative",
           borderTopLeftRadius: coverRadius,
           borderTopRightRadius: coverRadius,
+          backgroundImage: theme =>
+            `linear-gradient(180deg, ${alpha(theme.palette.common.black, 0)} 40%, ${alpha(theme.palette.common.black, 0.12)} 100%)`,
         }}
       >
-        <Box sx={{ position: "absolute", top: 6, right: 6, zIndex: 2 }}>
+        <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}>
           {isOwnProfile ? (
             <Tooltip title="Edit profile">
               <IconButton
@@ -184,126 +186,147 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               </IconButton>
             </Tooltip>
           ) : (
-            <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
+            <FriendToggleButton
+              isFriend={isFriend}
+              onCover
+              onClick={() => void patchFriend()}
+            />
           )}
         </Box>
       </Box>
 
       <Box sx={{ px: "1.15rem", pb: "1.15rem", pt: 0, position: "relative", zIndex: 1 }}>
-        <FlexBetween sx={{ gap: "0.5rem", pb: "0.85rem", mt: "-1.85rem" }}>
-          <FlexBetween
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 0.35,
+            pb: "0.95rem",
+            mt: "-2.35rem",
+          }}
+        >
+          <Box
             onClick={handleGoToProfile}
-            sx={{ gap: "0.75rem", cursor: alreadyOnThisProfile ? "default" : "pointer", minWidth: 0 }}
+            onKeyDown={e => {
+              if (alreadyOnThisProfile) return
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                handleGoToProfile()
+              }
+            }}
+            role={alreadyOnThisProfile ? undefined : "link"}
+            tabIndex={alreadyOnThisProfile ? undefined : 0}
+            sx={{
+              cursor: alreadyOnThisProfile ? "default" : "pointer",
+              borderRadius: "50%",
+              border: theme => `3px solid ${theme.palette.background.paper}`,
+              boxShadow: theme => `0 0 0 1px ${theme.palette.divider}`,
+              position: "relative",
+              zIndex: 1,
+              flexShrink: 0,
+              "&:focus-visible": {
+                outline: `2px solid ${palette.primary.main}`,
+                outlineOffset: 2,
+              },
+            }}
           >
-            <Box
+            <UserImage
+              image={displayUrl}
+              name={`${user.firstName} ${user.lastName}`}
+              size="64px"
+              bgColor={avatarColor}
+            />
+          </Box>
+          <Box sx={{ minWidth: 0, width: "100%", pt: "0.35rem" }}>
+            <Typography
+              variant="h4"
+              onClick={handleGoToProfile}
+              noWrap
               sx={{
-                borderRadius: "50%",
-                border: theme => `3px solid ${theme.palette.background.paper}`,
-                boxShadow: theme => `0 0 0 1px ${theme.palette.divider}`,
-                position: "relative",
-                zIndex: 1,
-                flexShrink: 0,
+                color: dark,
+                fontWeight: 700,
+                lineHeight: 1.25,
+                fontSize: "1.2rem",
+                cursor: alreadyOnThisProfile ? "default" : "pointer",
+                ...(!alreadyOnThisProfile && {
+                  "&:hover": {
+                    color: palette.primary.main,
+                  },
+                }),
               }}
             >
-              <UserImage
-                image={displayUrl}
-                name={`${user.firstName} ${user.lastName}`}
-                size="52px"
-                bgColor={avatarColor}
-              />
-            </Box>
-            <Box sx={{ minWidth: 0, pt: "2.35rem" }}>
-              <Typography
-                variant="h4"
-                noWrap
-                sx={{
-                  color: dark,
-                  fontWeight: 600,
-                  lineHeight: 1.25,
-                  fontSize: "1.1rem",
-                  ...(!alreadyOnThisProfile && {
-                    "&:hover": {
-                      color: palette.primary.main,
-                    },
-                  }),
-                }}
-              >
-                {user.firstName} {user.lastName}
-              </Typography>
-              <Typography variant="body2" sx={{ color: medium, mt: 0.15 }}>
-                {friendCount} friends
-              </Typography>
-            </Box>
-          </FlexBetween>
-        </FlexBetween>
-
-      <Divider />
-
-      <Box sx={{ py: "0.75rem" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: "0.65rem", mb: "0.4rem" }}>
-          <LocationOnOutlined sx={{ fontSize: "1.15rem", color: main }} />
-          <Typography variant="body2" sx={{ color: medium }}>
-            {user.location?.trim() || "-"}
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-          <WorkOutlineOutlined sx={{ fontSize: "1.15rem", color: main }} />
-          <Typography variant="body2" sx={{ color: medium }}>
-            {user.occupation?.trim() || "-"}
-          </Typography>
-        </Box>
-      </Box>
-
-      <Divider />
-
-      <Box sx={{ py: "0.75rem" }}>
-        <FlexBetween>
-          <Typography variant="body2" sx={{ color: medium }}>
-            Profile visits
-          </Typography>
-          <Typography variant="body2" sx={{ color: main, fontWeight: 600 }}>
-            {user.viewedProfile || 0}
-          </Typography>
-        </FlexBetween>
-      </Box>
-
-      {activeSocials.length > 0 ? (
-        <>
-          <Divider />
-          <Box sx={{ py: "0.75rem" }}>
-            <Typography variant="subtitle2" sx={{ color: main, mb: "0.65rem" }}>
-              Social Profiles
+              {user.firstName} {user.lastName}
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+            <Typography variant="body2" sx={{ color: medium, mt: 0.2, fontWeight: 500 }}>
+              {friendCount} {friendCount === 1 ? "friend" : "friends"}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Divider />
+
+        <Box sx={{ py: "0.7rem", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+            <LocationOnOutlined sx={{ fontSize: "1.05rem", color: main }} />
+            <Typography variant="body2" sx={{ color: medium }}>
+              {user.location?.trim() || "-"}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+            <WorkOutlineOutlined sx={{ fontSize: "1.05rem", color: main }} />
+            <Typography variant="body2" sx={{ color: medium }}>
+              {user.occupation?.trim() || "-"}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Divider />
+
+        <Box sx={{ py: "0.7rem" }}>
+          <FlexBetween>
+            <Typography variant="body2" sx={{ color: medium }}>
+              Profile visits
+            </Typography>
+            <Typography variant="body2" sx={{ color: main, fontWeight: 600 }}>
+              {user.viewedProfile || 0}
+            </Typography>
+          </FlexBetween>
+        </Box>
+
+        {activeSocials.length > 0 ? (
+          <>
+            <Divider />
+            <Box sx={{ pt: "0.75rem", display: "flex", flexWrap: "wrap", gap: 0.75 }}>
               {activeSocials.map(item =>
                 item.href ? (
-                  <FlexBetween key={item.key} sx={{ gap: "0.75rem" }}>
-                    <FlexBetween sx={{ gap: "0.65rem", minWidth: 0 }}>
-                      <Box sx={{ color: main, display: "flex", "& svg": { fontSize: "1.15rem" } }} aria-hidden>
-                        {SOCIAL_ICONS[item.key]}
-                      </Box>
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="body2" sx={{ color: main, fontWeight: 600 }}>
-                          {item.label}
-                        </Typography>
-                        <Link
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          underline="hover"
-                          sx={{ color: medium, fontWeight: 500, fontSize: "0.8125rem" }}
-                        >
-                          @{item.handle}
-                        </Link>
-                      </Box>
-                    </FlexBetween>
-                  </FlexBetween>
+                  <Tooltip key={item.key} title={`${item.label}: @${item.handle}`}>
+                    <IconButton
+                      component={Link}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      size="small"
+                      aria-label={`${item.label} profile`}
+                      sx={{
+                        color: main,
+                        border: `1px solid ${theme.palette.divider}`,
+                        borderRadius: 2,
+                        "&:hover": {
+                          color: palette.primary.main,
+                          borderColor: alpha(palette.primary.main, 0.35),
+                          bgcolor: alpha(palette.primary.main, 0.06),
+                        },
+                      }}
+                    >
+                      {SOCIAL_ICONS[item.key]}
+                    </IconButton>
+                  </Tooltip>
                 ) : null
               )}
             </Box>
-          </Box>
-        </>
-      ) : null}
+          </>
+        ) : null}
       </Box>
 
       {isOwnProfile ? (

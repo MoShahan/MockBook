@@ -5,6 +5,7 @@ import {
   Close,
   DarkMode,
   Help,
+  KeyboardArrowDown,
   LightMode,
   LogoutOutlined,
   Menu,
@@ -21,6 +22,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Menu as MuiMenu,
+  MenuItem,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -41,6 +44,7 @@ import UserImage from "./UserImage"
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [accountAnchor, setAccountAnchor] = useState<null | HTMLElement>(null)
   const dispatch = useAppDispatch()
   const router = useRouter()
   const user = useAppSelector(state => state.user)
@@ -54,19 +58,23 @@ const Navbar = () => {
   const isDark = theme.palette.mode === "dark"
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : "Profile"
+  const accountOpen = Boolean(accountAnchor)
 
   const closeMobile = () => setMobileOpen(false)
+  const closeAccount = () => setAccountAnchor(null)
 
   const handleGoToHome = () => {
     router.push("/home")
   }
 
   const handleGoToProfile = () => {
+    closeAccount()
     closeMobile()
     router.push("/profile")
   }
 
   const handleLogout = () => {
+    closeAccount()
     closeMobile()
     dispatch(setLogout())
     success("Signed out")
@@ -74,6 +82,7 @@ const Navbar = () => {
   }
 
   const handleGoToHelp = () => {
+    closeAccount()
     closeMobile()
     router.push("/help")
   }
@@ -107,30 +116,6 @@ const Navbar = () => {
     </Tooltip>
   )
 
-  const desktopAccount = (
-    <>
-      <Button
-        onClick={handleGoToProfile}
-        sx={{
-          color: dark,
-          textTransform: "none",
-          fontWeight: 500,
-          px: 1.25,
-          minWidth: 0,
-        }}
-      >
-        {fullName}
-      </Button>
-      <Button
-        onClick={handleLogout}
-        startIcon={<LogoutOutlined />}
-        sx={{ color: dark, textTransform: "none", flexShrink: 0 }}
-      >
-        Log Out
-      </Button>
-    </>
-  )
-
   return (
     <Box
       component="header"
@@ -155,7 +140,7 @@ const Navbar = () => {
         <BrandLogo size="nav" onClick={handleGoToHome} />
 
         {isNonMobileScreens ? (
-          <FlexBetween sx={{ gap: "0.75rem" }}>
+          <FlexBetween sx={{ gap: "0.5rem" }}>
             {themeToggle}
             <NotificationsMenu />
             <Tooltip title="Help & FAQ">
@@ -163,7 +148,87 @@ const Navbar = () => {
                 <Help sx={{ fontSize: "25px" }} />
               </IconButton>
             </Tooltip>
-            {desktopAccount}
+            <Button
+              onClick={e => setAccountAnchor(e.currentTarget)}
+              aria-haspopup="true"
+              aria-expanded={accountOpen}
+              aria-controls={accountOpen ? "account-menu" : undefined}
+              endIcon={
+                <KeyboardArrowDown
+                  sx={{
+                    fontSize: "1.15rem",
+                    transition: "transform 0.15s ease",
+                    transform: accountOpen ? "rotate(180deg)" : "none",
+                  }}
+                />
+              }
+              sx={{
+                color: dark,
+                textTransform: "none",
+                fontWeight: 500,
+                px: 1,
+                minWidth: 0,
+                gap: 0.75,
+                borderRadius: 2,
+                border: `1px solid ${theme.palette.divider}`,
+                "&:hover": {
+                  bgcolor: "action.hover",
+                  borderColor: theme.palette.divider,
+                },
+              }}
+            >
+              <UserImage
+                image={user?.picturePath || ""}
+                name={fullName}
+                size="28px"
+                bgColor={user?.avatarColor}
+              />
+              <Typography
+                component="span"
+                noWrap
+                sx={{
+                  maxWidth: 120,
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                  color: dark,
+                }}
+              >
+                {user?.firstName || "Account"}
+              </Typography>
+            </Button>
+            <MuiMenu
+              id="account-menu"
+              anchorEl={accountAnchor}
+              open={accountOpen}
+              onClose={closeAccount}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+              slotProps={{
+                paper: { sx: { mt: 1, minWidth: 200 } },
+              }}
+            >
+              <MenuItem onClick={handleGoToProfile}>
+                <ListItemIcon>
+                  <PersonOutlined fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Profile</ListItemText>
+              </MenuItem>
+              <MenuItem onClick={handleGoToHelp}>
+                <ListItemIcon>
+                  <Help fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Help & FAQ</ListItemText>
+              </MenuItem>
+              <Divider sx={{ my: 0.5 }} />
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutOutlined fontSize="small" color="error" />
+                </ListItemIcon>
+                <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>
+                  Log out
+                </ListItemText>
+              </MenuItem>
+            </MuiMenu>
           </FlexBetween>
         ) : (
           <FlexBetween sx={{ gap: 0.5 }}>

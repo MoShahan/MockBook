@@ -1,17 +1,16 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import { FavoriteOutlined } from "@mui/icons-material"
+import CloseIcon from "@mui/icons-material/Close"
 import {
+  alpha,
   Box,
   Button,
   CircularProgress,
   Dialog,
   DialogContent,
-  DialogTitle,
-  List,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
+  IconButton,
   Typography,
   useTheme,
 } from "@mui/material"
@@ -58,7 +57,10 @@ type LikersListProps = {
 
 const LikersList = ({ fetchPath, pageSize, onSelectUser }: LikersListProps) => {
   const theme = useTheme()
+  const primary = theme.palette.primary.main
+  const dark = theme.palette.neutral.dark
   const medium = theme.palette.neutral.medium
+  const isDark = theme.palette.mode === "dark"
 
   const [likers, setLikers] = useState<Liker[]>([])
   const [page, setPage] = useState(1)
@@ -121,60 +123,202 @@ const LikersList = ({ fetchPath, pageSize, onSelectUser }: LikersListProps) => {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 3 }} role="status" aria-live="polite">
-        <CircularProgress size={32} />
+      <Box
+        sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.25, py: 5 }}
+        role="status"
+        aria-live="polite"
+      >
+        <CircularProgress size={28} />
+        <Typography sx={{ color: medium, fontSize: "0.8125rem" }}>Loading likes…</Typography>
       </Box>
     )
   }
 
   if (error && likers.length === 0) {
     return (
-      <Typography sx={{ color: "error.main", px: 2, py: 2 }} role="alert">
-        {error}
-      </Typography>
+      <Box
+        sx={{
+          textAlign: "center",
+          py: 4,
+          px: 2,
+          borderRadius: 2.5,
+          border: `1px dashed ${theme.palette.divider}`,
+          bgcolor: isDark ? alpha(theme.palette.common.white, 0.03) : alpha(theme.palette.common.black, 0.02),
+        }}
+        role="alert"
+      >
+        <Typography sx={{ color: "error.main", fontWeight: 600, mb: 0.5 }}>Couldn’t load likes</Typography>
+        <Typography sx={{ color: medium, fontSize: "0.8125rem" }}>{error}</Typography>
+      </Box>
     )
   }
 
   if (likers.length === 0) {
-    return <Typography sx={{ color: medium, px: 2, py: 2 }}>No likes yet</Typography>
+    return (
+      <Box
+        role="status"
+        sx={{
+          textAlign: "center",
+          py: 4,
+          px: 2,
+          borderRadius: 2.5,
+          border: `1px dashed ${theme.palette.divider}`,
+          bgcolor: isDark ? alpha(theme.palette.common.white, 0.03) : alpha(theme.palette.common.black, 0.02),
+        }}
+      >
+        <Box
+          sx={{
+            width: 48,
+            height: 48,
+            mx: "auto",
+            mb: 1.25,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: alpha(primary, isDark ? 0.16 : 0.1),
+            color: primary,
+          }}
+        >
+          <FavoriteOutlined sx={{ fontSize: "1.35rem" }} />
+        </Box>
+        <Typography sx={{ color: dark, fontWeight: 600, mb: 0.35 }}>No likes yet</Typography>
+        <Typography sx={{ color: medium, fontSize: "0.8125rem", lineHeight: 1.5 }}>
+          When people like this, they’ll show up here.
+        </Typography>
+      </Box>
+    )
   }
 
   return (
     <>
       {total > 0 && (
-        <Typography sx={{ color: medium, px: 2, pb: 1, fontSize: "0.8125rem" }}>{total} likes</Typography>
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.65,
+            mb: 1.5,
+            px: 1.1,
+            py: 0.45,
+            borderRadius: 2,
+            bgcolor: alpha(primary, isDark ? 0.14 : 0.09),
+            color: primary,
+          }}
+        >
+          <FavoriteOutlined sx={{ fontSize: "0.9rem" }} />
+          <Typography sx={{ fontWeight: 700, fontSize: "0.75rem", letterSpacing: "0.02em" }}>
+            {total} {total === 1 ? "like" : "likes"}
+          </Typography>
+        </Box>
       )}
-      <List disablePadding>
-        {likers.map(liker => {
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        {likers.map((liker, index) => {
           const name = [liker.firstName, liker.lastName].filter(Boolean).join(" ").trim() || "User"
           return (
-            <ListItemButton key={liker._id} onClick={() => onSelectUser(liker._id)} sx={{ borderRadius: 1 }}>
-              <ListItemAvatar sx={{ minWidth: 48 }}>
+            <Box
+              key={liker._id}
+              component="button"
+              type="button"
+              onClick={() => onSelectUser(liker._id)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.25,
+                width: "100%",
+                textAlign: "left",
+                border: `1px solid transparent`,
+                borderRadius: 1,
+                px: 1.1,
+                py: 0.85,
+                cursor: "pointer",
+                font: "inherit",
+                color: "inherit",
+                bgcolor: "transparent",
+                transition: "background-color 0.15s ease, border-color 0.15s ease, transform 0.12s ease",
+                "@keyframes likerEnter": {
+                  from: { opacity: 0, transform: "translateY(4px)" },
+                  to: { opacity: 1, transform: "translateY(0)" },
+                },
+                animation: "likerEnter 0.28s ease both",
+                animationDelay: `${Math.min(index, 8) * 30}ms`,
+                "&:hover": {
+                  bgcolor: alpha(primary, isDark ? 0.1 : 0.06),
+                  borderColor: alpha(primary, isDark ? 0.22 : 0.14),
+                },
+                "&:focus-visible": {
+                  outline: `2px solid ${primary}`,
+                  outlineOffset: 2,
+                },
+                "&:active": {
+                  transform: "scale(0.99)",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  position: "relative",
+                  flexShrink: 0,
+                  borderRadius: "50%",
+                  boxShadow: `0 0 0 2px ${alpha(primary, 0.18)}`,
+                }}
+              >
                 <UserImage
                   image={liker.picturePath || ""}
                   name={name}
-                  size="40px"
+                  size="42px"
                   bgColor={liker.avatarColor}
                 />
-              </ListItemAvatar>
-              <ListItemText
-                primary={name}
-                slotProps={{ primary: { sx: { fontWeight: 500, fontSize: "0.9375rem" } } }}
-              />
-            </ListItemButton>
+              </Box>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography
+                  noWrap
+                  sx={{
+                    color: dark,
+                    fontWeight: 600,
+                    fontSize: "0.9375rem",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {name}
+                </Typography>
+                <Typography sx={{ color: medium, fontSize: "0.75rem", mt: 0.15 }}>
+                  View profile
+                </Typography>
+              </Box>
+            </Box>
           )
         })}
-      </List>
+      </Box>
 
       {error && (
-        <Typography sx={{ color: "error.main", px: 2, py: 1, fontSize: "0.8125rem" }} role="alert">
+        <Typography sx={{ color: "error.main", mt: 1.25, fontSize: "0.8125rem" }} role="alert">
           {error}
         </Typography>
       )}
 
       {hasMore && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }}>
-          <Button onClick={() => void loadMore()} disabled={loadingMore} size="small">
+        <Box sx={{ display: "flex", justifyContent: "center", pt: 1.75 }}>
+          <Button
+            onClick={() => void loadMore()}
+            disabled={loadingMore}
+            size="small"
+            variant="outlined"
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 2,
+              px: 2,
+              borderColor: theme.palette.divider,
+              color: dark,
+              "&:hover": {
+                borderColor: alpha(primary, 0.45),
+                bgcolor: alpha(primary, 0.06),
+                color: primary,
+              },
+            }}
+          >
             {loadingMore ? "Loading…" : "Load more"}
           </Button>
         </Box>
@@ -190,8 +334,12 @@ const LikersDialog = ({
   title = "Liked by",
   pageSize = 20,
 }: LikersDialogProps) => {
+  const theme = useTheme()
   const router = useRouter()
   const currentUserId = useAppSelector(state => state.user?._id)
+  const primary = theme.palette.primary.main
+  const dark = theme.palette.neutral.dark
+  const isDark = theme.palette.mode === "dark"
 
   const goToProfile = (userId: string) => {
     onClose()
@@ -203,9 +351,80 @@ const LikersDialog = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent dividers sx={{ minHeight: 120, px: 1 }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      aria-labelledby="likers-dialog-title"
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 1,
+            overflow: "hidden",
+            backgroundImage: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            boxShadow: isDark
+              ? `0 18px 48px ${alpha(theme.palette.common.black, 0.45)}`
+              : `0 18px 48px ${alpha(theme.palette.common.black, 0.12)}`,
+          },
+        },
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.25,
+          px: 2.25,
+          py: 1.6,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          bgcolor: isDark ? alpha(theme.palette.common.white, 0.03) : alpha(theme.palette.common.black, 0.015),
+        }}
+      >
+        <Box
+          sx={{
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: alpha(primary, isDark ? 0.18 : 0.12),
+            color: primary,
+            flexShrink: 0,
+          }}
+        >
+          <FavoriteOutlined sx={{ fontSize: "1.1rem" }} />
+        </Box>
+        <Typography
+          id="likers-dialog-title"
+          component="h2"
+          sx={{ flex: 1, fontWeight: 700, fontSize: "1.05rem", color: dark, letterSpacing: "-0.01em" }}
+        >
+          {title}
+        </Typography>
+        <IconButton
+          onClick={onClose}
+          aria-label="Close"
+          size="small"
+          sx={{
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+            color: dark,
+          }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Box>
+      <DialogContent
+        sx={{
+          minHeight: 160,
+          maxHeight: "min(62dvh, 420px)",
+          px: 1.75,
+          py: 1.75,
+        }}
+      >
         {open && fetchPath ? (
           <LikersList
             key={fetchPath}

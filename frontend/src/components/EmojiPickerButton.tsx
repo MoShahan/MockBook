@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { SentimentSatisfiedAltOutlined } from "@mui/icons-material"
-import { alpha, Box, IconButton, Popover, Tooltip, Typography, useTheme } from "@mui/material"
+import { alpha, Box, Popover, Tooltip, Typography, useTheme } from "@mui/material"
 
 /** Curated set - covers common reactions without a heavy emoji library. */
 const EMOJIS = [
@@ -163,6 +163,8 @@ type EmojiPickerButtonProps = {
   /** Optional label shown next to the icon (create-post toolbar). */
   showLabel?: boolean
   active?: boolean
+  /** Compact circular control for inline composers. */
+  dense?: boolean
 }
 
 /**
@@ -173,6 +175,7 @@ const EmojiPickerButton = ({
   disabled = false,
   showLabel = false,
   active = false,
+  dense = false,
 }: EmojiPickerButtonProps) => {
   const theme = useTheme()
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
@@ -193,23 +196,35 @@ const EmojiPickerButton = ({
           sx={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "0.35rem",
+            justifyContent: "center",
+            gap: dense ? 0 : "0.35rem",
             border: 0,
             background: accent ? alpha(theme.palette.primary.main, 0.1) : "transparent",
             cursor: disabled ? "default" : "pointer",
-            px: showLabel ? 1 : 0.5,
-            py: 0.5,
-            borderRadius: 1.5,
+            ...(dense
+              ? {
+                  width: 32,
+                  height: 32,
+                  p: 0,
+                  borderRadius: "8px",
+                }
+              : {
+                  px: showLabel ? 1 : 0.5,
+                  py: 0.5,
+                  borderRadius: 1.5,
+                }),
             color: accent ? theme.palette.primary.main : theme.palette.neutral.mediumMain,
             font: "inherit",
             fontWeight: accent ? 600 : 500,
+            transition: "color 0.15s ease, background-color 0.15s ease",
             "&:hover": {
               color: disabled ? undefined : theme.palette.primary.main,
+              bgcolor: disabled ? undefined : alpha(theme.palette.primary.main, 0.08),
             },
           }}
         >
-          <SentimentSatisfiedAltOutlined sx={{ fontSize: 22 }} />
-          {showLabel ? <Typography component="span">Emoji</Typography> : null}
+          <SentimentSatisfiedAltOutlined sx={{ fontSize: dense ? 20 : 22 }} />
+          {showLabel && !dense ? <Typography component="span">Emoji</Typography> : null}
         </Box>
       </Tooltip>
 
@@ -254,11 +269,21 @@ const EmojiPickerButton = ({
             overflowY: "auto",
             overflowX: "hidden",
             pr: 0.25,
+            // Slightly warmer panel so emoji yellows read richer in light mode.
+            ...(theme.palette.mode === "light"
+              ? {
+                  bgcolor: alpha(theme.palette.common.black, 0.02),
+                  borderRadius: 1.5,
+                  p: 0.5,
+                }
+              : null),
           }}
         >
           {UNIQUE_EMOJIS.map(emoji => (
-            <IconButton
+            <Box
               key={emoji}
+              component="button"
+              type="button"
               role="option"
               aria-label={`Insert ${emoji}`}
               onClick={() => {
@@ -270,14 +295,40 @@ const EmojiPickerButton = ({
                 minWidth: 0,
                 aspectRatio: "1",
                 p: 0,
-                fontSize: "1.4rem",
+                m: 0,
+                border: 0,
+                cursor: "pointer",
+                fontSize: "1.45rem",
                 lineHeight: 1,
                 borderRadius: 1.5,
-                "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.1) },
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "transparent",
+                // IconButton’s action.active color washes Segoe UI Emoji in light mode.
+                color: "unset",
+                WebkitTextFillColor: "unset",
+                opacity: 1,
+                transition: "background-color 0.12s ease, transform 0.12s ease",
+                "&:hover": {
+                  bgcolor:
+                    theme.palette.mode === "dark"
+                      ? alpha(theme.palette.primary.main, 0.14)
+                      : alpha(theme.palette.common.black, 0.06),
+                },
+                "&:active": {
+                  transform: "scale(0.92)",
+                },
+                "&:focus-visible": {
+                  outline: `2px solid ${theme.palette.primary.main}`,
+                  outlineOffset: 1,
+                },
               }}
             >
-              {emoji}
-            </IconButton>
+              <Box component="span" aria-hidden sx={{ color: "unset", WebkitTextFillColor: "unset" }}>
+                {emoji}
+              </Box>
+            </Box>
           ))}
         </Box>
       </Popover>

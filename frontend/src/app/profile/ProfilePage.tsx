@@ -1,6 +1,12 @@
 "use client"
 
 import React, { useMemo } from "react"
+import {
+  BookmarkBorderOutlined,
+  ChatBubbleOutlineOutlined,
+  FavoriteBorderOutlined,
+  GridViewOutlined,
+} from "@mui/icons-material"
 import { Box, CircularProgress, Tab, Tabs, useMediaQuery } from "@mui/material"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
@@ -8,6 +14,7 @@ import FriendsListWidget from "@/components/FriendsListWidget"
 import Navbar from "@/components/Navbar"
 import PageShell from "@/components/PageShell"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
+import { segmentedTabsSx } from "@/components/segmentedTabsSx"
 import UserWidget from "@/components/UserWidget"
 import { sameUserId } from "@/types/models"
 
@@ -17,11 +24,23 @@ type ProfilePageProps = { id: string }
 
 type OwnTab = "posts" | "saved" | "liked" | "commented"
 
-const OWN_TABS: { value: OwnTab; label: string; list: PostsListKind }[] = [
-  { value: "posts", label: "Posts", list: "authored" },
-  { value: "saved", label: "Saved", list: "saved" },
-  { value: "liked", label: "Liked", list: "liked" },
-  { value: "commented", label: "Commented", list: "commented" },
+const tabIconSx = { fontSize: "15px" } as const
+
+const OWN_TABS: {
+  value: OwnTab
+  label: string
+  list: PostsListKind
+  icon: React.ReactElement
+}[] = [
+  { value: "posts", label: "Posts", list: "authored", icon: <GridViewOutlined sx={tabIconSx} /> },
+  { value: "saved", label: "Saved", list: "saved", icon: <BookmarkBorderOutlined sx={tabIconSx} /> },
+  { value: "liked", label: "Liked", list: "liked", icon: <FavoriteBorderOutlined sx={tabIconSx} /> },
+  {
+    value: "commented",
+    label: "Commented",
+    list: "commented",
+    icon: <ChatBubbleOutlineOutlined sx={tabIconSx} />,
+  },
 ]
 
 function parseOwnTab(raw: string | null): OwnTab {
@@ -114,10 +133,17 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
                   variant="scrollable"
                   scrollButtons="auto"
                   aria-label="Profile content sections"
-                  sx={{ mb: "0.85rem", borderBottom: 1, borderColor: "divider", minHeight: 40 }}
+                  sx={segmentedTabsSx}
                 >
                   {OWN_TABS.map(tab => (
-                    <Tab key={tab.value} value={tab.value} label={tab.label} />
+                    <Tab
+                      key={tab.value}
+                      value={tab.value}
+                      label={tab.label}
+                      icon={tab.icon}
+                      iconPosition="start"
+                      disableRipple
+                    />
                   ))}
                 </Tabs>
                 <PostsWidget key={activeList} list={activeList} userId={profileId} />

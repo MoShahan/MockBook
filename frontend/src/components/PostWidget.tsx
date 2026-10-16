@@ -14,13 +14,16 @@ import {
   ImageOutlined,
   LinkedIn,
   MoreVert,
+  SendRounded,
   ShareOutlined,
   WhatsApp,
   X,
 } from "@mui/icons-material"
 import {
+  alpha,
   Box,
   Button,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -37,6 +40,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material"
+import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api, mediaUrl } from "@/lib/api"
@@ -47,6 +51,7 @@ import { useToast } from "@/providers/ToastProvider"
 import { removePost, setPost, setSavedPosts } from "@/state"
 import { type Post,sameUserId } from "@/types/models"
 
+import EmojiPickerButton, { insertEmojiAtCursor } from "./EmojiPickerButton"
 import ExpandableText from "./ExpandableText"
 import FlexBetween from "./FlexBetween"
 import Friend from "./Friend"
@@ -65,6 +70,7 @@ const COMMENTS_LOAD_STEP = 5
 
 const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const user = useAppSelector(state => state.user)
   const { success, error: toastError, info } = useToast()
   const likes = post.likes ?? {}
@@ -106,6 +112,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const [editError, setEditError] = useState<string | undefined>()
   const [isSavingEditPost, setIsSavingEditPost] = useState(false)
   const [imageFailed, setImageFailed] = useState(false)
+  const editDescriptionInputRef = React.useRef<HTMLInputElement>(null)
 
   const authorName =
     [post.user?.firstName, post.user?.lastName].filter(Boolean).join(" ").trim() || "Unknown user"
@@ -132,6 +139,15 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       success(data.message || (data.saved ? "Post saved" : "Post unsaved"))
     } catch (err: unknown) {
       toastError(getErrorMessage(err, isSaved ? "Failed to unsave post" : "Failed to save post"))
+    }
+  }
+
+  const goToProfile = (userId: string | undefined) => {
+    if (!userId) return
+    if (sameUserId(user?._id, userId)) {
+      router.push("/profile")
+    } else {
+      router.push(`/profile/${userId}`)
     }
   }
 
@@ -376,41 +392,67 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           text={post.description}
           maxWords={40}
           typographySx={{
-            color: neutral,
-            mt: "0.65rem",
-            fontSize: "0.9rem",
-            lineHeight: 1.5,
+            color: theme.palette.text.primary,
+            mt: "0.75rem",
+            fontSize: "0.9375rem",
+            lineHeight: 1.55,
           }}
           buttonSx={{ color: primary, ml: 0 }}
         />
       ) : null}
       {post?.url && !imageFailed ? (
         <Box
-          component="img"
-          alt="Post image"
-          src={mediaUrl(post.url)}
-          onError={() => setImageFailed(true)}
           sx={{
-            display: "block",
-            width: "100%",
-            mt: "0.65rem",
-            borderRadius: "0.65rem",
-            maxHeight: { xs: "min(300px, 45vh)", sm: "min(360px, 50vh)" },
-            objectFit: "contain",
+            mt: "0.75rem",
+            borderRadius: 2,
+            overflow: "hidden",
             bgcolor: "action.hover",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            maxHeight: { xs: "min(300px, 45vh)", sm: "min(360px, 50vh)" },
           }}
-        />
+        >
+          <Box
+            component="img"
+            alt="Post image"
+            src={mediaUrl(post.url)}
+            onError={() => setImageFailed(true)}
+            sx={{
+              display: "block",
+              width: "100%",
+              maxHeight: { xs: "min(300px, 45vh)", sm: "min(360px, 50vh)" },
+              objectFit: "contain",
+            }}
+          />
+        </Box>
       ) : null}
-      <Divider sx={{ mt: "0.65rem", mb: "0.1rem" }} />
-      <FlexBetween sx={{ py: 0 }}>
-        <FlexBetween sx={{ gap: "0.2rem" }}>
-          <FlexBetween sx={{ gap: "0.1rem" }}>
+      <Divider sx={{ mt: "0.75rem", mb: "0.15rem", opacity: 0.7 }} />
+      <FlexBetween sx={{ py: 0.15 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <Tooltip title={isLiked ? "Unlike" : "Like"}>
-              <IconButton size="small" onClick={patchLike} aria-label={isLiked ? "Unlike" : "Like"}>
+              <IconButton
+                size="small"
+                onClick={patchLike}
+                aria-label={isLiked ? "Unlike" : "Like"}
+                sx={{
+                  p: "0.35rem",
+                  transition: "transform 0.15s ease",
+                  "&:active": { transform: "scale(0.88)" },
+                }}
+              >
                 {isLiked ? (
-                  <FavoriteOutlined sx={{ color: primary, fontSize: "1.2rem" }} />
+                  <FavoriteOutlined
+                    sx={{
+                      color: primary,
+                      fontSize: "1.25rem",
+                      transform: "scale(1.06)",
+                      transition: "transform 0.15s ease",
+                    }}
+                  />
                 ) : (
-                  <FavoriteBorderOutlined sx={{ fontSize: "1.2rem" }} />
+                  <FavoriteBorderOutlined sx={{ fontSize: "1.25rem" }} />
                 )}
               </IconButton>
             </Tooltip>
@@ -422,14 +464,16 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               sx={{
                 border: 0,
                 background: "none",
-                padding: "0.2rem 0.3rem",
+                padding: "0.15rem 0.1rem 0.15rem 0",
                 margin: 0,
-                minWidth: "1.1rem",
+                ml: "-0.15rem",
+                minWidth: 0,
                 cursor: "pointer",
                 color: isLiked ? primary : "inherit",
                 font: "inherit",
                 fontWeight: 600,
                 fontSize: "0.8125rem",
+                lineHeight: 1,
                 borderRadius: 1,
                 transition: "color 0.15s ease",
                 "&:hover": { textDecoration: "underline", color: primary },
@@ -437,9 +481,9 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             >
               {likesCount}
             </Typography>
-          </FlexBetween>
+          </Box>
 
-          <FlexBetween sx={{ gap: "0.1rem" }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <Tooltip title={isComments ? "Hide comments" : "Comments"}>
               <IconButton
                 size="small"
@@ -451,23 +495,28 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                 }}
                 aria-label={isComments ? "Hide comments" : "Show comments"}
                 aria-expanded={isComments}
-                sx={isComments ? { color: primary } : undefined}
+                sx={{
+                  p: "0.35rem",
+                  ...(isComments ? { color: primary } : null),
+                }}
               >
-                <ChatBubbleOutlineOutlined sx={{ fontSize: "1.2rem" }} />
+                <ChatBubbleOutlineOutlined sx={{ fontSize: "1.25rem" }} />
               </IconButton>
             </Tooltip>
             <Typography
               sx={{
                 fontWeight: 600,
                 fontSize: "0.8125rem",
-                minWidth: "1.1rem",
+                lineHeight: 1,
+                minWidth: 0,
+                ml: "-0.15rem",
                 color: isComments ? primary : "inherit",
               }}
             >
               {comments.length}
             </Typography>
-          </FlexBetween>
-        </FlexBetween>
+          </Box>
+        </Box>
         <FlexBetween sx={{ gap: 0 }}>
           <Tooltip title={isSaved ? "Unsave" : "Save"}>
             <IconButton
@@ -475,11 +524,15 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               onClick={() => void toggleSave()}
               aria-label={isSaved ? "Unsave post" : "Save post"}
               aria-pressed={isSaved}
+              sx={{
+                transition: "transform 0.15s ease",
+                "&:active": { transform: "scale(0.88)" },
+              }}
             >
               {isSaved ? (
-                <Bookmark sx={{ color: primary, fontSize: "1.2rem" }} />
+                <Bookmark sx={{ color: primary, fontSize: "1.25rem" }} />
               ) : (
-                <BookmarkBorder sx={{ fontSize: "1.2rem" }} />
+                <BookmarkBorder sx={{ fontSize: "1.25rem" }} />
               )}
             </IconButton>
           </Tooltip>
@@ -491,7 +544,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               aria-expanded={Boolean(shareAnchor)}
               onClick={e => setShareAnchor(e.currentTarget)}
             >
-              <ShareOutlined sx={{ fontSize: "1.2rem" }} />
+              <ShareOutlined sx={{ fontSize: "1.25rem" }} />
             </IconButton>
           </Tooltip>
         </FlexBetween>
@@ -534,163 +587,368 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           </MenuItem>
         </Menu>
       </FlexBetween>
-      {isComments && (
-        <Box sx={{ mt: "0.5rem" }}>
-          {comments.length === 0 && (
-            <Typography sx={{ color: medium, m: "0.5rem 0", pl: "0.25rem", fontSize: "0.875rem" }}>
-              No comments yet
-            </Typography>
-          )}
-          {comments.slice(0, visibleCommentCount).map((comment, index) => {
-            const name =
-              [comment.user?.firstName, comment.user?.lastName].filter(Boolean).join(" ").trim() || "User"
-            const commentLikes = comment.likes ?? {}
-            const isCommentLiked = Boolean(user?._id && commentLikes[user._id])
-            const commentLikesCount = Object.keys(commentLikes).length
-            const isOwnComment = Boolean(comment._id && sameUserId(user?._id, comment.userId))
-            const isEditing = Boolean(comment._id && editingCommentId === comment._id)
-            return (
-              <Box key={comment._id || `${post._id}-c-${index}`}>
-                <Divider />
-                <Box sx={{ display: "flex", gap: "0.75rem", m: "0.75rem 0", pl: "0.25rem", alignItems: "flex-start" }}>
-                  <UserImage
-                    image={comment.user?.picturePath || ""}
-                    name={name}
-                    size="36px"
-                    bgColor={comment.user?.avatarColor}
-                  />
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <FlexBetween sx={{ alignItems: "flex-start" }}>
-                      <Typography
+      <Collapse in={isComments} timeout={220} unmountOnExit>
+        <Box
+          sx={{
+            mt: 1.25,
+            pt: 1.25,
+            borderTop: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 700,
+              fontSize: "0.7rem",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              color: medium,
+              mb: 1.25,
+              px: 0.25,
+            }}
+          >
+            {comments.length === 0
+              ? "Comments"
+              : `${comments.length} comment${comments.length === 1 ? "" : "s"}`}
+          </Typography>
+
+          {comments.length === 0 ? (
+            <Box
+              role="status"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+                py: 1.1,
+                px: 1.5,
+                mb: 1.15,
+                borderRadius: 2,
+                border: `1px dashed ${theme.palette.divider}`,
+                bgcolor: theme =>
+                  theme.palette.mode === "dark"
+                    ? alpha(theme.palette.common.white, 0.03)
+                    : alpha(theme.palette.common.black, 0.02),
+              }}
+            >
+              <Box
+                sx={{
+                  width: 28,
+                  height: 28,
+                  flexShrink: 0,
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: alpha(primary, theme.palette.mode === "dark" ? 0.14 : 0.1),
+                  color: primary,
+                }}
+              >
+                <ChatBubbleOutlineOutlined sx={{ fontSize: "0.95rem" }} />
+              </Box>
+              <Typography sx={{ color: medium, fontSize: "0.8125rem", lineHeight: 1.35 }}>
+                Be the first to comment
+              </Typography>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.15,
+                mb: comments.length > visibleCommentCount ? 0.5 : 1.25,
+              }}
+            >
+              {comments.slice(0, visibleCommentCount).map((comment, index) => {
+                const name =
+                  [comment.user?.firstName, comment.user?.lastName].filter(Boolean).join(" ").trim() ||
+                  "User"
+                const commentLikes = comment.likes ?? {}
+                const isCommentLiked = Boolean(user?._id && commentLikes[user._id])
+                const commentLikesCount = Object.keys(commentLikes).length
+                const isOwnComment = Boolean(comment._id && sameUserId(user?._id, comment.userId))
+                const isEditing = Boolean(comment._id && editingCommentId === comment._id)
+                return (
+                  <Box
+                    key={comment._id || `${post._id}-c-${index}`}
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      alignItems: "flex-start",
+                      "@keyframes commentEnter": {
+                        from: { opacity: 0, transform: "translateY(6px)" },
+                        to: { opacity: 1, transform: "translateY(0)" },
+                      },
+                      animation: "commentEnter 0.28s ease both",
+                      animationDelay: `${Math.min(index, 6) * 35}ms`,
+                    }}
+                  >
+                    <Box
+                      onClick={() => goToProfile(comment.userId)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault()
+                          goToProfile(comment.userId)
+                        }
+                      }}
+                      role={comment.userId ? "link" : undefined}
+                      tabIndex={comment.userId ? 0 : undefined}
+                      aria-label={comment.userId ? `View ${name}'s profile` : undefined}
+                      sx={{
+                        flexShrink: 0,
+                        mt: 0.15,
+                        cursor: comment.userId ? "pointer" : "default",
+                        borderRadius: "50%",
+                        "&:focus-visible": {
+                          outline: `2px solid ${primary}`,
+                          outlineOffset: 2,
+                        },
+                      }}
+                    >
+                      <UserImage
+                        image={comment.user?.picturePath || ""}
+                        name={name}
+                        size="34px"
+                        bgColor={comment.user?.avatarColor}
+                      />
+                    </Box>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Box
                         sx={{
-                          color: theme.palette.neutral.dark,
-                          fontWeight: 600,
-                          fontSize: "0.8125rem",
-                          lineHeight: 1.3,
+                          position: "relative",
+                          px: 1.35,
+                          py: 0.9,
+                          borderRadius: "14px",
+                          bgcolor: theme =>
+                            theme.palette.mode === "dark"
+                              ? alpha(theme.palette.common.white, 0.055)
+                              : alpha(theme.palette.common.black, 0.035),
+                          border: `1px solid ${
+                            theme.palette.mode === "dark"
+                              ? alpha(theme.palette.common.white, 0.06)
+                              : alpha(theme.palette.common.black, 0.04)
+                          }`,
+                          transition: "background-color 0.15s ease, border-color 0.15s ease",
+                          "&:hover": {
+                            bgcolor: theme =>
+                              theme.palette.mode === "dark"
+                                ? alpha(theme.palette.common.white, 0.075)
+                                : alpha(theme.palette.common.black, 0.05),
+                          },
+                          "&:hover .comment-menu-btn": {
+                            opacity: 1,
+                          },
                         }}
                       >
-                        {name}
-                      </Typography>
-                      {isOwnComment && comment._id && !isEditing && (
-                        <IconButton
-                          size="small"
-                          aria-label="Comment options"
-                          aria-haspopup="true"
-                          aria-expanded={commentMenu?.commentId === comment._id}
-                          onClick={e => setCommentMenu({ anchor: e.currentTarget, commentId: comment._id! })}
-                          sx={{ p: "0.15rem", ml: "0.25rem" }}
-                        >
-                          <MoreVert sx={{ fontSize: "1.1rem" }} />
-                        </IconButton>
-                      )}
-                    </FlexBetween>
-                    {isEditing && comment._id ? (
-                      <Box sx={{ mt: "0.35rem" }}>
-                        <InputBase
-                          fullWidth
-                          multiline
-                          maxRows={4}
-                          value={editCommentText}
-                          onChange={e => {
-                            setEditCommentText(e.target.value)
-                            if (editCommentError) setEditCommentError(undefined)
-                          }}
-                          disabled={isSavingEdit}
-                          sx={{
-                            backgroundColor: theme.palette.neutral.light,
-                            borderRadius: "0.75rem",
-                            padding: "0.5rem 0.75rem",
-                            fontSize: "0.9375rem",
-                            border: editCommentError ? `1px solid ${theme.palette.error.main}` : undefined,
-                          }}
-                        />
-                        {editCommentError && (
-                          <Typography sx={{ color: "error.main", mt: "0.25rem", fontSize: "0.75rem" }} role="alert">
-                            {editCommentError}
-                          </Typography>
-                        )}
-                        <Box sx={{ display: "flex", gap: "0.5rem", mt: "0.5rem" }}>
-                          <Button
-                            size="small"
-                            disabled={isSavingEdit}
-                            onClick={() => saveEditComment(comment._id!)}
-                            sx={{ color: theme.palette.background.alt, backgroundColor: primary }}
-                          >
-                            {isSavingEdit ? "Saving…" : "Save"}
-                          </Button>
-                          <Button size="small" disabled={isSavingEdit} onClick={cancelEditComment}>
-                            Cancel
-                          </Button>
-                        </Box>
-                      </Box>
-                    ) : (
-                      <ExpandableText
-                        text={comment.text}
-                        maxWords={30}
-                        typographySx={{
-                          color: neutral,
-                          fontWeight: 400,
-                          fontSize: "0.9375rem",
-                          mt: "0.15rem",
-                          lineHeight: 1.4,
-                        }}
-                        buttonSx={{ color: primary }}
-                      />
-                    )}
-                    <FlexBetween sx={{ mt: "0.35rem", justifyContent: "flex-start", gap: "0.85rem" }}>
-                      {comment.createdAt && (
-                        <Typography sx={{ color: medium, fontSize: "0.75rem" }}>
-                          {formatPostTime(comment.createdAt)}
-                        </Typography>
-                      )}
-                      {comment._id && !isEditing && (
-                        <FlexBetween sx={{ gap: "0.2rem" }}>
-                          <Tooltip title={isCommentLiked ? "Unlike" : "Like"}>
-                            <IconButton
-                              size="small"
-                              onClick={() => patchCommentLike(comment._id!)}
-                              aria-label={isCommentLiked ? "Unlike comment" : "Like comment"}
-                              sx={{ p: "0.2rem" }}
-                            >
-                              {isCommentLiked ? (
-                                <FavoriteOutlined sx={{ fontSize: "1rem", color: primary }} />
-                              ) : (
-                                <FavoriteBorderOutlined sx={{ fontSize: "1rem", color: medium }} />
-                              )}
-                            </IconButton>
-                          </Tooltip>
+                        <FlexBetween sx={{ alignItems: "flex-start", gap: 0.5 }}>
                           <Typography
                             component="button"
                             type="button"
-                            onClick={() => setCommentLikersId(comment._id!)}
-                            aria-label={`View who liked this comment (${commentLikesCount})`}
+                            onClick={() => goToProfile(comment.userId)}
                             sx={{
                               border: 0,
                               background: "none",
-                              padding: "0.1rem 0.2rem",
+                              padding: 0,
                               margin: 0,
-                              cursor: "pointer",
-                              color: isCommentLiked ? primary : medium,
-                              fontSize: "0.75rem",
-                              fontWeight: 600,
-                              fontFamily: "inherit",
-                              lineHeight: "inherit",
-                              borderRadius: 1,
-                              "&:hover": { textDecoration: "underline", color: primary },
+                              font: "inherit",
+                              cursor: comment.userId ? "pointer" : "default",
+                              color: theme.palette.neutral.dark,
+                              fontWeight: 700,
+                              fontSize: "0.8125rem",
+                              lineHeight: 1.3,
+                              textAlign: "left",
+                              borderRadius: 0.5,
+                              transition: "color 0.15s ease",
+                              "&:hover": {
+                                color: comment.userId ? primary : theme.palette.neutral.dark,
+                              },
+                              "&:focus-visible": {
+                                outline: `2px solid ${primary}`,
+                                outlineOffset: 2,
+                              },
                             }}
                           >
-                            {commentLikesCount > 0 ? commentLikesCount : "Like"}
+                            {name}
                           </Typography>
+                          {isOwnComment && comment._id && !isEditing && (
+                            <IconButton
+                              className="comment-menu-btn"
+                              size="small"
+                              aria-label="Comment options"
+                              aria-haspopup="true"
+                              aria-expanded={commentMenu?.commentId === comment._id}
+                              onClick={e =>
+                                setCommentMenu({ anchor: e.currentTarget, commentId: comment._id! })
+                              }
+                              sx={{
+                                p: "0.15rem",
+                                ml: "auto",
+                                mt: -0.35,
+                                mr: -0.5,
+                                opacity: { xs: 1, sm: 0 },
+                                transition: "opacity 0.15s ease",
+                              }}
+                            >
+                              <MoreVert sx={{ fontSize: "1.05rem" }} />
+                            </IconButton>
+                          )}
                         </FlexBetween>
+                        {isEditing && comment._id ? (
+                          <Box sx={{ mt: 0.65 }}>
+                            <InputBase
+                              fullWidth
+                              multiline
+                              maxRows={4}
+                              autoFocus
+                              value={editCommentText}
+                              onChange={e => {
+                                setEditCommentText(e.target.value)
+                                if (editCommentError) setEditCommentError(undefined)
+                              }}
+                              disabled={isSavingEdit}
+                              sx={{
+                                backgroundColor: theme.palette.background.paper,
+                                borderRadius: 2,
+                                padding: "0.55rem 0.75rem",
+                                fontSize: "0.9rem",
+                                border: editCommentError
+                                  ? `1px solid ${theme.palette.error.main}`
+                                  : `1px solid ${theme.palette.divider}`,
+                                "&.Mui-focused": {
+                                  borderColor: alpha(primary, 0.55),
+                                  boxShadow: `0 0 0 3px ${alpha(primary, 0.12)}`,
+                                },
+                              }}
+                            />
+                            {editCommentError && (
+                              <Typography
+                                sx={{ color: "error.main", mt: 0.35, fontSize: "0.75rem" }}
+                                role="alert"
+                              >
+                                {editCommentError}
+                              </Typography>
+                            )}
+                            <Box sx={{ display: "flex", gap: 0.75, mt: 0.85 }}>
+                              <Button
+                                size="small"
+                                variant="contained"
+                                disabled={isSavingEdit}
+                                onClick={() => saveEditComment(comment._id!)}
+                                sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+                              >
+                                {isSavingEdit ? "Saving…" : "Save"}
+                              </Button>
+                              <Button
+                                size="small"
+                                disabled={isSavingEdit}
+                                onClick={cancelEditComment}
+                                sx={{ textTransform: "none" }}
+                              >
+                                Cancel
+                              </Button>
+                            </Box>
+                          </Box>
+                        ) : (
+                          <ExpandableText
+                            text={comment.text}
+                            maxWords={30}
+                            typographySx={{
+                              color: neutral,
+                              fontWeight: 400,
+                              fontSize: "0.9rem",
+                              mt: 0.25,
+                              lineHeight: 1.45,
+                            }}
+                            buttonSx={{ color: primary }}
+                          />
+                        )}
+                      </Box>
+                      {!isEditing && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: 0.25,
+                            mt: 0.45,
+                            pl: 0.35,
+                          }}
+                        >
+                          {comment.createdAt && (
+                            <Typography sx={{ color: medium, fontSize: "0.7rem", fontWeight: 500, px: 0.5 }}>
+                              {formatPostTime(comment.createdAt)}
+                            </Typography>
+                          )}
+                          {comment._id && (
+                            <>
+                              <Typography
+                                component="button"
+                                type="button"
+                                onClick={() => patchCommentLike(comment._id!)}
+                                aria-label={isCommentLiked ? "Unlike comment" : "Like comment"}
+                                sx={{
+                                  border: 0,
+                                  background: "none",
+                                  cursor: "pointer",
+                                  fontFamily: "inherit",
+                                  fontSize: "0.7rem",
+                                  fontWeight: 700,
+                                  px: 0.65,
+                                  py: 0.2,
+                                  borderRadius: 1,
+                                  color: isCommentLiked ? primary : medium,
+                                  transition: "color 0.15s ease, background-color 0.15s ease",
+                                  "&:hover": {
+                                    color: primary,
+                                    bgcolor: alpha(primary, 0.08),
+                                  },
+                                }}
+                              >
+                                {isCommentLiked ? "Liked" : "Like"}
+                              </Typography>
+                              {commentLikesCount > 0 ? (
+                                <Typography
+                                  component="button"
+                                  type="button"
+                                  onClick={() => setCommentLikersId(comment._id!)}
+                                  aria-label={`View who liked this comment (${commentLikesCount})`}
+                                  sx={{
+                                    border: 0,
+                                    background: "none",
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    fontSize: "0.7rem",
+                                    fontWeight: 600,
+                                    px: 0.5,
+                                    py: 0.2,
+                                    borderRadius: 1,
+                                    color: medium,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 0.35,
+                                    "&:hover": {
+                                      color: primary,
+                                      textDecoration: "underline",
+                                    },
+                                  }}
+                                >
+                                  <FavoriteOutlined sx={{ fontSize: "0.7rem", color: primary }} />
+                                  {commentLikesCount}
+                                </Typography>
+                              ) : null}
+                            </>
+                          )}
+                        </Box>
                       )}
-                    </FlexBetween>
+                    </Box>
                   </Box>
-                </Box>
-              </Box>
-            )
-          })}
+                )
+              })}
+            </Box>
+          )}
+
           {comments.length > visibleCommentCount && (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 0.5 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", py: 0.75, mb: 0.5 }}>
               <Button
                 size="small"
                 onClick={() =>
@@ -698,12 +956,20 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                     Math.min(count + COMMENTS_LOAD_STEP, comments.length)
                   )
                 }
-                sx={{ textTransform: "none", color: primary }}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  color: primary,
+                  borderRadius: 2,
+                  px: 1.5,
+                  "&:hover": { bgcolor: alpha(primary, 0.08) },
+                }}
               >
-                View more ({comments.length - visibleCommentCount} more)
+                View {Math.min(COMMENTS_LOAD_STEP, comments.length - visibleCommentCount)} more
               </Button>
             </Box>
           )}
+
           <Menu
             anchorEl={commentMenu?.anchor ?? null}
             open={Boolean(commentMenu)}
@@ -735,65 +1001,173 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>Delete</ListItemText>
             </MenuItem>
           </Menu>
-          <Divider sx={{ mb: "0.75rem" }} />
-          <Box component="form" onSubmit={submitComment} noValidate>
-            <FlexBetween sx={{ gap: "0.5rem" }}>
-              <InputBase
-                fullWidth
-                placeholder="Write a comment…"
-                value={commentText}
-                onChange={e => {
-                  setCommentText(e.target.value)
-                  if (commentError) setCommentError(undefined)
-                }}
-                disabled={isSubmittingComment}
-                sx={{
-                  backgroundColor: theme.palette.neutral.light,
-                  borderRadius: "2rem",
-                  padding: "0.5rem 1rem",
-                  border: commentError ? `1px solid ${theme.palette.error.main}` : undefined,
-                }}
+
+          <Box
+            component="form"
+            onSubmit={submitComment}
+            noValidate
+            sx={{
+              display: "flex",
+              alignItems: "flex-end",
+              gap: 1,
+              mt: comments.length === 0 ? 0 : 0.25,
+            }}
+          >
+            <Box sx={{ flexShrink: 0, mb: 0.35 }}>
+              <UserImage
+                image={user?.picturePath || ""}
+                name={user ? `${user.firstName} ${user.lastName}` : "You"}
+                size="34px"
+                bgColor={user?.avatarColor}
               />
-              <Button
-                type="submit"
-                disabled={isSubmittingComment}
-                sx={{ color: theme.palette.background.alt, backgroundColor: primary, flexShrink: 0 }}
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-end",
+                  gap: 0.5,
+                  px: 1.25,
+                  py: 0.35,
+                  borderRadius: 3,
+                  bgcolor: theme =>
+                    theme.palette.mode === "dark"
+                      ? alpha(theme.palette.common.white, 0.06)
+                      : theme.palette.neutral.light,
+                  border: commentError
+                    ? `1px solid ${theme.palette.error.main}`
+                    : `1px solid ${theme.palette.divider}`,
+                  transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+                  "&:focus-within": {
+                    borderColor: alpha(primary, 0.55),
+                    boxShadow: `0 0 0 3px ${alpha(primary, 0.12)}`,
+                  },
+                }}
               >
-                {isSubmittingComment ? "…" : "Post"}
-              </Button>
-            </FlexBetween>
-            {commentError && (
-              <Typography sx={{ color: "error.main", mt: "0.35rem", fontSize: "0.75rem" }} role="alert">
-                {commentError}
-              </Typography>
-            )}
+                <InputBase
+                  fullWidth
+                  multiline
+                  maxRows={4}
+                  placeholder="Add a comment…"
+                  value={commentText}
+                  onChange={e => {
+                    setCommentText(e.target.value)
+                    if (commentError) setCommentError(undefined)
+                  }}
+                  disabled={isSubmittingComment}
+                  sx={{
+                    flex: 1,
+                    py: 0.65,
+                    fontSize: "0.9rem",
+                    lineHeight: 1.4,
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      const form = e.currentTarget.closest("form")
+                      if (form && !isSubmittingComment && commentText.trim()) {
+                        if (typeof form.requestSubmit === "function") form.requestSubmit()
+                        else form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }))
+                      }
+                    }
+                  }}
+                />
+                <Tooltip title="Post comment">
+                  <span>
+                    <IconButton
+                      type="submit"
+                      size="small"
+                      disabled={isSubmittingComment || !commentText.trim()}
+                      aria-label="Post comment"
+                      sx={{
+                        mb: 0.15,
+                        color: theme.palette.common.white,
+                        bgcolor: primary,
+                        width: 32,
+                        height: 32,
+                        "&:hover": { bgcolor: theme.palette.primary.dark },
+                        "&.Mui-disabled": {
+                          bgcolor: alpha(primary, 0.35),
+                          color: alpha(theme.palette.common.white, 0.7),
+                        },
+                      }}
+                    >
+                      <SendRounded sx={{ fontSize: "1.05rem" }} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Box>
+              {commentError && (
+                <Typography sx={{ color: "error.main", mt: 0.5, ml: 0.5, fontSize: "0.75rem" }} role="alert">
+                  {commentError}
+                </Typography>
+              )}
+            </Box>
           </Box>
         </Box>
-      )}
+      </Collapse>
 
       <Dialog open={editOpen} onClose={closeEditPost} fullWidth maxWidth="sm">
         <DialogTitle>Edit post</DialogTitle>
         <DialogContent>
-          <InputBase
-            fullWidth
-            multiline
-            minRows={3}
-            maxRows={8}
-            value={editDescription}
-            onChange={e => {
-              setEditDescription(e.target.value)
-              if (editError) setEditError(undefined)
-            }}
-            disabled={isSavingEditPost}
-            placeholder="What's on your mind?"
+          <Box
             sx={{
               mt: 1,
               backgroundColor: theme.palette.neutral.light,
-              borderRadius: "0.75rem",
-              padding: "0.75rem 1rem",
-              border: editError ? `1px solid ${theme.palette.error.main}` : undefined,
+              borderRadius: "12px",
+              border: editError
+                ? `1px solid ${theme.palette.error.main}`
+                : `1px solid ${theme.palette.divider}`,
+              transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+              "&:focus-within": {
+                borderColor: primary,
+                boxShadow: `0 0 0 3px ${alpha(primary, 0.14)}`,
+              },
             }}
-          />
+          >
+            <InputBase
+              fullWidth
+              multiline
+              minRows={3}
+              maxRows={8}
+              inputRef={editDescriptionInputRef}
+              value={editDescription}
+              onChange={e => {
+                setEditDescription(e.target.value)
+                if (editError) setEditError(undefined)
+              }}
+              disabled={isSavingEditPost}
+              placeholder="What's on your mind?"
+              sx={{
+                px: 1.25,
+                pt: 1,
+                pb: 0.5,
+                fontSize: "0.95rem",
+              }}
+            />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                px: 0.65,
+                pb: 0.55,
+              }}
+            >
+              <EmojiPickerButton
+                dense
+                disabled={isSavingEditPost}
+                onSelect={emoji =>
+                  insertEmojiAtCursor(
+                    editDescriptionInputRef.current,
+                    editDescription,
+                    emoji,
+                    setEditDescription
+                  )
+                }
+              />
+            </Box>
+          </Box>
           {editError && (
             <Typography sx={{ color: "error.main", mt: "0.35rem", fontSize: "0.75rem" }} role="alert">
               {editError}

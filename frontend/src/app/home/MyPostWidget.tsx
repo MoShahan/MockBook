@@ -1,19 +1,17 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { CloseOutlined, ImageOutlined } from "@mui/icons-material"
+import { AttachFileOutlined, CloseOutlined, SendRounded } from "@mui/icons-material"
 import {
   alpha,
   Box,
-  Button,
-  Divider,
   IconButton,
   InputBase,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material"
 import { Formik, type FormikHelpers } from "formik"
-import DropZone from "react-dropzone"
 import type { ObjectSchema } from "yup"
 import * as yup from "yup"
 
@@ -27,9 +25,10 @@ import { useToast } from "@/providers/ToastProvider"
 import { prependPost } from "@/state"
 import type { CreatePostFormValues, Post } from "@/types/models"
 
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024
-
 import { useAppDispatch, useAppSelector } from "../hooks"
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+const ACCEPT_IMAGE = "image/jpeg,image/png,image/gif,image/webp"
 
 type MyPostWidgetProps = { url: string }
 
@@ -37,9 +36,10 @@ type ImagePreviewProps = {
   file: File
   disabled?: boolean
   onRemove: () => void
+  onReplace: () => void
 }
 
-const ImagePreview = ({ file, disabled, onRemove }: ImagePreviewProps) => {
+const ImagePreview = ({ file, disabled, onRemove, onReplace }: ImagePreviewProps) => {
   const [previewUrl, setPreviewUrl] = useState("")
 
   useEffect(() => {
@@ -49,7 +49,16 @@ const ImagePreview = ({ file, disabled, onRemove }: ImagePreviewProps) => {
   }, [file])
 
   return (
-    <Box sx={{ position: "relative", width: "100%", bgcolor: "background.default" }}>
+    <Box
+      sx={{
+        position: "relative",
+        width: "100%",
+        bgcolor: "background.default",
+        borderRadius: 2,
+        overflow: "hidden",
+        border: theme => `1px solid ${theme.palette.divider}`,
+      }}
+    >
       <Box
         component="img"
         src={previewUrl}
@@ -81,21 +90,32 @@ const ImagePreview = ({ file, disabled, onRemove }: ImagePreviewProps) => {
       >
         <CloseOutlined fontSize="small" />
       </IconButton>
-      <Typography
+      <Box
+        component="button"
+        type="button"
+        onClick={onReplace}
+        disabled={disabled}
         sx={{
+          display: "block",
+          width: "100%",
+          border: 0,
+          textAlign: "left",
+          cursor: disabled ? "default" : "pointer",
           px: 1.5,
           py: 0.75,
+          font: "inherit",
           fontSize: "0.75rem",
           color: "text.secondary",
           borderTop: 1,
           borderColor: "divider",
           bgcolor: "background.alt",
+          "&:hover": disabled ? undefined : { color: "primary.main" },
         }}
-        noWrap
-        title={file.name}
       >
-        {file.name} · click to replace
-      </Typography>
+        <Typography component="span" noWrap title={file.name} sx={{ fontSize: "inherit" }}>
+          {file.name} · click to replace
+        </Typography>
+      </Box>
     </Box>
   )
 }
@@ -118,15 +138,24 @@ const createPostInitVals: CreatePostFormValues = {
   picture: null,
 }
 
+function validateImageFile(file: File): string | null {
+  if (!ACCEPT_IMAGE.split(",").includes(file.type)) {
+    return "Use a JPEG, PNG, GIF, or WebP image"
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return "Image must be 5MB or smaller"
+  }
+  return null
+}
+
 const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   const user = useAppSelector(state => state.user)
   const dispatch = useAppDispatch()
   const { palette } = useTheme()
   const medMain = palette.neutral.mediumMain
-  const medium = palette.neutral.medium
 
-  const [isImage, setIsImage] = useState(false)
   const descriptionInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const { success, error: toastError } = useToast()
 
   const handleCreatePost = async (vals: CreatePostFormValues, helpers: FormikHelpers<CreatePostFormValues>) => {
@@ -146,7 +175,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
       const { data } = await api.post<{ post: Post }>("/posts", formData)
       dispatch(prependPost({ post: data.post }))
       helpers.resetForm()
-      setIsImage(false)
+      if (fileInputRef.current) fileInputRef.current.value = ""
       success("Post created")
     } catch (e: unknown) {
       const msg = getErrorMessage(e, "Failed to create post")
@@ -156,7 +185,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   }
 
   return (
-    <WidgetWrapper>
+    <WidgetWrapper sx={{ p: { xs: "1.15rem", sm: "1.35rem 1.25rem 1.15rem" } }}>
       <Formik<CreatePostFormValues>
         initialValues={createPostInitVals}
         validationSchema={createPostSchema}
@@ -182,194 +211,216 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
             : errors.picture
               ? String(errors.picture)
               : POST_EMPTY_MESSAGE
+          const canSubmit =
+            Boolean(values.description?.trim()) || values.picture instanceof File
+          const hasPhoto = values.picture instanceof File
+
+          const openFilePicker = () => {
+            if (isSubmitting) return
+            fileInputRef.current?.click()
+          }
+
+          const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0]
+            e.target.value = ""
+            if (!file) return
+            const invalid = validateImageFile(file)
+            if (invalid) {
+              toastError(invalid)
+              return
+            }
+            void setFieldValue("picture", file)
+          }
 
           return (
             <form onSubmit={handleSubmit} noValidate>
-              <FlexBetween sx={{ gap: "0.85rem", alignItems: "center" }}>
-                <UserImage
-                  image={url}
-                  name={[user?.firstName, user?.lastName].filter(Boolean).join(" ")}
-                  size="44px"
-                  bgColor={user?.avatarColor}
-                />
-                <InputBase
-                  name="description"
-                  placeholder="What's on your mind?"
-                  inputRef={descriptionInputRef}
-                  aria-invalid={showContentError}
-                  aria-describedby={showContentError ? "create-post-error" : undefined}
-                  sx={{
-                    width: "100%",
-                    borderRadius: "1.5rem",
-                    padding: "0.7rem 1.15rem",
-                    fontSize: "0.9rem",
-                    backgroundColor: palette.neutral.light,
-                    border: showContentError ? `1px solid ${palette.error.main}` : undefined,
-                  }}
-                  value={values.description ?? ""}
-                  // Avoid Formik handleChange/handleBlur - they call event.persist and crash
-                  // when MUI/React 19 invokes the handler without a synthetic event.
-                  onBlur={() => void setFieldTouched("description", true)}
-                  onChange={e => void setFieldValue("description", e.target.value)}
-                  disabled={isSubmitting}
-                />
-              </FlexBetween>
-              {showContentError && (
-                <Typography
-                  id="create-post-error"
-                  role="alert"
-                  sx={{
-                    color: "error.main",
-                    mt: "0.65rem",
-                    ml: { xs: 0, sm: "3.5rem" },
-                    fontSize: "0.8125rem",
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {contentErrorMessage}
-                </Typography>
-              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ACCEPT_IMAGE}
+                hidden
+                onChange={onFileChange}
+              />
 
-              {isImage && (
-                <Box sx={{ mt: "1rem" }}>
-                  <DropZone
-                    multiple={false}
-                    maxSize={MAX_IMAGE_BYTES}
-                    accept={{ "image/jpeg": [], "image/png": [], "image/gif": [], "image/webp": [] }}
-                    disabled={isSubmitting}
-                    onDrop={(acceptedFiles, fileRejections) => {
-                      if (fileRejections.length > 0) {
-                        const code = fileRejections[0]?.errors?.[0]?.code
-                        toastError(
-                          code === "file-too-large"
-                            ? "Image must be 5MB or smaller"
-                            : "Use a JPEG, PNG, GIF, or WebP image"
-                        )
-                        return
-                      }
-                      void setFieldValue("picture", acceptedFiles[0] ?? null)
+              <FlexBetween sx={{ gap: "0.75rem", alignItems: "flex-start" }}>
+                <Box sx={{ mt: 0.55, flexShrink: 0 }}>
+                  <UserImage
+                    image={url}
+                    name={[user?.firstName, user?.lastName].filter(Boolean).join(" ")}
+                    size="44px"
+                    bgColor={user?.avatarColor}
+                  />
+                </Box>
+
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-end",
+                      gap: 0.5,
+                      borderRadius: "12px",
+                      pl: 1.5,
+                      pr: 0.65,
+                      py: 0.45,
+                      minHeight: 48,
+                      backgroundColor: palette.neutral.light,
+                      border: showContentError
+                        ? `1px solid ${palette.error.main}`
+                        : `1px solid ${palette.divider}`,
+                      transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+                      "&:focus-within": {
+                        borderColor: palette.primary.main,
+                        boxShadow: `0 0 0 3px ${alpha(palette.primary.main, 0.16)}`,
+                      },
                     }}
                   >
-                    {({ getRootProps, getInputProps, isDragActive }) => (
-                      <Box
-                        {...getRootProps()}
-                        sx={{
-                          position: "relative",
-                          width: "100%",
-                          borderRadius: 2,
-                          overflow: "hidden",
-                          border: `1px dashed ${
-                            isDragActive ? palette.primary.main : alpha(palette.neutral.medium, 0.7)
-                          }`,
-                          bgcolor: isDragActive
-                            ? alpha(palette.primary.main, 0.06)
-                            : alpha(palette.neutral.light, 0.55),
-                          cursor: isSubmitting ? "default" : "pointer",
-                          transition: "border-color 0.15s ease, background-color 0.15s ease",
-                          "&:hover": {
-                            borderColor: isSubmitting ? undefined : palette.primary.main,
-                            bgcolor: isSubmitting
-                              ? undefined
-                              : alpha(palette.primary.main, 0.04),
-                          },
-                        }}
-                      >
-                        <input {...getInputProps()} />
-                        {values.picture ? (
-                          <ImagePreview
-                            file={values.picture}
-                            disabled={isSubmitting}
-                            onRemove={() => setFieldValue("picture", null)}
-                          />
-                        ) : (
-                          <Box
+                    <InputBase
+                      name="description"
+                      placeholder="What's on your mind?"
+                      inputRef={descriptionInputRef}
+                      multiline
+                      maxRows={5}
+                      aria-invalid={showContentError}
+                      aria-describedby={showContentError ? "create-post-error" : undefined}
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        py: 0.85,
+                        fontSize: "0.95rem",
+                        alignSelf: "center",
+                        lineHeight: 1.4,
+                      }}
+                      value={values.description ?? ""}
+                      onBlur={() => void setFieldTouched("description", true)}
+                      onChange={e => void setFieldValue("description", e.target.value)}
+                      disabled={isSubmitting}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                          e.preventDefault()
+                          if (!isSubmitting && canSubmit) {
+                            const form = e.currentTarget.closest("form")
+                            if (form && typeof form.requestSubmit === "function") form.requestSubmit()
+                          }
+                        }
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.25,
+                        flexShrink: 0,
+                        alignSelf: "center",
+                        pl: 0.75,
+                        ml: 0.25,
+                        borderLeft: `1px solid ${palette.divider}`,
+                        minHeight: 32,
+                      }}
+                    >
+                      <Tooltip title={hasPhoto ? "Replace photo" : "Add photo"}>
+                        <IconButton
+                          type="button"
+                          size="small"
+                          disabled={isSubmitting}
+                          aria-label={hasPhoto ? "Replace photo" : "Add photo"}
+                          aria-pressed={hasPhoto}
+                          onClick={openFilePicker}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: "8px",
+                            color: hasPhoto ? palette.primary.main : medMain,
+                            bgcolor: hasPhoto ? alpha(palette.primary.main, 0.1) : "transparent",
+                            "&:hover": {
+                              color: palette.primary.main,
+                              bgcolor: alpha(palette.primary.main, 0.08),
+                            },
+                          }}
+                        >
+                          <AttachFileOutlined sx={{ fontSize: "1.15rem" }} />
+                        </IconButton>
+                      </Tooltip>
+                      <EmojiPickerButton
+                        dense
+                        disabled={isSubmitting}
+                        onSelect={emoji =>
+                          insertEmojiAtCursor(
+                            descriptionInputRef.current,
+                            values.description,
+                            emoji,
+                            next => void setFieldValue("description", next)
+                          )
+                        }
+                      />
+                      <Tooltip title={canSubmit ? "Post" : "Add text or a photo to post"}>
+                        <span>
+                          <IconButton
+                            type="submit"
+                            size="small"
+                            disabled={isSubmitting || !canSubmit}
+                            aria-label="Post"
                             sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: 0.5,
-                              py: 2.25,
-                              px: 1.5,
-                              textAlign: "center",
+                              ml: 0.15,
+                              width: 32,
+                              height: 32,
+                              borderRadius: "8px",
+                              color: palette.common.white,
+                              bgcolor: palette.primary.main,
+                              transition: "background-color 0.15s ease, transform 0.12s ease",
+                              "&:hover": { bgcolor: palette.primary.dark },
+                              "&:active": { transform: "scale(0.94)" },
+                              "&.Mui-disabled": {
+                                bgcolor: alpha(palette.primary.main, 0.28),
+                                color: alpha(palette.common.white, 0.8),
+                              },
                             }}
                           >
-                            <ImageOutlined sx={{ fontSize: 28, color: medMain }} />
-                            <Typography variant="subtitle2" sx={{ color: palette.neutral.dark }}>
-                              {isDragActive ? "Drop photo here" : "Add a photo"}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: medium }}>
-                              Drag and drop, or click to browse · JPEG, PNG, GIF, WebP
-                            </Typography>
-                          </Box>
-                        )}
-                      </Box>
-                    )}
-                  </DropZone>
+                            <SendRounded sx={{ fontSize: "1.05rem" }} />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </Box>
+                  </Box>
+
+                  {showContentError && (
+                    <Typography
+                      id="create-post-error"
+                      role="alert"
+                      sx={{
+                        color: "error.main",
+                        mt: "0.55rem",
+                        fontSize: "0.8125rem",
+                        fontWeight: 500,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {contentErrorMessage}
+                    </Typography>
+                  )}
+                </Box>
+              </FlexBetween>
+
+              {hasPhoto && values.picture ? (
+                <Box sx={{ mt: "0.85rem", ml: { xs: 0, sm: "3.45rem" } }}>
+                  <ImagePreview
+                    file={values.picture}
+                    disabled={isSubmitting}
+                    onRemove={() => {
+                      void setFieldValue("picture", null)
+                      if (fileInputRef.current) fileInputRef.current.value = ""
+                    }}
+                    onReplace={openFilePicker}
+                  />
                   {(touched.picture || submitCount > 0) && errors.picture && (
                     <Typography sx={{ color: "error.main", mt: "0.5rem", fontSize: "0.75rem" }} role="alert">
                       {String(errors.picture)}
                     </Typography>
                   )}
                 </Box>
-              )}
-
-              <Divider sx={{ margin: "0.85rem 0" }} />
-              <FlexBetween>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <FlexBetween
-                    onClick={() => {
-                      if (isSubmitting) return
-                      if (isImage) void setFieldValue("picture", null)
-                      setIsImage(prev => !prev)
-                    }}
-                    sx={{
-                      gap: "0.35rem",
-                      cursor: isSubmitting ? "default" : "pointer",
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1.5,
-                      bgcolor: isImage ? alpha(palette.primary.main, 0.1) : "transparent",
-                    }}
-                  >
-                    <ImageOutlined sx={{ color: isImage ? palette.primary.main : medMain }} />
-                    <Typography
-                      sx={{
-                        color: isImage ? palette.primary.main : medMain,
-                        fontWeight: isImage ? 600 : 500,
-                        "&:hover": {
-                          color: isImage ? palette.primary.main : medium,
-                        },
-                      }}
-                    >
-                      Image
-                    </Typography>
-                  </FlexBetween>
-                  <EmojiPickerButton
-                    showLabel
-                    disabled={isSubmitting}
-                    onSelect={emoji =>
-                      insertEmojiAtCursor(
-                        descriptionInputRef.current,
-                        values.description,
-                        emoji,
-                        next => void setFieldValue("description", next)
-                      )
-                    }
-                  />
-                </Box>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  sx={{ color: palette.background.alt, backgroundColor: palette.primary.main }}
-                >
-                  {isSubmitting ? "POSTING…" : "POST"}
-                </Button>
-              </FlexBetween>
+              ) : null}
 
               {status && (
-                <Typography sx={{ color: "error.main", mt: "1rem", textAlign: "center" }} role="alert">
+                <Typography sx={{ color: "error.main", mt: "0.85rem", textAlign: "center" }} role="alert">
                   {String(status)}
                 </Typography>
               )}

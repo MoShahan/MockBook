@@ -68,16 +68,19 @@ const InfoPageShell = ({ title, subtitle, children }: InfoPageShellProps) => {
       )}
 
       <PageShell narrow sx={{ flex: 1 }}>
-        <Typography variant="h3" sx={{ mb: 0.75, fontWeight: 600 }}>
-          {title}
-        </Typography>
-        {subtitle ? (
-          <Typography variant="body1" sx={{ color: "text.secondary", mb: 2.25, lineHeight: 1.55 }}>
-            {subtitle}
+        <Box sx={{ mb: subtitle ? 2.5 : 2.25 }}>
+          <Typography variant="h3" sx={{ mb: subtitle ? 0.6 : 0, fontWeight: 700, letterSpacing: "-0.02em" }}>
+            {title}
           </Typography>
-        ) : (
-          <Box sx={{ mb: 2.25 }} />
-        )}
+          {subtitle ? (
+            <Typography
+              variant="body1"
+              sx={{ color: "text.secondary", lineHeight: 1.55, maxWidth: 540 }}
+            >
+              {subtitle}
+            </Typography>
+          ) : null}
+        </Box>
         {children}
       </PageShell>
 

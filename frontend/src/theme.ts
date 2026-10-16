@@ -37,8 +37,21 @@ export const colorTokens = {
 const fontBody = 'var(--font-body), "Segoe UI", system-ui, sans-serif'
 const fontDisplay = 'var(--font-display), Georgia, "Times New Roman", serif'
 
+/** Soft card elevation — use on WidgetWrapper / feed surfaces. */
+export function cardShadow(mode: "light" | "dark"): string {
+  return mode === "dark"
+    ? `0 1px 0 ${alpha(colorTokens.stone[0], 0.05)}, 0 4px 16px ${alpha("#000", 0.28)}`
+    : `0 1px 2px ${alpha(colorTokens.stone[900], 0.04)}, 0 4px 14px ${alpha(colorTokens.stone[900], 0.06)}`
+}
+
 export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
   const isDark = mode === "dark"
+  const scrollbarThumb = isDark
+    ? alpha(colorTokens.stone[100], 0.28)
+    : alpha(colorTokens.stone[800], 0.28)
+  const scrollbarThumbHover = isDark
+    ? alpha(colorTokens.stone[100], 0.42)
+    : alpha(colorTokens.stone[800], 0.4)
 
   // Keep primary quieter so most UI reads as stone/ink, not green.
   const primary = isDark
@@ -72,11 +85,12 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
       }
 
   // Neutral charcoal/stone surfaces - not green-tinted pages.
+  // Dark: slightly lift cards (alt) off the page for clearer separation.
   const background = isDark
     ? { default: colorTokens.stone[950], alt: colorTokens.stone[900] }
     : { default: colorTokens.stone[100], alt: colorTokens.stone[0] }
 
-  const divider = isDark ? alpha(colorTokens.stone[100], 0.1) : alpha(colorTokens.stone[800], 0.1)
+  const divider = isDark ? alpha(colorTokens.stone[100], 0.12) : alpha(colorTokens.stone[800], 0.1)
 
   return {
     palette: {
@@ -109,7 +123,8 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
       },
     },
     shape: {
-      borderRadius: 12,
+      // Cards use ~1.25x via WidgetWrapper; controls stay ~10px via overrides.
+      borderRadius: 14,
     },
     spacing: 8,
     typography: {
@@ -175,13 +190,36 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
           body: {
             // Soft stone wash only - avoid green wash across the whole app.
             backgroundImage: isDark
-              ? `radial-gradient(900px 480px at 8% -8%, ${alpha(colorTokens.stone[700], 0.35)}, transparent 55%)`
-              : `radial-gradient(900px 480px at 8% -8%, ${alpha(colorTokens.stone[200], 0.7)}, transparent 55%)`,
+              ? `radial-gradient(1000px 520px at 10% -10%, ${alpha(colorTokens.stone[700], 0.42)}, transparent 55%)`
+              : `radial-gradient(1000px 520px at 10% -10%, ${alpha(colorTokens.stone[200], 0.85)}, transparent 55%)`,
             backgroundAttachment: "fixed",
+            // Firefox
+            scrollbarWidth: "thin",
+            scrollbarColor: `${scrollbarThumb} transparent`,
           },
           "*:focus-visible": {
             outline: `2px solid ${primary.main}`,
             outlineOffset: 2,
+          },
+          // Thin overlay scrollbars (dialogs, menus, page) — match stone UI.
+          "*::-webkit-scrollbar": {
+            width: 8,
+            height: 8,
+          },
+          "*::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "*::-webkit-scrollbar-thumb": {
+            backgroundColor: scrollbarThumb,
+            borderRadius: 8,
+            border: "2px solid transparent",
+            backgroundClip: "padding-box",
+          },
+          "*::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: scrollbarThumbHover,
+          },
+          "*::-webkit-scrollbar-corner": {
+            background: "transparent",
           },
         },
       },

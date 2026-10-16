@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, useTheme } from "@mui/material"
+import { alpha, Box, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -28,6 +28,8 @@ type FriendProps = {
   showFriendButton?: boolean
   /** Optional trailing control (e.g. post ⋮ menu). */
   endAction?: React.ReactNode
+  /** Soft row hover for list contexts (friends / discover). */
+  listHover?: boolean
 }
 
 const Friend = ({
@@ -39,6 +41,7 @@ const Friend = ({
   avatarSize = "42px",
   showFriendButton = true,
   endAction,
+  listHover = false,
 }: FriendProps) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
@@ -77,8 +80,30 @@ const Friend = ({
   }
 
   return (
-    <FlexBetween sx={{ width: "100%", gap: 1, minWidth: 0, alignItems: "center" }}>
-        <FlexBetween sx={{ gap: "0.65rem", flex: "1 1 auto", minWidth: 0 }}>
+    <FlexBetween
+      sx={{
+        width: "100%",
+        gap: 1,
+        minWidth: 0,
+        alignItems: "center",
+        ...(listHover
+          ? {
+              mx: -0.75,
+              px: 0.75,
+              py: 0.55,
+              borderRadius: 2,
+              transition: "background-color 0.15s ease",
+              "&:hover": {
+                bgcolor: alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.08 : 0.05
+                ),
+              },
+            }
+          : null),
+      }}
+    >
+      <FlexBetween sx={{ gap: "0.65rem", flex: "1 1 auto", minWidth: 0 }}>
         <Box
           onClick={handleGoToProfile}
           onKeyDown={e => {

@@ -78,6 +78,18 @@ const HelpPage = () => {
       title="Help & FAQ"
       subtitle="Quick answers about MockBook accounts, posting, friends, and privacy."
     >
+      <Typography
+        sx={{
+          color: "text.secondary",
+          lineHeight: 1.65,
+          mb: 2.5,
+          maxWidth: 560,
+        }}
+      >
+        Browse the questions below for common account and feed tips. Still stuck? Jump to Contact at the
+        bottom of this page.
+      </Typography>
+
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         {FAQS.map(item => (
           <Accordion
@@ -107,12 +119,16 @@ const HelpPage = () => {
         id="contact"
         component="section"
         sx={{
-          mt: 5,
+          mt: 4,
           p: { xs: 2.5, sm: 3 },
           borderRadius: 3,
-          bgcolor: "background.alt",
+          bgcolor: "background.paper",
           border: 1,
           borderColor: "divider",
+          boxShadow: theme =>
+            theme.palette.mode === "dark"
+              ? "0 1px 0 rgba(255,255,255,0.04)"
+              : "0 1px 3px rgba(28,25,23,0.06)",
           scrollMarginTop: "5rem",
         }}
       >

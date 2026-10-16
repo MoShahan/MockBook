@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { type ReactNode,useEffect, useState } from "react"
 import {
   Box,
   Button,
@@ -8,6 +8,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   TextField,
   Typography,
 } from "@mui/material"
@@ -80,6 +81,24 @@ function valuesFromUser(user: User): EditProfileValues {
   }
 }
 
+function SectionLabel({ children }: { children: ReactNode }) {
+  return (
+    <Typography
+      variant="subtitle2"
+      sx={{
+        fontWeight: 700,
+        letterSpacing: "0.02em",
+        textTransform: "uppercase",
+        fontSize: "0.7rem",
+        color: "text.secondary",
+        mb: 1.25,
+      }}
+    >
+      {children}
+    </Typography>
+  )
+}
+
 const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogProps) => {
   const dispatch = useAppDispatch()
   const { success, error: toastError } = useToast()
@@ -92,7 +111,22 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
   }, [previewUrl])
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" aria-labelledby="edit-profile-title">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      aria-labelledby="edit-profile-title"
+      slotProps={{
+        paper: {
+          sx: {
+            display: "flex",
+            flexDirection: "column",
+            maxHeight: "min(92dvh, 720px)",
+          },
+        },
+      }}
+    >
       <Formik<EditProfileValues>
         initialValues={valuesFromUser(user)}
         enableReinitialize
@@ -138,128 +172,184 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
           isSubmitting,
           status,
         }) => (
-          <form onSubmit={handleSubmit}>
-            <DialogTitle id="edit-profile-title">Edit profile</DialogTitle>
-            <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-              <Box
-                sx={{
-                  borderRadius: 2,
-                  overflow: "hidden",
-                  border: theme => `1px solid ${theme.palette.divider}`,
-                }}
-              >
-                <Box sx={{ height: 56, bgcolor: values.coverColor }} aria-hidden />
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 1.5, py: 1.25, mt: -3 }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}
+          >
+            <DialogTitle id="edit-profile-title" sx={{ pb: 1.25 }}>
+              Edit profile
+            </DialogTitle>
+            <DialogContent
+              dividers
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0,
+                px: { xs: 2, sm: 3 },
+                py: 0,
+                flex: 1,
+                minHeight: 0,
+              }}
+            >
+              <Box sx={{ py: 2.25 }}>
+                <SectionLabel>Photo and colors</SectionLabel>
+                <Box
+                  sx={{
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    border: theme => `1px solid ${theme.palette.divider}`,
+                    mb: 2,
+                  }}
+                >
+                  <Box sx={{ height: 64, bgcolor: values.coverColor }} aria-hidden />
                   <Box
                     sx={{
-                      borderRadius: "50%",
-                      border: theme => `3px solid ${theme.palette.background.paper}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      px: 1.5,
+                      py: 1.25,
+                      mt: -3.25,
                     }}
                   >
-                    <UserImage
-                      image={previewUrl || user.picturePath || ""}
-                      name={`${values.firstName} ${values.lastName}`}
-                      size="56px"
-                      bgColor={values.avatarColor}
-                    />
-                  </Box>
-                  <Button component="label" variant="outlined" size="small">
-                    Change photo
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/gif,image/webp"
-                      hidden
-                      onChange={e => {
-                        const file = e.target.files?.[0] ?? null
-                        setFieldValue("picture", file)
-                        if (previewUrl) URL.revokeObjectURL(previewUrl)
-                        setPreviewUrl(file ? URL.createObjectURL(file) : null)
+                    <Box
+                      sx={{
+                        borderRadius: "50%",
+                        border: theme => `3px solid ${theme.palette.background.paper}`,
                       }}
-                    />
-                  </Button>
+                    >
+                      <UserImage
+                        image={previewUrl || user.picturePath || ""}
+                        name={`${values.firstName} ${values.lastName}`}
+                        size="56px"
+                        bgColor={values.avatarColor}
+                      />
+                    </Box>
+                    <Button component="label" variant="outlined" size="small">
+                      Change photo
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        hidden
+                        onChange={e => {
+                          const file = e.target.files?.[0] ?? null
+                          setFieldValue("picture", file)
+                          if (previewUrl) URL.revokeObjectURL(previewUrl)
+                          setPreviewUrl(file ? URL.createObjectURL(file) : null)
+                        }}
+                      />
+                    </Button>
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+                  <ColorSwatchPicker
+                    label="Avatar color"
+                    hint="Shown when you don’t have a profile photo."
+                    value={values.avatarColor}
+                    onChange={hex => setFieldValue("avatarColor", hex)}
+                  />
+                  <ColorSwatchPicker
+                    label="Cover color"
+                    hint="Solid header on your profile."
+                    value={values.coverColor}
+                    onChange={hex => setFieldValue("coverColor", hex)}
+                  />
                 </Box>
               </Box>
 
-              <ColorSwatchPicker
-                label="Avatar color"
-                hint="Shown when you don’t have a profile photo."
-                value={values.avatarColor}
-                onChange={hex => setFieldValue("avatarColor", hex)}
-              />
+              <Divider />
 
-              <ColorSwatchPicker
-                label="Cover color"
-                hint="Solid header on your profile."
-                value={values.coverColor}
-                onChange={hex => setFieldValue("coverColor", hex)}
-              />
-
-              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-                <TextField
-                  label="First name"
-                  name="firstName"
-                  value={values.firstName}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  error={Boolean(touched.firstName && errors.firstName)}
-                  helperText={touched.firstName && errors.firstName}
-                  fullWidth
-                />
-                <TextField
-                  label="Last name"
-                  name="lastName"
-                  value={values.lastName}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  error={Boolean(touched.lastName && errors.lastName)}
-                  helperText={touched.lastName && errors.lastName}
-                  fullWidth
-                />
+              <Box sx={{ py: 2.25 }}>
+                <SectionLabel>About</SectionLabel>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                      gap: 1.75,
+                    }}
+                  >
+                    <TextField
+                      label="First name"
+                      name="firstName"
+                      value={values.firstName}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      error={Boolean(touched.firstName && errors.firstName)}
+                      helperText={touched.firstName && errors.firstName}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Last name"
+                      name="lastName"
+                      value={values.lastName}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      error={Boolean(touched.lastName && errors.lastName)}
+                      helperText={touched.lastName && errors.lastName}
+                      fullWidth
+                    />
+                  </Box>
+                  <TextField
+                    label="Location"
+                    name="location"
+                    value={values.location}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Occupation"
+                    name="occupation"
+                    value={values.occupation}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                </Box>
               </Box>
 
-              <TextField
-                label="Location"
-                name="location"
-                value={values.location}
-                onBlur={handleBlur}
-                onChange={handleChange}
-                fullWidth
-              />
-              <TextField
-                label="Occupation"
-                name="occupation"
-                value={values.occupation}
-                onBlur={handleBlur}
-                onChange={handleChange}
-                fullWidth
-              />
+              <Divider />
 
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                Social profiles
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Optional usernames or handles (not full URLs).
-              </Typography>
-              {SOCIAL_NETWORKS.map(({ key, label }) => (
-                <TextField
-                  key={key}
-                  label={label}
-                  name={key}
-                  value={values[key]}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder="username"
-                  fullWidth
-                />
-              ))}
+              <Box sx={{ py: 2.25 }}>
+                <SectionLabel>Social</SectionLabel>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Optional usernames or handles (not full URLs).
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+                  {SOCIAL_NETWORKS.map(({ key, label }) => (
+                    <TextField
+                      key={key}
+                      label={label}
+                      name={key}
+                      value={values[key]}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      placeholder="username"
+                      fullWidth
+                    />
+                  ))}
+                </Box>
+              </Box>
 
               {status ? (
-                <Typography color="error" role="alert">
+                <Typography color="error" role="alert" sx={{ pb: 2 }}>
                   {String(status)}
                 </Typography>
               ) : null}
             </DialogContent>
-            <DialogActions sx={{ px: 3, pb: 2 }}>
+            <DialogActions
+              sx={{
+                px: { xs: 2, sm: 3 },
+                py: 1.5,
+                position: "sticky",
+                bottom: 0,
+                bgcolor: "background.paper",
+                borderTop: theme => `1px solid ${theme.palette.divider}`,
+                zIndex: 1,
+              }}
+            >
               <Button onClick={onClose} disabled={isSubmitting}>
                 Cancel
               </Button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Box, CircularProgress, Typography, useTheme } from "@mui/material"
+import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
@@ -17,6 +18,7 @@ type FriendsListWidgetProps = { userId: string }
 
 const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const loggedInUser = useAppSelector(state => state.user)
   const theme = useTheme()
   const [otherFriends, setOtherFriends] = useState<{ forUserId: string; friends: FriendData[] } | null>(
@@ -68,7 +70,7 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
     <WidgetWrapper sx={{ overflow: "hidden" }}>
       <Typography
         variant="subtitle1"
-        sx={{ fontWeight: 600, color: theme.palette.neutral.dark, mb: "0.85rem" }}
+        sx={{ fontWeight: 600, color: theme.palette.neutral.dark, mb: "0.65rem" }}
       >
         Friends
       </Typography>
@@ -76,9 +78,11 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
         <EmptyState
           title="No friends yet"
           description="Find people from Home → Add people, or visit a profile and add them."
+          actionLabel={isOwnList ? "Go to Home" : undefined}
+          onAction={isOwnList ? () => router.push("/home") : undefined}
         />
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "0.85rem", width: "100%", minWidth: 0 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "0.35rem", width: "100%", minWidth: 0 }}>
           {friends.map(friend => {
             const id = friendIdOf(friend)
             return (
@@ -89,7 +93,9 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
                 subtitle={friend.occupation ?? ""}
                 url={friend.picturePath ?? friend.url ?? ""}
                 avatarColor={friend.avatarColor}
+                avatarSize="36px"
                 showFriendButton
+                listHover
               />
             )
           })}
