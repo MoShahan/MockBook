@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Box, Typography, useTheme } from "@mui/material"
+import { Box, CircularProgress, Typography, useTheme } from "@mui/material"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
@@ -9,6 +9,7 @@ import { setFriends } from "@/state"
 import type { Friend as FriendData } from "@/types/models"
 import { friendIdOf, sameUserId } from "@/types/models"
 
+import EmptyState from "./EmptyState"
 import Friend from "./Friend"
 import WidgetWrapper from "./WidgetWrapper"
 
@@ -48,16 +49,28 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
       : null
 
   if (friends == null) {
-    return null
+    return (
+      <WidgetWrapper sx={{ overflow: "hidden" }}>
+        <Typography variant="h5" sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1.5rem" }}>
+          Friends
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }} role="status">
+          <CircularProgress size={28} />
+        </Box>
+      </WidgetWrapper>
+    )
   }
 
   return (
     <WidgetWrapper sx={{ overflow: "hidden" }}>
       <Typography variant="h5" sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1.5rem" }}>
-        List of Friends
+        Friends
       </Typography>
       {!friends.length ? (
-        <Typography sx={{ color: theme.palette.neutral.medium }}>No friends yet.</Typography>
+        <EmptyState
+          title="No friends yet"
+          description="Find people from Home → Add people, or visit a profile and add them."
+        />
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%", minWidth: 0 }}>
           {friends.map(friend => {
@@ -69,6 +82,7 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
                 name={`${friend.firstName} ${friend.lastName}`}
                 subtitle={friend.occupation ?? ""}
                 url={friend.picturePath ?? friend.url ?? ""}
+                avatarColor={friend.avatarColor}
                 showFriendButton
               />
             )

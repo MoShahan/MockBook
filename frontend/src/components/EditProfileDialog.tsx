@@ -17,11 +17,17 @@ import * as yup from "yup"
 import { useAppDispatch } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import {
+  DEFAULT_AVATAR_COLOR,
+  DEFAULT_COVER_COLOR,
+  normalizeProfileColor,
+} from "@/lib/profileColors"
 import { SOCIAL_NETWORKS } from "@/lib/social"
 import { useToast } from "@/providers/ToastProvider"
 import { setUser } from "@/state"
 import type { User } from "@/types/models"
 
+import ColorSwatchPicker from "./ColorSwatchPicker"
 import UserImage from "./UserImage"
 
 type EditProfileDialogProps = {
@@ -40,6 +46,8 @@ type EditProfileValues = {
   x: string
   linkedin: string
   instagram: string
+  avatarColor: string
+  coverColor: string
   picture: File | null
 }
 
@@ -52,6 +60,8 @@ const schema = yup.object({
   x: yup.string().trim().max(64),
   linkedin: yup.string().trim().max(64),
   instagram: yup.string().trim().max(64),
+  avatarColor: yup.string().required(),
+  coverColor: yup.string().required(),
 })
 
 function valuesFromUser(user: User): EditProfileValues {
@@ -64,6 +74,8 @@ function valuesFromUser(user: User): EditProfileValues {
     x: user.x || "",
     linkedin: user.linkedin || "",
     instagram: user.instagram || "",
+    avatarColor: normalizeProfileColor(user.avatarColor, DEFAULT_AVATAR_COLOR),
+    coverColor: normalizeProfileColor(user.coverColor, DEFAULT_COVER_COLOR),
     picture: null,
   }
 }
@@ -97,6 +109,8 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
             formData.append("x", vals.x.trim())
             formData.append("linkedin", vals.linkedin.trim())
             formData.append("instagram", vals.instagram.trim())
+            formData.append("avatarColor", vals.avatarColor)
+            formData.append("coverColor", vals.coverColor)
             if (vals.picture instanceof File) {
               formData.append("picture", vals.picture)
             }
@@ -127,27 +141,61 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
           <form onSubmit={handleSubmit}>
             <DialogTitle id="edit-profile-title">Edit profile</DialogTitle>
             <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <UserImage
-                  image={previewUrl || user.picturePath || ""}
-                  name={`${values.firstName} ${values.lastName}`}
-                  size="72px"
+              <Box
+                sx={{
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  border: theme => `1px solid ${theme.palette.divider}`,
+                }}
+              >
+                <Box
+                  sx={{ height: 72, bgcolor: values.coverColor }}
+                  aria-hidden
                 />
-                <Button component="label" variant="outlined" size="small">
-                  Change photo
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif,image/webp"
-                    hidden
-                    onChange={e => {
-                      const file = e.target.files?.[0] ?? null
-                      setFieldValue("picture", file)
-                      if (previewUrl) URL.revokeObjectURL(previewUrl)
-                      setPreviewUrl(file ? URL.createObjectURL(file) : null)
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, px: 2, py: 1.5, mt: -4 }}>
+                  <Box
+                    sx={{
+                      borderRadius: "50%",
+                      border: theme => `3px solid ${theme.palette.background.paper}`,
                     }}
-                  />
-                </Button>
+                  >
+                    <UserImage
+                      image={previewUrl || user.picturePath || ""}
+                      name={`${values.firstName} ${values.lastName}`}
+                      size="72px"
+                      bgColor={values.avatarColor}
+                    />
+                  </Box>
+                  <Button component="label" variant="outlined" size="small">
+                    Change photo
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      hidden
+                      onChange={e => {
+                        const file = e.target.files?.[0] ?? null
+                        setFieldValue("picture", file)
+                        if (previewUrl) URL.revokeObjectURL(previewUrl)
+                        setPreviewUrl(file ? URL.createObjectURL(file) : null)
+                      }}
+                    />
+                  </Button>
+                </Box>
               </Box>
+
+              <ColorSwatchPicker
+                label="Avatar color"
+                hint="Shown when you don’t have a profile photo."
+                value={values.avatarColor}
+                onChange={hex => setFieldValue("avatarColor", hex)}
+              />
+
+              <ColorSwatchPicker
+                label="Cover color"
+                hint="Solid header on your profile."
+                value={values.coverColor}
+                onChange={hex => setFieldValue("coverColor", hex)}
+              />
 
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
                 <TextField

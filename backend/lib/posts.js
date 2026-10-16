@@ -34,7 +34,7 @@ export async function usersFromLikeIds(ids) {
   if (unique.length === 0) return []
 
   const users = await User.find({ _id: { $in: unique } })
-    .select("_id firstName lastName picturePath")
+    .select("_id firstName lastName picturePath avatarColor")
     .lean()
 
   const byId = Object.fromEntries(users.map(u => [String(u._id), u]))
@@ -46,6 +46,7 @@ export async function usersFromLikeIds(ids) {
       firstName: u.firstName,
       lastName: u.lastName,
       picturePath: u.picturePath || "",
+      avatarColor: u.avatarColor || "#314F3B",
     }))
 }
 
@@ -94,6 +95,7 @@ function authorSnapshot(author) {
     lastName: author.lastName,
     location: author.location || "",
     picturePath: author.picturePath || "",
+    avatarColor: author.avatarColor || "#314F3B",
   }
 }
 
@@ -139,7 +141,7 @@ export async function withAuthors(posts) {
   }
 
   const users = await User.find({ _id: { $in: [...ids] } })
-    .select("firstName lastName location picturePath")
+    .select("firstName lastName location picturePath avatarColor")
     .lean()
 
   const byId = Object.fromEntries(users.map(u => [String(u._id), u]))

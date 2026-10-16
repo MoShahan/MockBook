@@ -94,15 +94,16 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
               userId={profileId}
               isOwnProfile={isOwnProfile}
             />
-            <Box sx={{ m: "2rem 0" }} />
-            <FriendsListWidget userId={profileId} />
+            <Box sx={{ mt: { xs: "1.25rem", md: "1.5rem" } }}>
+              <FriendsListWidget userId={profileId} />
+            </Box>
           </Box>
           <Box
             sx={{
               flex: isNonMobileScreens ? "1 1 auto" : undefined,
               minWidth: 0,
               width: "100%",
-              mt: isNonMobileScreens ? undefined : "2rem",
+              mt: isNonMobileScreens ? undefined : "1.75rem",
             }}
           >
             {isOwnProfile ? (

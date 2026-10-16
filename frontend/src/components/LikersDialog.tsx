@@ -29,6 +29,7 @@ export type Liker = {
   firstName: string
   lastName: string
   picturePath?: string
+  avatarColor?: string
 }
 
 type LikersPageResponse = {
@@ -149,7 +150,12 @@ const LikersList = ({ fetchPath, pageSize, onSelectUser }: LikersListProps) => {
           return (
             <ListItemButton key={liker._id} onClick={() => onSelectUser(liker._id)} sx={{ borderRadius: 1 }}>
               <ListItemAvatar sx={{ minWidth: 48 }}>
-                <UserImage image={liker.picturePath || ""} name={name} size="40px" />
+                <UserImage
+                  image={liker.picturePath || ""}
+                  name={name}
+                  size="40px"
+                  bgColor={liker.avatarColor}
+                />
               </ListItemAvatar>
               <ListItemText
                 primary={name}

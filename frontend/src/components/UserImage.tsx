@@ -4,12 +4,15 @@ import { useState } from "react"
 import { Box, Typography } from "@mui/material"
 
 import { mediaUrl } from "@/lib/api"
+import { DEFAULT_AVATAR_COLOR, normalizeProfileColor } from "@/lib/profileColors"
 
 type UserImageProps = {
   image: string
   /** Full name or "First Last" — used for initials when there is no photo. */
   name?: string
   size?: string
+  /** Solid background when showing initials (allowlisted hex). */
+  bgColor?: string
 }
 
 export function getInitials(name?: string): string {
@@ -23,11 +26,12 @@ export function getInitials(name?: string): string {
   return `${first}${last}`.toUpperCase()
 }
 
-const UserImage = ({ image, name, size = "60px" }: UserImageProps) => {
+const UserImage = ({ image, name, size = "60px", bgColor }: UserImageProps) => {
   const src = mediaUrl(image)
   const [imgFailed, setImgFailed] = useState(false)
   const showImage = Boolean(src) && !imgFailed
   const initials = getInitials(name)
+  const fill = normalizeProfileColor(bgColor, DEFAULT_AVATAR_COLOR)
 
   const fontSize = `calc(${size} * 0.36)`
 
@@ -41,7 +45,7 @@ const UserImage = ({ image, name, size = "60px" }: UserImageProps) => {
         flexShrink: 0,
         borderRadius: "50%",
         overflow: "hidden",
-        bgcolor: "primary.main",
+        bgcolor: fill,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -65,7 +69,7 @@ const UserImage = ({ image, name, size = "60px" }: UserImageProps) => {
         <Typography
           component="span"
           sx={{
-            color: "primary.contrastText",
+            color: "#FAFAF9",
             fontWeight: 700,
             fontSize,
             lineHeight: 1,

@@ -1,3 +1,4 @@
+import { DEFAULT_AVATAR_COLOR } from "./profileColors.js"
 import User from "../models/User.js"
 
 /** Normalize a stored friend id (ObjectId or string) to a string. */
@@ -18,6 +19,7 @@ export const formatFriend = friend => {
     occupation: friend.occupation || "",
     location: friend.location || "",
     picturePath: friend.picturePath || "",
+    avatarColor: friend.avatarColor || DEFAULT_AVATAR_COLOR,
   }
 }
 
@@ -27,7 +29,9 @@ export const formatFriendsList = async friendIds => {
   if (!ids.length) return []
 
   const friends = await Promise.all(
-    ids.map(id => User.findById(id).select("firstName lastName occupation location picturePath"))
+    ids.map(id =>
+      User.findById(id).select("firstName lastName occupation location picturePath avatarColor")
+    )
   )
   return friends.map(formatFriend).filter(Boolean)
 }

@@ -15,7 +15,12 @@ import { usePathname, useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
-import { SOCIAL_NETWORKS, type SocialNetwork,socialProfileUrl } from "@/lib/social"
+import {
+  DEFAULT_AVATAR_COLOR,
+  DEFAULT_COVER_COLOR,
+  normalizeProfileColor,
+} from "@/lib/profileColors"
+import { SOCIAL_NETWORKS, type SocialNetwork, socialProfileUrl } from "@/lib/social"
 import { useToast } from "@/providers/ToastProvider"
 import { setFriends } from "@/state"
 import type { Friend, User } from "@/types/models"
@@ -47,7 +52,8 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   const dispatch = useAppDispatch()
   const loggedInUser = useAppSelector(state => state.user)
   const { success, error: toastError } = useToast()
-  const { palette } = useTheme()
+  const theme = useTheme()
+  const { palette } = theme
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
   const main = palette.neutral.main
@@ -82,6 +88,8 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
         location: loggedInUser.location,
         occupation: loggedInUser.occupation,
         picturePath: loggedInUser.picturePath,
+        avatarColor: loggedInUser.avatarColor ?? fetched.avatarColor,
+        coverColor: loggedInUser.coverColor ?? fetched.coverColor,
         facebook: loggedInUser.facebook,
         x: loggedInUser.x,
         linkedin: loggedInUser.linkedin,
@@ -123,11 +131,19 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   }
 
   if (!user) {
-    return null
+    return (
+      <WidgetWrapper>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 3 }} role="status">
+          <Typography sx={{ color: medium }}>Loading profile…</Typography>
+        </Box>
+      </WidgetWrapper>
+    )
   }
 
   const displayUrl = url || user.picturePath || ""
   const friendCount = Array.isArray(user.friends) ? user.friends.length : 0
+  const avatarColor = normalizeProfileColor(user.avatarColor, DEFAULT_AVATAR_COLOR)
+  const coverColor = normalizeProfileColor(user.coverColor, DEFAULT_COVER_COLOR)
 
   const activeSocials = SOCIAL_NETWORKS.filter(({ key }) => Boolean((user[key] || "").trim())).map(
     ({ key, label }) => ({
@@ -138,46 +154,83 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     })
   )
 
+  const coverRadius = `${Number(theme.shape.borderRadius) * 1.25}px`
+
   return (
-    <WidgetWrapper>
-      <FlexBetween sx={{ gap: "0.5rem", pb: "1.1rem" }}>
-        <FlexBetween
-          onClick={handleGoToProfile}
-          sx={{ gap: "1rem", cursor: alreadyOnThisProfile ? "default" : "pointer" }}
-        >
-          <UserImage image={displayUrl} name={`${user.firstName} ${user.lastName}`} />
-          <Box>
-            <Typography
-              variant="h4"
+    <WidgetWrapper sx={{ p: 0, overflow: "visible" }}>
+      <Box
+        sx={{
+          height: { xs: 88, sm: 104 },
+          bgcolor: coverColor,
+          position: "relative",
+          borderTopLeftRadius: coverRadius,
+          borderTopRightRadius: coverRadius,
+        }}
+      >
+        <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}>
+          {isOwnProfile ? (
+            <Tooltip title="Edit profile">
+              <IconButton
+                sx={{
+                  p: "0.5rem",
+                  bgcolor: "rgba(0,0,0,0.28)",
+                  color: "#FAFAF9",
+                  "&:hover": { bgcolor: "rgba(0,0,0,0.42)" },
+                }}
+                onClick={() => setEditOpen(true)}
+                aria-label="Edit profile"
+              >
+                <ManageAccountsOutlined />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
+          )}
+        </Box>
+      </Box>
+
+      <Box sx={{ px: "1.5rem", pb: "1.5rem", pt: 0, position: "relative", zIndex: 1 }}>
+        <FlexBetween sx={{ gap: "0.5rem", pb: "1.1rem", mt: "-2.25rem" }}>
+          <FlexBetween
+            onClick={handleGoToProfile}
+            sx={{ gap: "1rem", cursor: alreadyOnThisProfile ? "default" : "pointer", minWidth: 0 }}
+          >
+            <Box
               sx={{
-                color: dark,
-                fontWeight: "500",
-                ...(!alreadyOnThisProfile && {
-                  "&:hover": {
-                    color: palette.primary.main,
-                  },
-                }),
+                borderRadius: "50%",
+                border: theme => `3px solid ${theme.palette.background.paper}`,
+                boxShadow: theme => `0 0 0 1px ${theme.palette.divider}`,
+                position: "relative",
+                zIndex: 1,
+                flexShrink: 0,
               }}
             >
-              {user.firstName} {user.lastName}
-            </Typography>
-            <Typography sx={{ color: medium }}>{friendCount} friends</Typography>
-          </Box>
+              <UserImage
+                image={displayUrl}
+                name={`${user.firstName} ${user.lastName}`}
+                bgColor={avatarColor}
+              />
+            </Box>
+            <Box sx={{ minWidth: 0, pt: "2rem" }}>
+              <Typography
+                variant="h4"
+                noWrap
+                sx={{
+                  color: dark,
+                  fontWeight: "500",
+                  ...(!alreadyOnThisProfile && {
+                    "&:hover": {
+                      color: palette.primary.main,
+                    },
+                  }),
+                }}
+              >
+                {user.firstName} {user.lastName}
+              </Typography>
+              <Typography sx={{ color: medium }}>{friendCount} friends</Typography>
+            </Box>
+          </FlexBetween>
         </FlexBetween>
-        {isOwnProfile ? (
-          <Tooltip title="Edit profile">
-            <IconButton
-              sx={{ p: "0.6rem" }}
-              onClick={() => setEditOpen(true)}
-              aria-label="Edit profile"
-            >
-              <ManageAccountsOutlined />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
-        )}
-      </FlexBetween>
 
       <Divider />
 
@@ -236,6 +289,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
           </Box>
         </>
       ) : null}
+      </Box>
 
       {isOwnProfile ? (
         <EditProfileDialog

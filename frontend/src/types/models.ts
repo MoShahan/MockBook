@@ -6,6 +6,7 @@ export type Friend = {
   occupation?: string
   location?: string
   picturePath?: string
+  avatarColor?: string
   /** @deprecated Prefer `_id`; kept for older persisted Redux state. */
   id?: string
   /** @deprecated Prefer `picturePath`. */
@@ -18,6 +19,10 @@ export type User = {
   lastName: string
   email?: string
   picturePath: string
+  /** Initials avatar background when no photo (allowlisted hex). */
+  avatarColor?: string
+  /** Solid profile header/cover color (allowlisted hex). */
+  coverColor?: string
   friends: Friend[]
   /** Post ids the user has bookmarked (private). */
   savedPosts?: string[]
@@ -36,6 +41,7 @@ export type DiscoverUser = {
   firstName: string
   lastName: string
   picturePath?: string
+  avatarColor?: string
   location?: string
   occupation?: string
 }
@@ -50,7 +56,7 @@ export type PostComment = {
   createdAt?: string
   /** Comment likes keyed by user id (same shape as post likes). */
   likes?: PostLikes
-  user?: Pick<User, "firstName" | "lastName" | "picturePath"> | null
+  user?: Pick<User, "firstName" | "lastName" | "picturePath" | "avatarColor"> | null
 }
 
 export type Post = {
@@ -62,7 +68,7 @@ export type Post = {
   comments: PostComment[]
   createdAt?: string
   updatedAt?: string
-  user?: Pick<User, "firstName" | "lastName" | "location" | "picturePath"> | null
+  user?: Pick<User, "firstName" | "lastName" | "location" | "picturePath" | "avatarColor"> | null
 }
 
 export type PaginatedPosts = {

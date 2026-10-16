@@ -5,6 +5,7 @@ export type NotificationActor = {
   firstName?: string
   lastName?: string
   picturePath?: string
+  avatarColor?: string
 }
 
 export type AppNotification = {

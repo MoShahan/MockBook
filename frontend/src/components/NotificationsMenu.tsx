@@ -147,7 +147,12 @@ const NotificationsMenu = () => {
                   }}
                 >
                   <ListItemAvatar sx={{ minWidth: 48, mt: 0.25 }}>
-                    <UserImage image={n.actor?.picturePath || ""} name={actorName} size="40px" />
+                    <UserImage
+                      image={n.actor?.picturePath || ""}
+                      name={actorName}
+                      size="40px"
+                      bgColor={n.actor?.avatarColor}
+                    />
                   </ListItemAvatar>
                   <ListItemText
                     primary={notificationCopy(n)}

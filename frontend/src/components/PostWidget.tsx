@@ -324,6 +324,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
         name={authorName}
         subtitle={formatPostTime(post.createdAt)}
         url={post.user?.picturePath || ""}
+        avatarColor={post.user?.avatarColor}
         showFriendButton={false}
         endAction={
           isOwnPost ? (
@@ -516,7 +517,12 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               <Box key={comment._id || `${post._id}-c-${index}`}>
                 <Divider />
                 <Box sx={{ display: "flex", gap: "0.75rem", m: "0.75rem 0", pl: "0.25rem", alignItems: "flex-start" }}>
-                  <UserImage image={comment.user?.picturePath || ""} name={name} size="36px" />
+                  <UserImage
+                    image={comment.user?.picturePath || ""}
+                    name={name}
+                    size="36px"
+                    bgColor={comment.user?.avatarColor}
+                  />
                   <Box sx={{ minWidth: 0, flex: 1 }}>
                     <FlexBetween sx={{ alignItems: "flex-start" }}>
                       <Typography

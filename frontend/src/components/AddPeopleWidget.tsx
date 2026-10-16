@@ -6,12 +6,18 @@ import { Box, CircularProgress, TextField, Typography, useTheme } from "@mui/mat
 import { api } from "@/lib/api"
 import type { DiscoverUser } from "@/types/models"
 
+import EmptyState from "./EmptyState"
 import Friend from "./Friend"
 import WidgetWrapper from "./WidgetWrapper"
 
 const DEBOUNCE_MS = 300
 
-const AddPeopleWidget = () => {
+type AddPeopleWidgetProps = {
+  /** When embedded (e.g. mobile accordion), skip outer card chrome + title. */
+  embedded?: boolean
+}
+
+const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
   const theme = useTheme()
   const [query, setQuery] = useState("")
   const [debounced, setDebounced] = useState("")
@@ -43,14 +49,16 @@ const AddPeopleWidget = () => {
     }
   }, [debounced])
 
-  return (
-    <WidgetWrapper sx={{ overflow: "hidden" }}>
-      <Typography
-        variant="h5"
-        sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1rem" }}
-      >
-        Add people
-      </Typography>
+  const body = (
+    <>
+      {!embedded ? (
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1rem" }}
+        >
+          Add people
+        </Typography>
+      ) : null}
       <TextField
         size="small"
         fullWidth
@@ -65,9 +73,14 @@ const AddPeopleWidget = () => {
           <CircularProgress size={28} />
         </Box>
       ) : !users.length ? (
-        <Typography sx={{ color: theme.palette.neutral.medium }}>
-          {debounced ? "No users found" : "No people to show yet."}
-        </Typography>
+        <EmptyState
+          title={debounced ? "No matches" : "No people to show"}
+          description={
+            debounced
+              ? "Try a different name, or clear the search to browse recent users."
+              : "When others join MockBook, you’ll see them here."
+          }
+        />
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: "1.25rem", width: "100%", minWidth: 0 }}>
           {users.map(u => (
@@ -77,13 +90,20 @@ const AddPeopleWidget = () => {
               name={`${u.firstName} ${u.lastName}`}
               subtitle={u.occupation || u.location || ""}
               url={u.picturePath || ""}
+              avatarColor={u.avatarColor}
               showFriendButton
             />
           ))}
         </Box>
       )}
-    </WidgetWrapper>
+    </>
   )
+
+  if (embedded) {
+    return <Box sx={{ px: 2, pb: 2 }}>{body}</Box>
+  }
+
+  return <WidgetWrapper sx={{ overflow: "hidden" }}>{body}</WidgetWrapper>
 }
 
 export default AddPeopleWidget

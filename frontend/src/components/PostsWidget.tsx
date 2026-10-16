@@ -9,6 +9,7 @@ import type { PaginatedPosts, Post } from "@/types/models"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 
+import EmptyState from "./EmptyState"
 import PostWidget from "./PostWidget"
 
 /** Which post list to load. */
@@ -22,13 +23,31 @@ type PostsWidgetProps = {
   isProfile?: boolean
 }
 
-const EMPTY_COPY: Record<PostsListKind, string> = {
-  feed: "No posts in the feed yet.",
-  friends: "No posts from you or your friends yet. Add people or switch to Everyone.",
-  authored: "No posts yet.",
-  saved: "No saved posts yet.",
-  liked: "No liked posts yet.",
-  commented: "No commented posts yet.",
+const EMPTY_COPY: Record<PostsListKind, { title: string; description: string }> = {
+  feed: {
+    title: "Nothing here yet",
+    description: "When people post, their updates will show up in Everyone.",
+  },
+  friends: {
+    title: "No friend posts yet",
+    description: "Add people from the right panel, or switch to Everyone to browse the wider feed.",
+  },
+  authored: {
+    title: "No posts yet",
+    description: "Share something from Home — it will appear here on this profile.",
+  },
+  saved: {
+    title: "No saved posts",
+    description: "Bookmark posts you want to revisit and they’ll collect here.",
+  },
+  liked: {
+    title: "No liked posts",
+    description: "Posts you like will show up in this list.",
+  },
+  commented: {
+    title: "No commented posts",
+    description: "Posts you’ve commented on will appear here.",
+  },
 }
 
 const PAGE_LIMIT = 10
@@ -73,6 +92,7 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
 
   const [loadedFor, setLoadedFor] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [loadingMore, setLoadingMore] = useState(false)
   const [nextCursor, setNextCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(false)
@@ -88,6 +108,7 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
     void (async () => {
       try {
         setLoading(true)
+        setLoadError(null)
         setNextCursor(null)
         setHasMore(false)
         const path = pathForList(kind, userId)
@@ -105,6 +126,12 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
           setNextCursor(null)
         }
         setLoadedFor(loadKey)
+      } catch {
+        if (!cancelled) {
+          setLoadError("Couldn’t load posts. Try refreshing the page.")
+          dispatch(setPosts({ posts: [] }))
+          setLoadedFor(loadKey)
+        }
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -150,18 +177,32 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
 
   if (loading || loadedFor !== loadKey) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 3 }} role="status" aria-live="polite">
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1.5,
+          py: 4,
+        }}
+        role="status"
+        aria-live="polite"
+      >
         <CircularProgress size={32} />
+        <Typography sx={{ color: theme.palette.neutral.medium }} variant="body2">
+          Loading posts…
+        </Typography>
       </Box>
     )
   }
 
+  if (loadError) {
+    return <EmptyState title="Something went wrong" description={loadError} />
+  }
+
   if (!posts.length) {
-    return (
-      <Typography sx={{ color: theme.palette.neutral.medium, textAlign: "center", py: 2 }}>
-        {EMPTY_COPY[kind]}
-      </Typography>
-    )
+    const copy = EMPTY_COPY[kind]
+    return <EmptyState title={copy.title} description={copy.description} />
   }
 
   return (

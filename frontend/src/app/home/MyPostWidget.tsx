@@ -189,6 +189,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                 <UserImage
                   image={url}
                   name={[user?.firstName, user?.lastName].filter(Boolean).join(" ")}
+                  bgColor={user?.avatarColor}
                 />
                 <InputBase
                   name="description"

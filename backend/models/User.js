@@ -26,6 +26,10 @@ const UserSchema = new Schema(
       default: [],
     },
     picturePath: { type: String, default: "" },
+    /** Solid color for initials avatar when no photo (allowlisted hex). */
+    avatarColor: { type: String, default: "#314F3B" },
+    /** Solid profile header/cover color (allowlisted hex). */
+    coverColor: { type: String, default: "#57534E" },
     friends: {
       type: [{ type: Schema.Types.ObjectId, ref: "User" }],
       default: [],

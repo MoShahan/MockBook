@@ -1,13 +1,18 @@
 import { formatFriendsList, toFriendId } from "../lib/friends.js"
 import { uploadImageBuffer } from "../lib/imagekit.js"
 import { createNotification } from "../lib/notifications.js"
+import {
+  DEFAULT_AVATAR_COLOR,
+  DEFAULT_COVER_COLOR,
+  sanitizeProfileColor,
+} from "../lib/profileColors.js"
 import { pickSocialFields } from "../lib/social.js"
 import User from "../models/User.js"
 
 const PUBLIC_USER_FIELDS =
-  "_id firstName lastName picturePath location occupation facebook x linkedin instagram friends viewedProfile createdAt"
+  "_id firstName lastName picturePath avatarColor coverColor location occupation facebook x linkedin instagram friends viewedProfile createdAt"
 
-const DISCOVER_FIELDS = "_id firstName lastName picturePath location occupation"
+const DISCOVER_FIELDS = "_id firstName lastName picturePath avatarColor location occupation"
 
 function sanitizeName(raw, fallback) {
   if (typeof raw !== "string") return fallback
@@ -33,6 +38,8 @@ function toPublicUser(userDoc) {
   user.x = user.x || ""
   user.linkedin = user.linkedin || ""
   user.instagram = user.instagram || ""
+  user.avatarColor = user.avatarColor || DEFAULT_AVATAR_COLOR
+  user.coverColor = user.coverColor || DEFAULT_COVER_COLOR
   return user
 }
 
@@ -89,6 +96,21 @@ export const updateProfile = async (req, res, next) => {
     const social = pickSocialFields(req.body)
     for (const [key, value] of Object.entries(social)) {
       user[key] = value
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "avatarColor")) {
+      const color = sanitizeProfileColor(req.body.avatarColor)
+      if (!color) {
+        return res.status(400).json({ error: "Invalid avatar color" })
+      }
+      user.avatarColor = color
+    }
+    if (Object.prototype.hasOwnProperty.call(req.body, "coverColor")) {
+      const color = sanitizeProfileColor(req.body.coverColor)
+      if (!color) {
+        return res.status(400).json({ error: "Invalid cover color" })
+      }
+      user.coverColor = color
     }
 
     if (req.file?.buffer) {
@@ -148,6 +170,7 @@ export const discoverUsers = async (req, res, next) => {
         firstName: u.firstName,
         lastName: u.lastName,
         picturePath: u.picturePath || "",
+        avatarColor: u.avatarColor || DEFAULT_AVATAR_COLOR,
         location: u.location || "",
         occupation: u.occupation || "",
       })),

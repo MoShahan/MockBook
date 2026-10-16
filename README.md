@@ -66,9 +66,10 @@ MockBook/
 
 - Add / remove friends (both users’ lists update)
 - Friends list on profile pages (empty state when none)
-- **Add people** discovery widget on `/home` (right rail on wide screens; below feed on mobile) with recent users + name search
+- **Add people** discovery widget on `/home` (sticky right rail on wide screens; collapsible “Find people” on mobile) with recent users + name search
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
-- Edit own profile (name, location, occupation, avatar, social handles) via manage-account control
+- Edit own profile (name, location, occupation, avatar, social handles, **avatar color**, **cover color**) via manage-account control
+- Solid color profile header (`coverColor`) and initials avatar color (`avatarColor`) when no photo — allowlisted swatches only
 - Optional public social links (Facebook, X, LinkedIn, Instagram) — shown only when set
 - Profile visit counter (`viewedProfile`) increments when another user loads your profile
 - In-app notifications (likes, comments, friend adds) via navbar bell + `/notifications` page
@@ -82,7 +83,7 @@ MockBook/
 - Image uploads via **Multer (memory) → ImageKit**
 - Image MIME whitelist (jpeg/png/gif/webp), **5MB** size limit
 - Server-generated unique filenames
-- Avatars fall back to initials when no photo
+- Avatars fall back to initials (user-chosen solid color) when no photo
 
 ### UX & client architecture
 
@@ -236,7 +237,7 @@ npm run start -w backend
 | `PATCH`  | `/notifications/read-all`    | Mark all notifications read                                      |
 | `PATCH`  | `/notifications/:id/read`    | Mark one notification read                                       |
 | `GET`    | `/users/discover`            | Recent users or search (`?q=&limit=`; excludes self)             |
-| `PATCH`  | `/users/me`                  | Update own profile (multipart optional `picture` → ImageKit)     |
+| `PATCH`  | `/users/me`                  | Update own profile (multipart optional `picture` → ImageKit; `avatarColor` / `coverColor` allowlisted hex) |
 | `GET`    | `/users/:id`                 | Get a user (no password)                                         |
 | `GET`    | `/users/:id/friends`         | Get that user’s friends (formatted)                              |
 | `PATCH`  | `/users/friends/:friendId`   | Add or remove a friend (JWT user only)                           |

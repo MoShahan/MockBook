@@ -191,6 +191,7 @@ const NotificationsPage = () => {
                       image={n.actor?.picturePath || ""}
                       name={actorName}
                       size="48px"
+                      bgColor={n.actor?.avatarColor}
                     />
                   </ListItemAvatar>
                   <ListItemText

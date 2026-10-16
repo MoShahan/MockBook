@@ -20,13 +20,23 @@ type FriendProps = {
   subtitle: string
   url: string
   name: string
+  /** Initials avatar background when no photo. */
+  avatarColor?: string
   /** When false, hide add/remove-friend (e.g. post cards). Default true. */
   showFriendButton?: boolean
   /** Optional trailing control (e.g. post ⋮ menu). */
   endAction?: React.ReactNode
 }
 
-const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }: FriendProps) => {
+const Friend = ({
+  id,
+  name,
+  subtitle,
+  url,
+  avatarColor,
+  showFriendButton = true,
+  endAction,
+}: FriendProps) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const user = useAppSelector(state => state.user)
@@ -71,7 +81,7 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
           onClick={handleGoToProfile}
           sx={{ cursor: id ? "pointer" : "default", flexShrink: 0 }}
         >
-          <UserImage image={url} name={name} size="55px" />
+          <UserImage image={url} name={name} size="55px" bgColor={avatarColor} />
         </Box>
         <Box onClick={handleGoToProfile} sx={{ minWidth: 0, flex: "1 1 auto", overflow: "hidden" }}>
           <Typography

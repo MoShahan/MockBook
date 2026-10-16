@@ -1,7 +1,7 @@
 import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
 import Notification from "../models/Notification.js"
 
-const ACTOR_FIELDS = "firstName lastName picturePath"
+const ACTOR_FIELDS = "firstName lastName picturePath avatarColor"
 
 function formatNotification(doc) {
   const n = doc.toObject ? doc.toObject() : { ...doc }
@@ -15,6 +15,7 @@ function formatNotification(doc) {
       firstName: n.actor.firstName,
       lastName: n.actor.lastName,
       picturePath: n.actor.picturePath || "",
+      avatarColor: n.actor.avatarColor || "#314F3B",
     }
   } else if (n.actor) {
     n.actor = { _id: String(n.actor) }

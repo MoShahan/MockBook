@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu } from "@mui/icons-material"
-import { alpha, Box, Button, IconButton, useMediaQuery, useTheme } from "@mui/material"
+import { alpha, Box, Button, IconButton, Tooltip, useMediaQuery, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -91,18 +91,29 @@ const Navbar = () => {
         <BrandLogo size="nav" onClick={handleGoToHome} />
 
         {isNonMobileScreens ? (
-          <FlexBetween sx={{ gap: "1rem" }}>
-            <IconButton onClick={() => dispatch(toggleMode())} aria-label="Toggle theme">
-              {theme.palette.mode === "dark" ? (
-                <DarkMode sx={{ fontSize: "25px" }} />
-              ) : (
-                <LightMode sx={{ color: dark, fontSize: "25px" }} />
-              )}
-            </IconButton>
+          <FlexBetween sx={{ gap: "0.75rem" }}>
+            <Tooltip title={theme.palette.mode === "dark" ? "Light mode" : "Dark mode"}>
+              <IconButton
+                onClick={() => dispatch(toggleMode())}
+                aria-label="Toggle theme"
+                sx={{
+                  border: `1px solid ${theme.palette.divider}`,
+                  borderRadius: 2,
+                }}
+              >
+                {theme.palette.mode === "dark" ? (
+                  <DarkMode sx={{ fontSize: "22px" }} />
+                ) : (
+                  <LightMode sx={{ color: dark, fontSize: "22px" }} />
+                )}
+              </IconButton>
+            </Tooltip>
             <NotificationsMenu />
-            <IconButton onClick={handleGoToHelp} aria-label="Help">
-              <Help sx={{ fontSize: "25px" }} />
-            </IconButton>
+            <Tooltip title="Help & FAQ">
+              <IconButton onClick={handleGoToHelp} aria-label="Help">
+                <Help sx={{ fontSize: "25px" }} />
+              </IconButton>
+            </Tooltip>
             {accountActions}
           </FlexBetween>
         ) : (
