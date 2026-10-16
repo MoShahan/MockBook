@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu, Notifications } from "@mui/icons-material"
-import { Box, Button, IconButton, Typography, useMediaQuery, useTheme } from "@mui/material"
+import { Box, Button, IconButton, useMediaQuery, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -10,6 +10,7 @@ import { useToast } from "@/providers/ToastProvider"
 
 import { setLogout, toggleMode } from "../state"
 
+import BrandLogo from "./BrandLogo"
 import FlexBetween from "./FlexBetween"
 
 const COMING_SOON = "This feature is coming soon"
@@ -25,7 +26,6 @@ const Navbar = () => {
   const theme = useTheme()
   const nLight = theme.palette.neutral.light
   const dark = theme.palette.neutral.dark
-  const pLight = theme.palette.primary.light
   const alt = theme.palette.background.alt
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : "Profile"
@@ -65,18 +65,17 @@ const Navbar = () => {
   )
 
   return (
-    <FlexBetween sx={{ padding: "1rem 6%", bgcolor: alt }}>
-      <Typography
-        onClick={() => handleGoToHome()}
-        sx={{
-          fontWeight: "bold",
-          fontSize: "clamp(1rem,2rem,2.25rem)",
-          color: "primary",
-          "&:hover": { color: pLight, cursor: "pointer" },
-        }}
-      >
-        MERN - Social Media
-      </Typography>
+    <FlexBetween
+      sx={{
+        padding: "1rem 6%",
+        bgcolor: alt,
+        position: "sticky",
+        top: 0,
+        zIndex: theme.zIndex.appBar,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+      }}
+    >
+      <BrandLogo size="nav" onClick={handleGoToHome} />
 
       {isNonMobileScreens ? (
         <FlexBetween sx={{ gap: "1rem" }}>

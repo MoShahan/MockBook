@@ -100,6 +100,7 @@ MockBook/
 
 - Home **Add people** rail (recent users + search; search lives in that widget, not the navbar)
 - Profile editing (location, occupation, avatar) + social links
+- MockBook **logo** in the header; **login/register** atmosphere images
 - Help/FAQ page
 - Infinite-scroll feed; UI overhaul; tests; production deploy
 - Messaging / DMs — **out of scope**

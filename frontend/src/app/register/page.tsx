@@ -5,6 +5,7 @@ import { Box, Typography, useMediaQuery, useTheme } from "@mui/material"
 import type { ObjectSchema } from "yup"
 import * as yup from "yup"
 
+import BrandLogo from "@/components/BrandLogo"
 import Form from "@/components/Form"
 import { isValidPassword, PASSWORD_POLICY_MESSAGE } from "@/lib/password"
 import type { RegisterFormValues } from "@/types/models"
@@ -39,8 +40,16 @@ const RegisterPage = () => {
 
   return (
     <Box>
-      <Box sx={{ width: "100%", bgcolor: alt, p: "1rem 6%", textAlign: "center" }}>
-        <Typography sx={{ fontWeight: "bold", fontSize: "32px", color: "primary" }}>MERN - Social Media</Typography>
+      <Box
+        sx={{
+          width: "100%",
+          bgcolor: alt,
+          p: "1rem 6%",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <BrandLogo size="auth" />
       </Box>
       <Box
         sx={{
@@ -52,7 +61,7 @@ const RegisterPage = () => {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: "500", mb: "1.5rem" }}>
-          Welcome to My Social Media App
+          Join MockBook
         </Typography>
         <Form initVals={registerInitVals} type="register" validationSchema={registerSchema} />
       </Box>
