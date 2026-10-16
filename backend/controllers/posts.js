@@ -409,3 +409,39 @@ export const getSavedPosts = async (req, res, next) => {
     next(e)
   }
 }
+
+/**
+ * Posts the JWT user has liked (Map key = user id).
+ * Sorted by post `createdAt` desc (document sort; not “liked at” time).
+ */
+export const getLikedPosts = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const posts = await Post.find({ [`likes.${userId}`]: true }).sort({ createdAt: -1 })
+    res.status(200).json(await withAuthors(posts))
+  } catch (e) {
+    next(e)
+  }
+}
+
+/**
+ * Distinct posts the JWT user has commented on.
+ * Sorted by post `createdAt` desc (not newest-comment time).
+ */
+export const getCommentedPosts = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const posts = await Post.find({ "comments.userId": String(userId) }).sort({ createdAt: -1 })
+    res.status(200).json(await withAuthors(posts))
+  } catch (e) {
+    next(e)
+  }
+}

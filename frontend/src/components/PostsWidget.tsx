@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { Box, Typography, useTheme } from "@mui/material"
+import { Box, CircularProgress, Typography, useTheme } from "@mui/material"
 
 import { api } from "@/lib/api"
 import { setPosts } from "@/state"
@@ -11,42 +11,89 @@ import { useAppDispatch, useAppSelector } from "../app/hooks"
 
 import PostWidget from "./PostWidget"
 
+/** Which post list to load. */
+export type PostsListKind = "feed" | "authored" | "saved" | "liked" | "commented"
+
 type PostsWidgetProps = {
-  isProfile: boolean
-  userId: string
+  list?: PostsListKind
+  /** Required for `authored` (and legacy `isProfile`). */
+  userId?: string
+  /** @deprecated Prefer `list="authored"`. */
+  isProfile?: boolean
 }
 
-const PostsWidget = ({ isProfile = false, userId }: PostsWidgetProps) => {
+const EMPTY_COPY: Record<PostsListKind, string> = {
+  feed: "No posts in the feed yet.",
+  authored: "No posts yet.",
+  saved: "No saved posts yet.",
+  liked: "No liked posts yet.",
+  commented: "No commented posts yet.",
+}
+
+function resolveList(list: PostsListKind | undefined, isProfile: boolean): PostsListKind {
+  if (list) return list
+  return isProfile ? "authored" : "feed"
+}
+
+function pathForList(kind: PostsListKind, userId: string): string {
+  switch (kind) {
+    case "feed":
+      return "/posts"
+    case "authored":
+      return `/posts/${userId}/posts`
+    case "saved":
+      return "/posts/saved"
+    case "liked":
+      return "/posts/liked"
+    case "commented":
+      return "/posts/commented"
+  }
+}
+
+const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps) => {
   const dispatch = useAppDispatch()
   const posts = useAppSelector(state => state.posts)
   const theme = useTheme()
+  const kind = resolveList(list, isProfile)
   const [loadedFor, setLoadedFor] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const loadKey = isProfile ? `profile:${userId}` : "feed"
+  const loadKey = kind === "authored" ? `authored:${userId}` : kind
 
   useEffect(() => {
-    if (isProfile && !userId) return
+    if (kind === "authored" && !userId) return
+
     let cancelled = false
     void (async () => {
-      const path = isProfile ? `/posts/${userId}/posts` : "/posts"
-      const { data } = await api.get<Post[]>(path)
-      if (cancelled) return
-      dispatch(setPosts({ posts: data }))
-      setLoadedFor(loadKey)
+      try {
+        setLoading(true)
+        const path = pathForList(kind, userId)
+        const { data } = await api.get<Post[]>(path)
+        if (cancelled) return
+        dispatch(setPosts({ posts: data }))
+        setLoadedFor(loadKey)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     })()
+
     return () => {
       cancelled = true
     }
-  }, [isProfile, userId, loadKey, dispatch])
+  }, [kind, userId, loadKey, dispatch])
 
-  if (loadedFor !== loadKey) {
-    return null
+  if (loading || loadedFor !== loadKey) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 3 }} role="status" aria-live="polite">
+        <CircularProgress size={32} />
+      </Box>
+    )
   }
 
   if (!posts.length) {
     return (
       <Typography sx={{ color: theme.palette.neutral.medium, textAlign: "center", py: 2 }}>
-        {isProfile ? "No posts yet." : "No posts in the feed yet."}
+        {EMPTY_COPY[kind]}
       </Typography>
     )
   }

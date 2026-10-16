@@ -51,13 +51,13 @@ MockBook/
 - Like / unlike posts (count updates in UI)
 - View who liked a post (click like count → list with profiles)
 - Save / unsave posts (bookmark on post cards; list via `GET /posts/saved`)
+- Own profile tabs: Posts / Saved / Liked / Commented (`?tab=`); other profiles show Posts only
 - Comment on posts (add + list with author)
 - Edit / delete **own** comments (⋮ menu; confirm on delete)
 - Like / unlike comments (heart + count on each comment)
 - View who liked a comment (click comment like count → list with profiles)
 - Delete **own** posts (⋮ menu + confirm dialog)
 - Single-post page at `/post/[postId]`; Share menu (copy link, X, Facebook, LinkedIn, WhatsApp)
-- Profile feed shows that user’s posts only (`isProfile`)
 
 ### Friends & profiles
 
@@ -98,7 +98,6 @@ MockBook/
 ### Planned next (see `PROJECT_PLAN.md`)
 
 - Edit own posts
-- Profile Posts/Saved/Liked/Commented sections (Saved API ready; tabs in Step 4.3b)
 - Home **Add people** rail (recent users + search; search lives in that widget, not the navbar)
 - Profile editing (location, occupation, avatar) + social links
 - Help/FAQ page
@@ -227,6 +226,8 @@ npm run start -w backend
 | `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit)          |
 | `GET`    | `/posts`                     | Home feed                                                        |
 | `GET`    | `/posts/saved`               | Logged-in user’s saved posts (newest save first)                 |
+| `GET`    | `/posts/liked`               | Logged-in user’s liked posts (`createdAt` desc)                  |
+| `GET`    | `/posts/commented`           | Posts the user commented on (`createdAt` desc; distinct)         |
 | `GET`    | `/posts/:userId/posts`       | One user’s posts                                                 |
 | `GET`    | `/posts/:postId`             | Single post                                                      |
 | `PUT`    | `/posts/:postId/save`        | Save/bookmark a post (idempotent)                                |

@@ -6,8 +6,10 @@ import {
   deleteComment,
   deletePost,
   editComment,
+  getCommentedPosts,
   getCommentLikers,
   getFeed,
+  getLikedPosts,
   getPost,
   getPostLikers,
   getSavedPosts,
@@ -27,8 +29,10 @@ router.get("/", verifyAccessToken, getFeed)
 
 router.post("/", verifyAccessToken, uploadPicture, createPost)
 
-/** Must be registered before `/:postId` so "saved" is not treated as an id. */
+/** Must be registered before `/:postId` so these paths are not treated as ids. */
 router.get("/saved", verifyAccessToken, getSavedPosts)
+router.get("/liked", verifyAccessToken, getLikedPosts)
+router.get("/commented", verifyAccessToken, getCommentedPosts)
 
 router.get("/:userId/posts", verifyAccessToken, requireObjectId("userId"), getUserPosts)
 
