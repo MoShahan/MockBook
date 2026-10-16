@@ -15,15 +15,13 @@ import FlexBetween from "./FlexBetween"
 import NotificationsMenu from "./NotificationsMenu"
 import { PAGE_MAX_WIDTH } from "./PageShell"
 
-const COMING_SOON = "This feature is coming soon"
-
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false)
   const dispatch = useAppDispatch()
   const router = useRouter()
   const user = useAppSelector(state => state.user)
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
-  const { info, success } = useToast()
+  const { success } = useToast()
 
   const theme = useTheme()
   const nLight = theme.palette.neutral.light
@@ -48,8 +46,9 @@ const Navbar = () => {
     router.push("/login")
   }
 
-  const showComingSoon = () => {
-    info(COMING_SOON)
+  const handleGoToHelp = () => {
+    setIsMobileMenuToggled(false)
+    router.push("/help")
   }
 
   const accountActions = (
@@ -101,7 +100,7 @@ const Navbar = () => {
               )}
             </IconButton>
             <NotificationsMenu />
-            <IconButton onClick={showComingSoon} aria-label="Help">
+            <IconButton onClick={handleGoToHelp} aria-label="Help">
               <Help sx={{ fontSize: "25px" }} />
             </IconButton>
             {accountActions}
@@ -141,7 +140,7 @@ const Navbar = () => {
               )}
             </IconButton>
             <NotificationsMenu />
-            <IconButton onClick={showComingSoon} aria-label="Help">
+            <IconButton onClick={handleGoToHelp} aria-label="Help">
               <Help sx={{ fontSize: "25px" }} />
             </IconButton>
             {accountActions}

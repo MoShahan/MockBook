@@ -89,6 +89,7 @@ MockBook/
 - Light / dark mode (persisted)
 - Stone-first theme + Fraunces / Source Sans 3; MockBook logo in the header
 - Split **login/register** layout (`AuthLayout`): wave backdrop (`auth-wave-*.jpg`) + café/social panel on the left (`auth-panel-*.jpg`)
+- **Help & FAQ** (`/help`) with Contact section; **Privacy** (`/privacy`) and **Terms** (`/terms`) — linked from navbar Help and auth footers
 - Toast / snackbar feedback for key actions
 - Formik + Yup validation with visible field errors
 - Shared **axios** client + Bearer request interceptor
@@ -107,7 +108,6 @@ MockBook/
 
 ### Planned next (see `PROJECT_PLAN.md`)
 
-- Help/FAQ page
 - Further UI polish (Part 5); tests; production deploy
 - Messaging / DMs — **out of scope**
 

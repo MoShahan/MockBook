@@ -9,7 +9,10 @@ import { setLogout, setUser } from "@/state"
 import type { User } from "@/types/models"
 
 /** Routes that unauthenticated users may open. */
-const PUBLIC_PATHS = new Set(["/login", "/register", "/auth/callback"])
+const PUBLIC_PATHS = new Set(["/login", "/register", "/auth/callback", "/help", "/privacy", "/terms"])
+
+/** Auth screens only — signed-in users should leave these, but may stay on Help/Privacy/Terms. */
+const AUTH_ENTRY_PATHS = new Set(["/login", "/register"])
 
 /** Finish OAuth handoff here — do not bounce away while tokens are being exchanged for a user. */
 const OAUTH_CALLBACK_PATH = "/auth/callback"
@@ -47,8 +50,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.replace("/login")
       return
     }
-    // Already logged in: leave login/register, but never yank /auth/callback mid-handoff
-    if (isAuth && isPublic && pathname !== OAUTH_CALLBACK_PATH) {
+    // Already logged in: leave login/register only (Help/Privacy/Terms stay reachable)
+    if (isAuth && AUTH_ENTRY_PATHS.has(pathname)) {
       router.replace("/home")
     }
   }, [isAuth, isPublic, pathname, router])

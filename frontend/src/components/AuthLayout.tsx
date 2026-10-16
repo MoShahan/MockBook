@@ -6,6 +6,7 @@ import { alpha, Box, IconButton, keyframes, Typography, useMediaQuery, useTheme 
 
 import { useAppDispatch } from "@/app/hooks"
 import BrandLogo from "@/components/BrandLogo"
+import SiteFooter from "@/components/SiteFooter"
 import { toggleMode } from "@/state"
 
 type AuthLayoutProps = {
@@ -218,6 +219,7 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
             >
               {children}
             </Box>
+            <SiteFooter compact />
           </Box>
         </Box>
       </Box>
