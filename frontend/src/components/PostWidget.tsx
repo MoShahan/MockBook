@@ -8,11 +8,15 @@ import {
   ContentCopy,
   DeleteOutlined,
   EditOutlined,
+  Facebook,
   FavoriteBorderOutlined,
   FavoriteOutlined,
   ImageOutlined,
+  LinkedIn,
   MoreVert,
   ShareOutlined,
+  WhatsApp,
+  X,
 } from "@mui/icons-material"
 import {
   Box,
@@ -446,15 +450,27 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             <ListItemText>Copy link</ListItemText>
           </MenuItem>
           <MenuItem onClick={() => shareTo(share.x)}>
+            <ListItemIcon>
+              <X fontSize="small" />
+            </ListItemIcon>
             <ListItemText>Share on X</ListItemText>
           </MenuItem>
           <MenuItem onClick={() => shareTo(share.facebook)}>
+            <ListItemIcon>
+              <Facebook fontSize="small" />
+            </ListItemIcon>
             <ListItemText>Share on Facebook</ListItemText>
           </MenuItem>
           <MenuItem onClick={() => shareTo(share.linkedin)}>
+            <ListItemIcon>
+              <LinkedIn fontSize="small" />
+            </ListItemIcon>
             <ListItemText>Share on LinkedIn</ListItemText>
           </MenuItem>
           <MenuItem onClick={() => shareTo(share.whatsapp)}>
+            <ListItemIcon>
+              <WhatsApp fontSize="small" />
+            </ListItemIcon>
             <ListItemText>Share on WhatsApp</ListItemText>
           </MenuItem>
         </Menu>
