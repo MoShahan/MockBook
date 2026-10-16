@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef } from "react"
 import { AttachFileOutlined, CloseOutlined, SendRounded } from "@mui/icons-material"
 import {
   alpha,
@@ -40,13 +40,11 @@ type ImagePreviewProps = {
 }
 
 const ImagePreview = ({ file, disabled, onRemove, onReplace }: ImagePreviewProps) => {
-  const [previewUrl, setPreviewUrl] = useState("")
+  const previewUrl = useMemo(() => URL.createObjectURL(file), [file])
 
   useEffect(() => {
-    const url = URL.createObjectURL(file)
-    setPreviewUrl(url)
-    return () => URL.revokeObjectURL(url)
-  }, [file])
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [previewUrl])
 
   return (
     <Box

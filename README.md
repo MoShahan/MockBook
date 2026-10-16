@@ -111,7 +111,7 @@ MockBook/
 
 ### Planned next (see `PROJECT_PLAN.md`)
 
-- Further UI polish (Part 5); tests; production deploy
+- Production deploy (Part 7)
 - Messaging / DMs - **out of scope**
 
 ## Requirements
@@ -211,7 +211,8 @@ npm run dev:frontend
 | `npm run lint:fix`     | Auto-fix ESLint issues (incl. import order) |
 | `npm run format`       | Format with Prettier                        |
 | `npm run format:check` | Check Prettier formatting                   |
-| `npm run test`         | Test frontend and backend                   |
+| `npm run test`         | Test frontend (Vitest) and backend (node:test + MongoMemoryServer) |
+| `npm run typecheck`    | Frontend `tsc --noEmit`                     |
 
 ### Per package
 
@@ -220,8 +221,11 @@ npm run lint -w frontend
 npm run lint -w backend
 npm run test -w frontend
 npm run test -w backend
+npm run typecheck -w frontend
 npm run start -w backend
 ```
+
+**Backend tests** use an in-memory MongoDB (`mongodb-memory-server`); no Atlas URI is required for `npm run test -w backend`.
 
 ## API overview
 

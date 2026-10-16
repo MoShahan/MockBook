@@ -1,5 +1,6 @@
-import { DEFAULT_AVATAR_COLOR } from "./profileColors.js"
 import User from "../models/User.js"
+
+import { DEFAULT_AVATAR_COLOR } from "./profileColors.js"
 
 /** Normalize a stored friend id (ObjectId or string) to a string. */
 export const toFriendId = value => {

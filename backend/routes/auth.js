@@ -15,6 +15,7 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many attempts. Please try again later." },
+  skip: () => process.env.NODE_ENV === "test",
 })
 
 function requireOauthProvider(req, res, next) {

@@ -3,16 +3,10 @@
 import React, { Suspense } from "react"
 import { Typography } from "@mui/material"
 import { useSearchParams } from "next/navigation"
-import type { ObjectSchema } from "yup"
-import * as yup from "yup"
 
 import Form from "@/components/Form"
+import { loginSchema } from "@/lib/authSchemas"
 import type { LoginFormValues } from "@/types/models"
-
-const loginSchema: ObjectSchema<LoginFormValues> = yup.object({
-  email: yup.string().email("Enter a valid email").required("Email is required"),
-  password: yup.string().required("Password is required"),
-})
 
 const loginInitVals: LoginFormValues = {
   email: "",

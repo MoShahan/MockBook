@@ -1,0 +1,87 @@
+import { describe, expect, it } from "vitest"
+
+import type { Post, User } from "@/types/models"
+
+import reducer, {
+  prependPost,
+  setFriends,
+  setLogin,
+  setLogout,
+  setPost,
+  setPosts,
+} from "./index"
+
+const baseUser: User = {
+  _id: "u1",
+  firstName: "Ada",
+  lastName: "Lovelace",
+  email: "ada@example.com",
+  picturePath: "",
+  friends: [],
+  savedPosts: [],
+}
+
+describe("authSlice", () => {
+  it("setLogin stores user and tokens and strips password if present", () => {
+    const state = reducer(undefined, setLogin({
+      user: { ...baseUser, password: "secret" } as User & { password?: string },
+      accessToken: "a",
+      refreshToken: "r",
+    }))
+    expect(state.accessToken).toBe("a")
+    expect(state.refreshToken).toBe("r")
+    expect(state.user?._id).toBe("u1")
+    expect((state.user as { password?: string } | null)?.password).toBeUndefined()
+  })
+
+  it("setLogout clears session and posts", () => {
+    let state = reducer(undefined, setLogin({
+      user: baseUser,
+      accessToken: "a",
+      refreshToken: "r",
+    }))
+    state = reducer(state, setPosts({ posts: [{ _id: "p1" } as Post] }))
+    state = reducer(state, setLogout())
+    expect(state.user).toBeNull()
+    expect(state.accessToken).toBeNull()
+    expect(state.posts).toEqual([])
+  })
+
+  it("setFriends updates the logged-in user friends list", () => {
+    let state = reducer(undefined, setLogin({
+      user: baseUser,
+      accessToken: "a",
+      refreshToken: "r",
+    }))
+    state = reducer(
+      state,
+      setFriends({
+        friends: [
+          {
+            _id: "f1",
+            firstName: "Bob",
+            lastName: "Friend",
+            occupation: "",
+            location: "",
+            picturePath: "",
+          },
+        ],
+      })
+    )
+    expect(state.user?.friends).toHaveLength(1)
+    expect(state.user?.friends[0]._id).toBe("f1")
+  })
+
+  it("setPost upserts and prependPost dedupes", () => {
+    let state = reducer(undefined, setPosts({ posts: [] }))
+    const post = { _id: "p1", description: "hi", userId: "u1", likes: {}, comments: [] } as Post
+    state = reducer(state, setPost({ post }))
+    expect(state.posts).toHaveLength(1)
+    state = reducer(state, setPost({ post: { ...post, description: "updated" } }))
+    expect(state.posts).toHaveLength(1)
+    expect(state.posts[0].description).toBe("updated")
+    state = reducer(state, prependPost({ post: { ...post, description: "again" } }))
+    expect(state.posts).toHaveLength(1)
+    expect(state.posts[0].description).toBe("again")
+  })
+})

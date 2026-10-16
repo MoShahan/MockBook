@@ -11,7 +11,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "node --test lib/**/*.test.js"
+    "test": "node --test --test-concurrency=1 lib/**/*.test.js test/**/*.test.js"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +34,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "globals": "^17.13.0",
-    "prettier": "^3.9.10"
+    "mongodb-memory-server": "^11.3.0",
+    "prettier": "^3.9.10",
+    "supertest": "^7.3.1"
   }
 }

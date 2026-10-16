@@ -86,6 +86,8 @@ function redirectToLogin() {
   if (typeof window === "undefined") return
   const path = window.location.pathname
   if (path === "/login" || path === "/register") return
+  // Full navigation clears in-memory Redux on hard auth failure (refresh expired).
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- intentional hard redirect
   window.location.assign(`${window.location.origin}/login`)
 }
 
