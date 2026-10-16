@@ -1,3 +1,4 @@
+import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
 import Notification from "../models/Notification.js"
 
 const ACTOR_FIELDS = "firstName lastName picturePath"
@@ -26,15 +27,23 @@ export const listNotifications = async (req, res, next) => {
     const userId = req.user?.id
     if (!userId) return res.status(401).json({ error: "Unauthenticated" })
 
-    const rawLimit = Number.parseInt(String(req.query.limit ?? "20"), 10)
-    const limit = Math.min(50, Math.max(1, Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : 20))
+    const { limit, cursorDate } = parseCursorPagination(req.query)
+    const filter = {
+      recipient: userId,
+      ...(cursorDate ? { createdAt: { $lt: cursorDate } } : {}),
+    }
 
-    const docs = await Notification.find({ recipient: userId })
+    const docs = await Notification.find(filter)
       .sort({ createdAt: -1 })
-      .limit(limit)
+      .limit(limit + 1)
       .populate("actor", ACTOR_FIELDS)
 
-    res.status(200).json({ notifications: docs.map(formatNotification) })
+    const { pageDocs, nextCursor, hasMore } = pageFromDocs(docs, limit)
+    res.status(200).json({
+      notifications: pageDocs.map(formatNotification),
+      nextCursor,
+      hasMore,
+    })
   } catch (e) {
     next(e)
   }

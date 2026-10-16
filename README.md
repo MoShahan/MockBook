@@ -70,7 +70,7 @@ MockBook/
 - Edit own profile (name, location, occupation, avatar, social handles) via manage-account control
 - Optional public social links (Facebook, X, LinkedIn, Instagram) — shown only when set
 - Profile visit counter (`viewedProfile`) increments when another user loads your profile
-- In-app notifications (likes, comments, friend adds) via navbar bell
+- In-app notifications (likes, comments, friend adds) via navbar bell + `/notifications` page
 - Optional OAuth sign-in: Google, GitHub, Discord (when configured in backend env)
 - Click name/avatar to open the correct profile
 - Add/remove friend on another user’s profile header and in friends lists (not on post cards)
@@ -231,7 +231,7 @@ npm run start -w backend
 | `GET`    | `/auth/providers`            | Configured OAuth providers                                       |
 | `GET`    | `/auth/:provider`            | Start OAuth (`google` \| `github` \| `discord`)                  |
 | `GET`    | `/auth/:provider/callback`   | OAuth callback → redirect to FE with tokens in URL fragment      |
-| `GET`    | `/notifications`             | Recent notifications for the logged-in user                      |
+| `GET`    | `/notifications`             | Notifications page (`?limit=&cursor=` → `{ notifications, nextCursor, hasMore }`) |
 | `GET`    | `/notifications/unread-count`| Unread notification count                                        |
 | `PATCH`  | `/notifications/read-all`    | Mark all notifications read                                      |
 | `PATCH`  | `/notifications/:id/read`    | Mark one notification read                                       |

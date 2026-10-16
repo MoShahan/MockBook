@@ -19,24 +19,9 @@ import {
 import { useRouter } from "next/navigation"
 
 import { api } from "@/lib/api"
+import { notificationCopy, notificationHref } from "@/lib/notifications"
 import { sameUserId } from "@/types/models"
 import type { AppNotification } from "@/types/notifications"
-
-function notificationCopy(n: AppNotification): string {
-  const name = `${n.actor?.firstName || ""} ${n.actor?.lastName || ""}`.trim() || "Someone"
-  switch (n.type) {
-    case "post_like":
-      return `${name} liked your post`
-    case "comment":
-      return `${name} commented on your post`
-    case "comment_like":
-      return `${name} liked your comment`
-    case "friend":
-      return `${name} added you as a friend`
-    default:
-      return `${name} interacted with you`
-  }
-}
 
 const NotificationsMenu = () => {
   const theme = useTheme()
@@ -58,7 +43,6 @@ const NotificationsMenu = () => {
   }, [])
 
   useEffect(() => {
-    // Defer initial fetch so we don't sync-setState inside the effect body.
     const boot = window.setTimeout(() => void refreshUnread(), 0)
     const id = window.setInterval(() => void refreshUnread(), 60_000)
     return () => {
@@ -70,7 +54,7 @@ const NotificationsMenu = () => {
   const loadList = async () => {
     setLoading(true)
     try {
-      const { data } = await api.get<{ notifications: AppNotification[] }>("/notifications?limit=20")
+      const { data } = await api.get<{ notifications: AppNotification[] }>("/notifications?limit=8")
       setItems(data.notifications || [])
       await refreshUnread()
     } finally {
@@ -91,6 +75,11 @@ const NotificationsMenu = () => {
     setUnread(0)
   }
 
+  const handleSeeAll = () => {
+    handleClose()
+    router.push("/notifications")
+  }
+
   const handleClickItem = async (n: AppNotification) => {
     if (!n.read) {
       try {
@@ -102,11 +91,8 @@ const NotificationsMenu = () => {
       }
     }
     handleClose()
-    if (n.postId) {
-      router.push(`/post/${n.postId}`)
-    } else if (n.actor?._id) {
-      router.push(`/profile/${n.actor._id}`)
-    }
+    const href = notificationHref(n)
+    if (href) router.push(href)
   }
 
   return (
@@ -166,6 +152,12 @@ const NotificationsMenu = () => {
             ))}
           </List>
         )}
+        <Divider />
+        <Box sx={{ px: 1, py: 0.5 }}>
+          <Button fullWidth size="small" onClick={handleSeeAll}>
+            See all notifications
+          </Button>
+        </Box>
       </Menu>
     </>
   )
