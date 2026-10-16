@@ -1,7 +1,8 @@
 "use client"
 
-import React from "react"
+import React, { Suspense } from "react"
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material"
+import { useSearchParams } from "next/navigation"
 import type { ObjectSchema } from "yup"
 import * as yup from "yup"
 
@@ -17,6 +18,19 @@ const loginSchema: ObjectSchema<LoginFormValues> = yup.object({
 const loginInitVals: LoginFormValues = {
   email: "",
   password: "",
+}
+
+function LoginFormWithOauth() {
+  const searchParams = useSearchParams()
+  const oauthError = searchParams.get("oauthError")
+  return (
+    <Form
+      initVals={loginInitVals}
+      type="login"
+      validationSchema={loginSchema}
+      oauthError={oauthError}
+    />
+  )
 }
 
 const LoginPage = () => {
@@ -50,7 +64,9 @@ const LoginPage = () => {
         <Typography variant="h5" sx={{ fontWeight: "500", mb: "1.5rem" }}>
           Welcome back to MockBook
         </Typography>
-        <Form initVals={loginInitVals} type="login" validationSchema={loginSchema} />
+        <Suspense fallback={null}>
+          <LoginFormWithOauth />
+        </Suspense>
       </Box>
     </Box>
   )

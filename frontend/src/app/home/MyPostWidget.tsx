@@ -13,7 +13,7 @@ import UserImage from "@/components/UserImage"
 import WidgetWrapper from "@/components/WidgetWrapper"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
-import { setPosts } from "@/state"
+import { prependPost } from "@/state"
 import type { CreatePostFormValues, Post } from "@/types/models"
 
 import { useAppDispatch, useAppSelector } from "../hooks"
@@ -59,8 +59,8 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
         formData.append("picture", vals.picture)
       }
 
-      const { data } = await api.post<Post[]>("/posts", formData)
-      dispatch(setPosts({ posts: data }))
+      const { data } = await api.post<{ post: Post }>("/posts", formData)
+      dispatch(prependPost({ post: data.post }))
       helpers.resetForm()
       setIsImage(false)
     } catch (e: unknown) {

@@ -48,6 +48,7 @@ MockBook/
 
 - Create text and/or image posts
 - Home feed with author name, avatar, and relative time
+- Infinite scroll on home feed and profile Posts tab (`?limit=&cursor=`)
 - Like / unlike posts (count updates in UI)
 - View who liked a post (click like count → list with profiles)
 - Save / unsave posts (bookmark on post cards; list via `GET /posts/saved`)
@@ -64,11 +65,16 @@ MockBook/
 
 - Add / remove friends (both users’ lists update)
 - Friends list on profile pages (empty state when none)
+- **Add people** discovery widget on `/home` (right rail on wide screens; below feed on mobile) with recent users + name search
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
+- Edit own profile (name, location, occupation, avatar, social handles) via manage-account control
+- Optional public social links (Facebook, X, LinkedIn, Instagram) — shown only when set
+- Profile visit counter (`viewedProfile`) increments when another user loads your profile
+- In-app notifications (likes, comments, friend adds) via navbar bell
+- Optional OAuth sign-in: Google, GitHub, Discord (when configured in backend env)
 - Click name/avatar to open the correct profile
 - Add/remove friend on another user’s profile header and in friends lists (not on post cards)
 - User details widget on profile only (not on home)
-- Manage-account control on own profile (coming-soon toast until profile edit ships)
 
 ### Media & uploads
 
@@ -221,15 +227,25 @@ npm run start -w backend
 | `POST`   | `/auth/register`             | Create account; returns user + access + refresh tokens           |
 | `POST`   | `/auth/login`                | Log in; returns user + access + refresh tokens                   |
 | `POST`   | `/auth/refresh`              | Exchange refresh token for a new access + refresh pair           |
+| `GET`    | `/auth/me`                   | Current user (Bearer)                                            |
+| `GET`    | `/auth/providers`            | Configured OAuth providers                                       |
+| `GET`    | `/auth/:provider`            | Start OAuth (`google` \| `github` \| `discord`)                  |
+| `GET`    | `/auth/:provider/callback`   | OAuth callback → redirect to FE with tokens in URL fragment      |
+| `GET`    | `/notifications`             | Recent notifications for the logged-in user                      |
+| `GET`    | `/notifications/unread-count`| Unread notification count                                        |
+| `PATCH`  | `/notifications/read-all`    | Mark all notifications read                                      |
+| `PATCH`  | `/notifications/:id/read`    | Mark one notification read                                       |
+| `GET`    | `/users/discover`            | Recent users or search (`?q=&limit=`; excludes self)             |
+| `PATCH`  | `/users/me`                  | Update own profile (multipart optional `picture` → ImageKit)     |
 | `GET`    | `/users/:id`                 | Get a user (no password)                                         |
 | `GET`    | `/users/:id/friends`         | Get that user’s friends (formatted)                              |
 | `PATCH`  | `/users/friends/:friendId`   | Add or remove a friend (JWT user only)                           |
-| `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit)          |
-| `GET`    | `/posts`                     | Home feed                                                        |
+| `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit); `{ post }` |
+| `GET`    | `/posts`                     | Home feed page (`?limit=&cursor=` → `{ posts, nextCursor, hasMore }`) |
 | `GET`    | `/posts/saved`               | Logged-in user’s saved posts (newest save first)                 |
 | `GET`    | `/posts/liked`               | Logged-in user’s liked posts (`createdAt` desc)                  |
 | `GET`    | `/posts/commented`           | Posts the user commented on (`createdAt` desc; distinct)         |
-| `GET`    | `/posts/:userId/posts`       | One user’s posts                                                 |
+| `GET`    | `/posts/:userId/posts`       | One user’s posts (same cursor pagination as feed)                |
 | `GET`    | `/posts/:postId`             | Single post                                                      |
 | `PUT`    | `/posts/:postId/save`        | Save/bookmark a post (idempotent)                                |
 | `DELETE` | `/posts/:postId/save`        | Unsave a post                                                    |

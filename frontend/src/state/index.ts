@@ -57,8 +57,38 @@ export const authSlice = createSlice({
         console.warn("User does not exist, cannot set saved posts")
       }
     },
+    setUser: (state, action: PayloadAction<{ user: User }>) => {
+      const next = sanitizeUser(action.payload.user)
+      // Preserve friends/saved when the API returns raw ids or omits private lists.
+      if (state.user) {
+        const incoming = action.payload.user.friends as unknown
+        const first = Array.isArray(incoming) ? incoming[0] : undefined
+        const looksLikeRawIds = typeof first === "string"
+        if (!Array.isArray(incoming) || looksLikeRawIds) {
+          next.friends = state.user.friends
+        }
+        if (!next.savedPosts?.length && state.user.savedPosts?.length) {
+          next.savedPosts = state.user.savedPosts
+        }
+      }
+      state.user = next
+    },
     setPosts: (state, action: PayloadAction<{ posts: Post[] }>) => {
       state.posts = action.payload.posts
+    },
+    prependPost: (state, action: PayloadAction<{ post: Post }>) => {
+      const id = String(action.payload.post._id)
+      state.posts = [action.payload.post, ...state.posts.filter(p => String(p._id) !== id)]
+    },
+    appendPosts: (state, action: PayloadAction<{ posts: Post[] }>) => {
+      const seen = new Set(state.posts.map(p => String(p._id)))
+      for (const post of action.payload.posts) {
+        const id = String(post._id)
+        if (!seen.has(id)) {
+          seen.add(id)
+          state.posts.push(post)
+        }
+      }
     },
     setPost: (state, action: PayloadAction<{ post: Post }>) => {
       const updated = action.payload.post
@@ -82,10 +112,13 @@ export const {
   toggleMode,
   setFriends,
   setSavedPosts,
+  setUser,
   setLogin,
   setTokens,
   setPost,
   setPosts,
+  prependPost,
+  appendPosts,
   removePost,
   setLogout,
 } = authSlice.actions

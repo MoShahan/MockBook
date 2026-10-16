@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation"
 import type { ObjectSchema } from "yup"
 
 import { useAppDispatch } from "@/app/hooks"
+import OauthButtons from "@/components/OauthButtons"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 import { setLogin } from "@/state"
@@ -29,14 +30,16 @@ type FormProps =
       type: "login"
       validationSchema: ObjectSchema<LoginFormValues>
       initVals: LoginFormValues
+      oauthError?: string | null
     }
   | {
       type: "register"
       validationSchema: ObjectSchema<RegisterFormValues>
       initVals: RegisterFormValues
+      oauthError?: string | null
     }
 
-const Form = ({ type, validationSchema, initVals }: FormProps) => {
+const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps) => {
   const router = useRouter()
   const { palette } = useTheme()
   const dispatch = useAppDispatch()
@@ -294,6 +297,7 @@ const Form = ({ type, validationSchema, initVals }: FormProps) => {
                   Have an account already? Log In
                 </Typography>
               )}
+              <OauthButtons oauthError={oauthError} />
             </Box>
           </form>
         )

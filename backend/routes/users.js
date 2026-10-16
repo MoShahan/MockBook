@@ -1,10 +1,21 @@
 import express from "express"
 
-import { addRemoveFriend, getUser, getUserFriends } from "../controllers/users.js"
+import {
+  addRemoveFriend,
+  discoverUsers,
+  getUser,
+  getUserFriends,
+  updateProfile,
+} from "../controllers/users.js"
 import { requireObjectId } from "../lib/objectId.js"
 import { verifyAccessToken } from "../middleware/auth.js"
+import { uploadPicture } from "../middleware/upload.js"
 
 const router = express.Router()
+
+router.get("/discover", verifyAccessToken, discoverUsers)
+
+router.patch("/me", verifyAccessToken, uploadPicture, updateProfile)
 
 router.patch("/friends/:friendId", verifyAccessToken, requireObjectId("friendId"), addRemoveFriend)
 

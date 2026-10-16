@@ -1,24 +1,29 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import {
-  EditOutlined,
+  Facebook,
+  Instagram,
+  LinkedIn,
   LocationOnOutlined,
   ManageAccountsOutlined,
   PersonAddOutlined,
   PersonRemoveOutlined,
   WorkOutlineOutlined,
+  X,
 } from "@mui/icons-material"
-import { Box, Divider, IconButton, Tooltip, Typography, useTheme } from "@mui/material"
+import { Box, Divider, IconButton, Link, Tooltip, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
+import { SOCIAL_NETWORKS, type SocialNetwork,socialProfileUrl } from "@/lib/social"
 import { useToast } from "@/providers/ToastProvider"
 import { setFriends } from "@/state"
 import type { Friend, User } from "@/types/models"
 import { friendIdOf, sameUserId } from "@/types/models"
 
+import EditProfileDialog from "./EditProfileDialog"
 import FlexBetween from "./FlexBetween"
 import UserImage from "./UserImage"
 import WidgetWrapper from "./WidgetWrapper"
@@ -30,18 +35,26 @@ type UserWidgetProps = {
   isOwnProfile?: boolean
 }
 
+const SOCIAL_ICONS: Record<SocialNetwork, React.ReactNode> = {
+  facebook: <Facebook />,
+  x: <X />,
+  linkedin: <LinkedIn />,
+  instagram: <Instagram />,
+}
+
 const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetProps) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const loggedInUser = useAppSelector(state => state.user)
-  const { success, error: toastError, info } = useToast()
+  const { success, error: toastError } = useToast()
   const { palette } = useTheme()
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
   const main = palette.neutral.main
   const pLight = palette.primary.light
 
-  const [user, setUser] = useState<User | null>(null)
+  const [fetched, setFetched] = useState<User | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
 
   const isOwnProfile = isOwnProfileProp ?? sameUserId(loggedInUser?._id, userId)
   const isFriend = Boolean(
@@ -53,12 +66,34 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     let cancelled = false
     void (async () => {
       const { data } = await api.get<User>(`/users/${userId}`)
-      if (!cancelled) setUser(data)
+      if (!cancelled) setFetched(data)
     })()
     return () => {
       cancelled = true
     }
   }, [userId])
+
+  const user = useMemo(() => {
+    if (!fetched || !sameUserId(fetched._id, userId)) return null
+    if (isOwnProfile && loggedInUser && sameUserId(loggedInUser._id, userId)) {
+      return {
+        ...fetched,
+        firstName: loggedInUser.firstName,
+        lastName: loggedInUser.lastName,
+        location: loggedInUser.location,
+        occupation: loggedInUser.occupation,
+        picturePath: loggedInUser.picturePath,
+        facebook: loggedInUser.facebook,
+        x: loggedInUser.x,
+        linkedin: loggedInUser.linkedin,
+        instagram: loggedInUser.instagram,
+        friends: loggedInUser.friends ?? fetched.friends,
+        // Prefer API value so visit counts stay current after others view the profile.
+        viewedProfile: fetched.viewedProfile ?? loggedInUser.viewedProfile,
+      }
+    }
+    return fetched
+  }, [fetched, userId, isOwnProfile, loggedInUser])
 
   const handleGoToProfile = () => {
     if (!userId) return
@@ -83,12 +118,21 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     }
   }
 
-  if (!user || !sameUserId(user._id, userId)) {
+  if (!user) {
     return null
   }
 
   const displayUrl = url || user.picturePath || ""
   const friendCount = Array.isArray(user.friends) ? user.friends.length : 0
+
+  const activeSocials = SOCIAL_NETWORKS.filter(({ key }) => Boolean((user[key] || "").trim())).map(
+    ({ key, label }) => ({
+      key,
+      label,
+      handle: (user[key] || "").trim(),
+      href: socialProfileUrl(key, user[key]),
+    })
+  )
 
   return (
     <WidgetWrapper>
@@ -112,11 +156,11 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
           </Box>
         </FlexBetween>
         {isOwnProfile ? (
-          <Tooltip title="Manage account">
+          <Tooltip title="Edit profile">
             <IconButton
               sx={{ p: "0.6rem" }}
-              onClick={() => info("This feature is coming soon")}
-              aria-label="Manage account"
+              onClick={() => setEditOpen(true)}
+              aria-label="Edit profile"
             >
               <ManageAccountsOutlined />
             </IconButton>
@@ -139,52 +183,67 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
       <Box sx={{ p: "1rem 0" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: "1rem", mb: "0.5rem" }}>
           <LocationOnOutlined sx={{ fontSize: "large", color: main }} />
-          <Typography sx={{ color: medium }}>{user.location || "—"}</Typography>
+          <Typography sx={{ color: medium }}>{user.location?.trim() || "—"}</Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <WorkOutlineOutlined sx={{ fontSize: "large", color: main }} />
-          <Typography sx={{ color: medium }}>{user.occupation || "—"}</Typography>
+          <Typography sx={{ color: medium }}>{user.occupation?.trim() || "—"}</Typography>
         </Box>
       </Box>
 
       <Divider />
 
       <Box sx={{ p: "1rem 0" }}>
-        <FlexBetween sx={{ mb: "0.5rem" }}>
-          <Typography sx={{ color: medium }}>Number of profile visits</Typography>
+        <FlexBetween>
+          <Typography sx={{ color: medium }}>Profile visits</Typography>
           <Typography sx={{ color: main, fontWeight: "500" }}>{user.viewedProfile || 0}</Typography>
         </FlexBetween>
-        <FlexBetween>
-          <Typography sx={{ color: medium }}>Impressions</Typography>
-          <Typography sx={{ color: main, fontWeight: "500" }}>{user.impressions || 0}</Typography>
-        </FlexBetween>
       </Box>
 
-      <Divider />
+      {activeSocials.length > 0 ? (
+        <>
+          <Divider />
+          <Box sx={{ p: "1rem 0" }}>
+            <Typography sx={{ color: main, mb: "1rem", fontSize: "1rem", fontWeight: "500" }}>
+              Social Profiles
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {activeSocials.map(item =>
+                item.href ? (
+                  <FlexBetween key={item.key} sx={{ gap: "1rem" }}>
+                    <FlexBetween sx={{ gap: "1rem", minWidth: 0 }}>
+                      <Box sx={{ color: main, display: "flex" }} aria-hidden>
+                        {SOCIAL_ICONS[item.key]}
+                      </Box>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography sx={{ color: main, fontWeight: "500" }}>{item.label}</Typography>
+                        <Link
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{ color: medium, fontWeight: 500 }}
+                        >
+                          @{item.handle}
+                        </Link>
+                      </Box>
+                    </FlexBetween>
+                  </FlexBetween>
+                ) : null
+              )}
+            </Box>
+          </Box>
+        </>
+      ) : null}
 
-      <Box sx={{ p: "1rem 0" }}>
-        <Typography sx={{ color: main, mb: "1rem", fontSize: "1rem", fontWeight: "500" }}>Social Profiles</Typography>
-        <FlexBetween sx={{ gap: "1rem", mb: "0.5rem" }}>
-          <FlexBetween sx={{ gap: "1rem" }}>
-            <img src="../assets/twitter.png" alt="twitter" />
-            <Box>
-              <Typography sx={{ color: main, fontWeight: "500" }}>Twitter</Typography>
-              <Typography sx={{ color: medium, fontWeight: "500" }}>Social Network</Typography>
-            </Box>
-          </FlexBetween>
-          <EditOutlined sx={{ color: main }} />
-        </FlexBetween>
-        <FlexBetween sx={{ gap: "1rem" }}>
-          <FlexBetween sx={{ gap: "1rem" }}>
-            <img src="../assets/linkedin.png" alt="linkedin" />
-            <Box>
-              <Typography sx={{ color: main, fontWeight: "500" }}>LinkedIn</Typography>
-              <Typography sx={{ color: medium, fontWeight: "500" }}>Network Platform</Typography>
-            </Box>
-          </FlexBetween>
-          <EditOutlined sx={{ color: main }} />
-        </FlexBetween>
-      </Box>
+      {isOwnProfile ? (
+        <EditProfileDialog
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          user={user}
+          onSaved={saved => setFetched(saved)}
+        />
+      ) : null}
     </WidgetWrapper>
   )
 }

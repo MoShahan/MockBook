@@ -23,8 +23,21 @@ export type User = {
   savedPosts?: string[]
   location?: string
   occupation?: string
+  facebook?: string
+  x?: string
+  linkedin?: string
+  instagram?: string
   viewedProfile?: number
-  impressions?: number
+}
+
+/** Public discover / search row (safe fields only). */
+export type DiscoverUser = {
+  _id: string
+  firstName: string
+  lastName: string
+  picturePath?: string
+  location?: string
+  occupation?: string
 }
 
 /** Post likes are a Map on the server, serialized as an object keyed by user id. */
@@ -50,6 +63,12 @@ export type Post = {
   createdAt?: string
   updatedAt?: string
   user?: Pick<User, "firstName" | "lastName" | "location" | "picturePath"> | null
+}
+
+export type PaginatedPosts = {
+  posts: Post[]
+  nextCursor: string | null
+  hasMore: boolean
 }
 
 export type AuthState = {

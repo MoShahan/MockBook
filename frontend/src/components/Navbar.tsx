@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu, Notifications } from "@mui/icons-material"
+import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu } from "@mui/icons-material"
 import { Box, Button, IconButton, useMediaQuery, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
@@ -12,6 +12,7 @@ import { setLogout, toggleMode } from "../state"
 
 import BrandLogo from "./BrandLogo"
 import FlexBetween from "./FlexBetween"
+import NotificationsMenu from "./NotificationsMenu"
 
 const COMING_SOON = "This feature is coming soon"
 
@@ -86,9 +87,7 @@ const Navbar = () => {
               <LightMode sx={{ color: dark, fontSize: "25px" }} />
             )}
           </IconButton>
-          <IconButton onClick={showComingSoon} aria-label="Notifications">
-            <Notifications sx={{ fontSize: "25px" }} />
-          </IconButton>
+          <NotificationsMenu />
           <IconButton onClick={showComingSoon} aria-label="Help">
             <Help sx={{ fontSize: "25px" }} />
           </IconButton>
@@ -127,9 +126,7 @@ const Navbar = () => {
                 <LightMode sx={{ color: dark, fontSize: "25px" }} />
               )}
             </IconButton>
-            <IconButton onClick={showComingSoon} aria-label="Notifications">
-              <Notifications sx={{ fontSize: "25px" }} />
-            </IconButton>
+            <NotificationsMenu />
             <IconButton onClick={showComingSoon} aria-label="Help">
               <Help sx={{ fontSize: "25px" }} />
             </IconButton>

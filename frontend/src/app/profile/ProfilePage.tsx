@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useMemo } from "react"
 import { Box, Tab, Tabs, useMediaQuery } from "@mui/material"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
@@ -8,8 +8,6 @@ import FriendsListWidget from "@/components/FriendsListWidget"
 import Navbar from "@/components/Navbar"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import UserWidget from "@/components/UserWidget"
-import { api } from "@/lib/api"
-import type { User } from "@/types/models"
 import { sameUserId } from "@/types/models"
 
 import { useAppSelector } from "../hooks"
@@ -37,8 +35,6 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [user, setUser] = useState<User | null>(null)
-
   const profileId = id || loggedInUser?._id || ""
   // `/profile` (empty id) is always own; `/profile/:id` is own when ids match.
   const isOwnProfile = !id || sameUserId(id, loggedInUser?._id)
@@ -50,18 +46,6 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
 
   const activeList = OWN_TABS.find(t => t.value === activeTab)?.list ?? "authored"
 
-  useEffect(() => {
-    if (!profileId) return
-    let cancelled = false
-    void (async () => {
-      const { data } = await api.get<User>(`/users/${profileId}`)
-      if (!cancelled) setUser(data)
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [profileId])
-
   const handleTabChange = (_: React.SyntheticEvent, value: OwnTab) => {
     const params = new URLSearchParams(searchParams.toString())
     if (value === "posts") params.delete("tab")
@@ -70,7 +54,8 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
-  if (!profileId || !user || !sameUserId(user._id, profileId)) {
+  // Single GET /users/:id lives in UserWidget so profile visits are not double-counted.
+  if (!profileId) {
     return (
       <Box>
         <Navbar />
@@ -91,7 +76,11 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
         }}
       >
         <Box sx={{ flexBasis: isNonMobileScreens ? "26%" : undefined }}>
-          <UserWidget url={user.picturePath} userId={profileId} isOwnProfile={isOwnProfile} />
+          <UserWidget
+            url={isOwnProfile ? (loggedInUser?.picturePath ?? "") : ""}
+            userId={profileId}
+            isOwnProfile={isOwnProfile}
+          />
           <Box sx={{ m: "2rem 0" }} />
           <FriendsListWidget userId={profileId} />
         </Box>

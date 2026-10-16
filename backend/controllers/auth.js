@@ -49,7 +49,6 @@ export const register = async (req, res, next) => {
       location: "",
       occupation: "",
       viewedProfile: 0,
-      impressions: 0,
     })
 
     const savedUser = await newUser.save()
@@ -70,7 +69,7 @@ export const login = async (req, res, next) => {
     }
 
     const user = await User.findOne({ email }).select("+password")
-    if (!user) {
+    if (!user || !user.password) {
       return res.status(400).json({ error: "Invalid credentials" })
     }
 
@@ -83,6 +82,20 @@ export const login = async (req, res, next) => {
     const safeUser = await withFormattedFriends(user)
 
     res.status(200).json({ user: safeUser, ...tokens })
+  } catch (e) {
+    next(e)
+  }
+}
+
+/** Current user from Bearer access token. */
+export const me = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" })
+    const user = await User.findById(userId)
+    if (!user) return res.status(401).json({ error: "Unauthenticated" })
+    const safeUser = await withFormattedFriends(user)
+    res.status(200).json({ user: safeUser })
   } catch (e) {
     next(e)
   }

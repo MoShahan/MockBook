@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 
 import { useAppSelector } from "@/app/hooks"
 
-const PUBLIC_PATHS = new Set(["/login", "/register"])
+const PUBLIC_PATHS = new Set(["/login", "/register", "/auth/callback"])
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()

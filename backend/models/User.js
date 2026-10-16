@@ -11,9 +11,20 @@ const UserSchema = new Schema(
   {
     firstName: { type: String, required: true, minlength: 2, maxlength: 50 },
     lastName: { type: String, required: true, minlength: 2, maxlength: 50 },
-    email: { type: String, required: true, maxlength: 50, unique: true },
-    // Hash only — never select by default; plaintext policy enforced in auth controller
+    email: { type: String, required: true, maxlength: 100, unique: true },
+    // Hash only — never select by default; plaintext policy enforced in auth controller.
+    // OAuth-only accounts still store a random unusable hash.
     password: { type: String, required: true, select: false },
+    /** Linked social login providers (Google / GitHub / Discord). */
+    oauthProviders: {
+      type: [
+        {
+          provider: { type: String, enum: ["google", "github", "discord"], required: true },
+          providerId: { type: String, required: true },
+        },
+      ],
+      default: [],
+    },
     picturePath: { type: String, default: "" },
     friends: {
       type: [{ type: Schema.Types.ObjectId, ref: "User" }],
@@ -26,8 +37,11 @@ const UserSchema = new Schema(
     },
     location: { type: String, default: "" },
     occupation: { type: String, default: "" },
-    viewedProfile: Number,
-    impressions: Number,
+    facebook: { type: String, default: "" },
+    x: { type: String, default: "" },
+    linkedin: { type: String, default: "" },
+    instagram: { type: String, default: "" },
+    viewedProfile: { type: Number, default: 0 },
   },
   { timestamps: true }
 )

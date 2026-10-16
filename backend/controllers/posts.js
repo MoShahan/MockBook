@@ -1,4 +1,6 @@
 import { uploadImageBuffer } from "../lib/imagekit.js"
+import { createNotification } from "../lib/notifications.js"
+import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
 import {
   likesMapKeys,
   parseLikersPagination,
@@ -29,22 +31,29 @@ export const createPost = async (req, res, next) => {
 
     const newPost = new Post({ description, userId, url, likes: {}, comments: [] })
     await newPost.save()
-    const posts = await Post.find().sort({ createdAt: -1 })
-    res.status(201).json(await withAuthors(posts))
+    const [formatted] = await withAuthors([newPost])
+    res.status(201).json({ post: formatted })
   } catch (e) {
     if (e.message?.includes("IMAGEKIT_PRIVATE_KEY")) {
       return res.status(503).json({ error: "Image upload is not configured" })
     }
-    res.status(409).json({ msg: e.message })
+    next(e)
   }
 }
 
 export const getFeed = async (req, res, next) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 })
-    res.status(200).json(await withAuthors(posts))
+    const { limit, cursorDate } = parseCursorPagination(req.query)
+    const filter = cursorDate ? { createdAt: { $lt: cursorDate } } : {}
+    const docs = await Post.find(filter).sort({ createdAt: -1 }).limit(limit + 1)
+    const { pageDocs, nextCursor, hasMore } = pageFromDocs(docs, limit)
+    res.status(200).json({
+      posts: await withAuthors(pageDocs),
+      nextCursor,
+      hasMore,
+    })
   } catch (e) {
-    res.status(404).json({ msg: e.message })
+    next(e)
   }
 }
 
@@ -65,10 +74,17 @@ export const getPost = async (req, res, next) => {
 export const getUserPosts = async (req, res, next) => {
   try {
     const { userId } = req.params
-    const posts = await Post.find({ userId }).sort({ createdAt: -1 })
-    res.status(200).json(await withAuthors(posts))
+    const { limit, cursorDate } = parseCursorPagination(req.query)
+    const filter = { userId, ...(cursorDate ? { createdAt: { $lt: cursorDate } } : {}) }
+    const docs = await Post.find(filter).sort({ createdAt: -1 }).limit(limit + 1)
+    const { pageDocs, nextCursor, hasMore } = pageFromDocs(docs, limit)
+    res.status(200).json({
+      posts: await withAuthors(pageDocs),
+      nextCursor,
+      hasMore,
+    })
   } catch (e) {
-    res.status(404).json({ msg: e.message })
+    next(e)
   }
 }
 
@@ -93,6 +109,12 @@ export const likePost = async (req, res, next) => {
     } else {
       post.likes.set(userId, true)
       message = "you liked this post"
+      void createNotification({
+        recipientId: String(post.userId),
+        actorId: userId,
+        type: "post_like",
+        postId: String(post._id),
+      })
     }
 
     const updatedPost = await Post.findByIdAndUpdate(postId, { likes: post.likes }, { new: true })
@@ -145,6 +167,15 @@ export const addComment = async (req, res, next) => {
     post.comments.push({ userId, text, likes: {} })
     await post.save()
 
+    const added = post.comments[post.comments.length - 1]
+    void createNotification({
+      recipientId: String(post.userId),
+      actorId: userId,
+      type: "comment",
+      postId: String(post._id),
+      commentId: added?._id ? String(added._id) : null,
+    })
+
     const [formatted] = await withAuthors([post])
     res.status(201).json({ updatedPost: formatted })
   } catch (e) {
@@ -181,6 +212,13 @@ export const likeComment = async (req, res, next) => {
     } else {
       comment.likes.set(userId, true)
       message = "Comment liked"
+      void createNotification({
+        recipientId: String(comment.userId),
+        actorId: userId,
+        type: "comment_like",
+        postId: String(post._id),
+        commentId: String(comment._id),
+      })
     }
 
     post.markModified("comments")
