@@ -41,7 +41,7 @@ const UserImage = ({ image, name, size = "60px" }: UserImageProps) => {
         flexShrink: 0,
         borderRadius: "50%",
         overflow: "hidden",
-        bgcolor: "primary.light",
+        bgcolor: "primary.main",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -65,8 +65,8 @@ const UserImage = ({ image, name, size = "60px" }: UserImageProps) => {
         <Typography
           component="span"
           sx={{
-            color: "background.alt",
-            fontWeight: 600,
+            color: "primary.contrastText",
+            fontWeight: 700,
             fontSize,
             lineHeight: 1,
             userSelect: "none",

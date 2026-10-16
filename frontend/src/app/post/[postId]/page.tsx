@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import Navbar from "@/components/Navbar"
+import PageShell from "@/components/PageShell"
 import PostWidget from "@/components/PostWidget"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
@@ -62,14 +63,7 @@ const PostPage = ({ params }: PostPageProps) => {
   return (
     <Box>
       <Navbar />
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: "680px",
-          margin: "0 auto",
-          padding: "2rem 6%",
-        }}
-      >
+      <PageShell narrow>
         {status === "loading" && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 6 }} role="status" aria-live="polite">
             <CircularProgress size={36} />
@@ -99,7 +93,7 @@ const PostPage = ({ params }: PostPageProps) => {
         {status === "ready" && post && (
           <PostWidget post={post} onDeleted={() => router.push("/home")} />
         )}
-      </Box>
+      </PageShell>
     </Box>
   )
 }

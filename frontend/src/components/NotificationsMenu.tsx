@@ -10,6 +10,7 @@ import {
   Divider,
   IconButton,
   List,
+  ListItemAvatar,
   ListItemButton,
   ListItemText,
   Menu,
@@ -18,6 +19,7 @@ import {
 } from "@mui/material"
 import { useRouter } from "next/navigation"
 
+import UserImage from "@/components/UserImage"
 import { api } from "@/lib/api"
 import { notificationCopy, notificationHref } from "@/lib/notifications"
 import { sameUserId } from "@/types/models"
@@ -131,25 +133,33 @@ const NotificationsMenu = () => {
           </Typography>
         ) : (
           <List dense disablePadding>
-            {items.map(n => (
-              <ListItemButton
-                key={n._id}
-                onClick={() => void handleClickItem(n)}
-                sx={{
-                  bgcolor: n.read ? undefined : theme.palette.action.hover,
-                  alignItems: "flex-start",
-                }}
-              >
-                <ListItemText
-                  primary={notificationCopy(n)}
-                  secondary={n.createdAt ? new Date(n.createdAt).toLocaleString() : undefined}
-                  slotProps={{
-                    primary: { sx: { fontSize: "0.9rem" } },
-                    secondary: { sx: { fontSize: "0.75rem" } },
+            {items.map(n => {
+              const actorName =
+                `${n.actor?.firstName || ""} ${n.actor?.lastName || ""}`.trim() || "Someone"
+              return (
+                <ListItemButton
+                  key={n._id}
+                  onClick={() => void handleClickItem(n)}
+                  sx={{
+                    bgcolor: n.read ? undefined : theme.palette.action.hover,
+                    alignItems: "flex-start",
+                    gap: 0.5,
                   }}
-                />
-              </ListItemButton>
-            ))}
+                >
+                  <ListItemAvatar sx={{ minWidth: 48, mt: 0.25 }}>
+                    <UserImage image={n.actor?.picturePath || ""} name={actorName} size="40px" />
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={notificationCopy(n)}
+                    secondary={n.createdAt ? new Date(n.createdAt).toLocaleString() : undefined}
+                    slotProps={{
+                      primary: { sx: { fontSize: "0.9rem", fontWeight: n.read ? 400 : 600 } },
+                      secondary: { sx: { fontSize: "0.75rem" } },
+                    }}
+                  />
+                </ListItemButton>
+              )
+            })}
           </List>
         )}
         <Divider />

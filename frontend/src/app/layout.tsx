@@ -1,7 +1,7 @@
 import { CssBaseline } from "@mui/material"
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Fraunces, Source_Sans_3 } from "next/font/google"
 
 import AuthProvider from "@/providers/AuthProvider"
 import ReduxProvider from "@/providers/ReduxProvider"
@@ -10,7 +10,17 @@ import ToastProvider from "@/providers/ToastProvider"
 
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+})
+
+const sourceSans = Source_Sans_3({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "MockBook",
@@ -19,8 +29,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${fraunces.variable} ${sourceSans.variable}`}>
+      <body className={sourceSans.className}>
         <AppRouterCacheProvider>
           <ReduxProvider>
             <AuthProvider>

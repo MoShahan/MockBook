@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu } from "@mui/icons-material"
-import { Box, Button, IconButton, useMediaQuery, useTheme } from "@mui/material"
+import { alpha, Box, Button, IconButton, useMediaQuery, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -67,13 +67,17 @@ const Navbar = () => {
 
   return (
     <FlexBetween
+      component="header"
       sx={{
-        padding: "1rem 6%",
-        bgcolor: alt,
+        padding: { xs: "0.85rem 1rem", sm: "1rem 5%", md: "1rem 6%" },
         position: "sticky",
         top: 0,
         zIndex: theme.zIndex.appBar,
         borderBottom: `1px solid ${theme.palette.divider}`,
+        // Glassy navbar only — page cards stay solid (Step 5.1 / 3C).
+        bgcolor: alpha(alt, theme.palette.mode === "dark" ? 0.72 : 0.78),
+        backdropFilter: "saturate(1.2) blur(14px)",
+        WebkitBackdropFilter: "saturate(1.2) blur(14px)",
       }}
     >
       <BrandLogo size="nav" onClick={handleGoToHome} />

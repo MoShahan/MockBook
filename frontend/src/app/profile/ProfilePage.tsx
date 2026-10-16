@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import FriendsListWidget from "@/components/FriendsListWidget"
 import Navbar from "@/components/Navbar"
+import PageShell from "@/components/PageShell"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import UserWidget from "@/components/UserWidget"
 import { sameUserId } from "@/types/models"
@@ -66,46 +67,52 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
   return (
     <Box>
       <Navbar />
-      <Box
-        sx={{
-          gap: "2rem",
-          justifyContent: "center",
-          width: "100%",
-          padding: "2rem 6%",
-          display: isNonMobileScreens ? "flex" : "block",
-        }}
-      >
-        <Box sx={{ flexBasis: isNonMobileScreens ? "26%" : undefined }}>
-          <UserWidget
-            url={isOwnProfile ? (loggedInUser?.picturePath ?? "") : ""}
-            userId={profileId}
-            isOwnProfile={isOwnProfile}
-          />
-          <Box sx={{ m: "2rem 0" }} />
-          <FriendsListWidget userId={profileId} />
+      <PageShell>
+        <Box
+          sx={{
+            gap: "2rem",
+            justifyContent: "center",
+            width: "100%",
+            display: isNonMobileScreens ? "flex" : "block",
+          }}
+        >
+          <Box sx={{ flexBasis: isNonMobileScreens ? "26%" : undefined }}>
+            <UserWidget
+              url={isOwnProfile ? (loggedInUser?.picturePath ?? "") : ""}
+              userId={profileId}
+              isOwnProfile={isOwnProfile}
+            />
+            <Box sx={{ m: "2rem 0" }} />
+            <FriendsListWidget userId={profileId} />
+          </Box>
+          <Box
+            sx={{
+              flexBasis: isNonMobileScreens ? "42%" : undefined,
+              mt: isNonMobileScreens ? undefined : "2rem",
+            }}
+          >
+            {isOwnProfile ? (
+              <>
+                <Tabs
+                  value={activeTab}
+                  onChange={handleTabChange}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  aria-label="Profile content sections"
+                  sx={{ mb: "1rem", borderBottom: 1, borderColor: "divider" }}
+                >
+                  {OWN_TABS.map(tab => (
+                    <Tab key={tab.value} value={tab.value} label={tab.label} />
+                  ))}
+                </Tabs>
+                <PostsWidget key={activeList} list={activeList} userId={profileId} />
+              </>
+            ) : (
+              <PostsWidget list="authored" userId={profileId} />
+            )}
+          </Box>
         </Box>
-        <Box sx={{ flexBasis: isNonMobileScreens ? "42%" : undefined, mt: isNonMobileScreens ? undefined : "2rem" }}>
-          {isOwnProfile ? (
-            <>
-              <Tabs
-                value={activeTab}
-                onChange={handleTabChange}
-                variant="scrollable"
-                scrollButtons="auto"
-                aria-label="Profile content sections"
-                sx={{ mb: "1rem", borderBottom: 1, borderColor: "divider" }}
-              >
-                {OWN_TABS.map(tab => (
-                  <Tab key={tab.value} value={tab.value} label={tab.label} />
-                ))}
-              </Tabs>
-              <PostsWidget key={activeList} list={activeList} userId={profileId} />
-            </>
-          ) : (
-            <PostsWidget list="authored" userId={profileId} />
-          )}
-        </Box>
-      </Box>
+      </PageShell>
     </Box>
   )
 }

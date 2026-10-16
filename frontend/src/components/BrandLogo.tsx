@@ -63,7 +63,8 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
         className="mockbook-wordmark"
         component="span"
         sx={{
-          fontWeight: 800,
+          fontFamily: "var(--font-display), Georgia, serif",
+          fontWeight: 700,
           letterSpacing: "-0.03em",
           lineHeight: 1,
           fontSize: isNav ? "clamp(1.15rem, 2.2vw, 1.65rem)" : "clamp(1.5rem, 3vw, 2rem)",

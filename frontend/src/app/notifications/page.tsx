@@ -16,6 +16,7 @@ import {
 import { useRouter } from "next/navigation"
 
 import Navbar from "@/components/Navbar"
+import PageShell from "@/components/PageShell"
 import UserImage from "@/components/UserImage"
 import { api } from "@/lib/api"
 import { notificationCopy, notificationHref } from "@/lib/notifications"
@@ -133,14 +134,7 @@ const NotificationsPage = () => {
   return (
     <Box>
       <Navbar />
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: 680,
-          margin: "0 auto",
-          padding: "2rem 6%",
-        }}
-      >
+      <PageShell narrow>
         <Box
           sx={{
             display: "flex",
@@ -227,7 +221,7 @@ const NotificationsPage = () => {
             )}
           </List>
         )}
-      </Box>
+      </PageShell>
     </Box>
   )
 }
