@@ -27,6 +27,8 @@ export default function OAuthCallbackPage() {
           return
         }
 
+        // Store tokens first so the Bearer interceptor can call /auth/me.
+        // AuthProvider must NOT redirect away from this route until we finish setLogin.
         dispatch(setTokens({ accessToken, refreshToken }))
         const { data } = await api.get<{ user: User }>("/auth/me")
         if (cancelled) return

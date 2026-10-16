@@ -7,10 +7,10 @@ import {
   Button,
   IconButton,
   InputAdornment,
+  Link as MuiLink,
   TextField,
   Typography,
   useMediaQuery,
-  useTheme,
 } from "@mui/material"
 import { Formik, type FormikHelpers } from "formik"
 import { useRouter } from "next/navigation"
@@ -41,7 +41,6 @@ type FormProps =
 
 const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps) => {
   const router = useRouter()
-  const { palette } = useTheme()
   const dispatch = useAppDispatch()
   const isNonMobile = useMediaQuery("(min-width:600px)")
   const isLogin = type === "login"
@@ -49,18 +48,6 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
-  const handleGoToLogin = () => {
-    router.push("/login")
-  }
-
-  const handleGoToRegister = () => {
-    router.push("/register")
-  }
-
-  const handleGoToHome = () => {
-    router.push("/home")
-  }
 
   const login = async (vals: LoginFormValues, onSubmitProps: FormikHelpers<LoginFormValues>) => {
     try {
@@ -80,7 +67,7 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
           refreshToken: data.refreshToken,
         })
       )
-      handleGoToHome()
+      router.push("/home")
     } catch (e: unknown) {
       onSubmitProps.setStatus(getErrorMessage(e, "Invalid credentials"))
     }
@@ -106,7 +93,7 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
           refreshToken: data.refreshToken,
         })
       )
-      handleGoToHome()
+      router.push("/home")
     } catch (e: unknown) {
       onSubmitProps.setStatus(getErrorMessage(e, "Registration failed"))
     }
@@ -129,13 +116,25 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
       validateOnBlur
       validateOnChange={false}
     >
-      {({ values, errors, touched, handleBlur, handleChange, handleSubmit, status, submitCount }) => {
-        // AuthFormValues is a union; register-only keys are not on LoginFormValues.
+      {({
+        values,
+        errors,
+        touched,
+        handleBlur,
+        handleChange,
+        handleSubmit,
+        status,
+        submitCount,
+        isSubmitting,
+      }) => {
         const touchedFields = touched as Record<string, boolean | undefined>
         const errorFields = errors as Record<string, string | undefined>
-        const fieldError = (name: string) => Boolean((touchedFields[name] || submitCount > 0) && errorFields[name])
+        const fieldError = (name: string) =>
+          Boolean((touchedFields[name] || submitCount > 0) && errorFields[name])
         const fieldHelper = (name: string) =>
-          (touchedFields[name] || submitCount > 0) && errorFields[name] ? String(errorFields[name]) : " "
+          (touchedFields[name] || submitCount > 0) && errorFields[name]
+            ? String(errorFields[name])
+            : " "
 
         const registerValues = values as RegisterFormValues
 
@@ -144,8 +143,8 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
             <Box
               sx={{
                 display: "grid",
-                gap: "30px",
-                gridTemplateColumns: "repeat(4,minmax(0,1fr))",
+                gap: 2,
+                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
                 "& > div": {
                   gridColumn: isNonMobile ? undefined : "span 4",
                 },
@@ -154,7 +153,7 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
               {isRegister && (
                 <>
                   <TextField
-                    label="First Name"
+                    label="First name"
                     name="firstName"
                     autoComplete="given-name"
                     onBlur={handleBlur}
@@ -163,9 +162,10 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
                     error={fieldError("firstName")}
                     helperText={fieldHelper("firstName")}
                     sx={{ gridColumn: "span 2" }}
+                    fullWidth
                   />
                   <TextField
-                    label="Last Name"
+                    label="Last name"
                     name="lastName"
                     autoComplete="family-name"
                     onBlur={handleBlur}
@@ -174,6 +174,7 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
                     error={fieldError("lastName")}
                     helperText={fieldHelper("lastName")}
                     sx={{ gridColumn: "span 2" }}
+                    fullWidth
                   />
                 </>
               )}
@@ -188,6 +189,7 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
                 value={values.email}
                 error={fieldError("email")}
                 helperText={fieldHelper("email")}
+                fullWidth
               />
               <TextField
                 onBlur={handleBlur}
@@ -200,6 +202,7 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
                 type={showPassword ? "text" : "password"}
                 name="password"
                 autoComplete={isLogin ? "current-password" : "new-password"}
+                fullWidth
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -223,17 +226,20 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
                   value={registerValues.cPassword}
                   error={fieldError("cPassword")}
                   helperText={fieldHelper("cPassword")}
-                  label="Confirm Password"
+                  label="Confirm password"
                   sx={{ gridColumn: "span 4" }}
                   type={showConfirmPassword ? "text" : "password"}
                   name="cPassword"
                   autoComplete="new-password"
+                  fullWidth
                   slotProps={{
                     input: {
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
-                            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                            aria-label={
+                              showConfirmPassword ? "Hide confirm password" : "Show confirm password"
+                            }
                             onClick={() => setShowConfirmPassword(v => !v)}
                             edge="end"
                           >
@@ -246,59 +252,78 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
                 />
               )}
             </Box>
-            <Box>
-              {status && (
-                <Typography sx={{ color: "error.main", mt: "1rem", textAlign: "center" }} role="alert">
-                  {String(status)}
-                </Typography>
+
+            {status ? (
+              <Typography sx={{ color: "error.main", mt: 1.5 }} role="alert">
+                {String(status)}
+              </Typography>
+            ) : null}
+
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isSubmitting}
+              sx={{
+                mt: 2.5,
+                mb: 2,
+                py: 1.35,
+                fontSize: "1rem",
+                transition: "transform 0.15s ease, background-color 0.15s ease",
+                "&:active:not(:disabled)": { transform: "scale(0.985)" },
+              }}
+            >
+              {isSubmitting ? (isLogin ? "Signing in…" : "Creating account…") : isLogin ? "Sign in" : "Create account"}
+            </Button>
+
+            <Typography sx={{ textAlign: "center", color: "text.secondary", fontSize: "0.95rem" }}>
+              {isLogin ? (
+                <>
+                  New to MockBook?{" "}
+                  <MuiLink
+                    component="button"
+                    type="button"
+                    underline="hover"
+                    onClick={() => router.replace("/register")}
+                    sx={{
+                      fontWeight: 600,
+                      color: "primary.main",
+                      verticalAlign: "baseline",
+                      cursor: "pointer",
+                      border: 0,
+                      background: "none",
+                      font: "inherit",
+                    }}
+                  >
+                    Create an account
+                  </MuiLink>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <MuiLink
+                    component="button"
+                    type="button"
+                    underline="hover"
+                    onClick={() => router.replace("/login")}
+                    sx={{
+                      fontWeight: 600,
+                      color: "primary.main",
+                      verticalAlign: "baseline",
+                      cursor: "pointer",
+                      border: 0,
+                      background: "none",
+                      font: "inherit",
+                    }}
+                  >
+                    Sign in
+                  </MuiLink>
+                </>
               )}
-              <Button
-                fullWidth
-                type="submit"
-                sx={{
-                  m: "2rem 0",
-                  p: "1rem",
-                  backgroundColor: palette.primary.main,
-                  color: palette.background.alt,
-                  "&:hover": { color: palette.primary.main },
-                }}
-              >
-                {isLogin ? "LOGIN" : "REGISTER"}
-              </Button>
-              {isLogin && (
-                <Typography
-                  sx={{
-                    textAlign: "center",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    color: palette.primary.main,
-                    "&:hover": {
-                      color: palette.primary.light,
-                    },
-                  }}
-                  onClick={handleGoToRegister}
-                >
-                  New User? Click here to register
-                </Typography>
-              )}
-              {isRegister && (
-                <Typography
-                  sx={{
-                    textAlign: "center",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    color: palette.primary.main,
-                    "&:hover": {
-                      color: palette.primary.light,
-                    },
-                  }}
-                  onClick={handleGoToLogin}
-                >
-                  Have an account already? Log In
-                </Typography>
-              )}
-              <OauthButtons oauthError={oauthError} />
-            </Box>
+            </Typography>
+
+            <OauthButtons oauthError={oauthError} />
           </form>
         )
       }}

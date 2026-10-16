@@ -365,17 +365,29 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       ) : null}
       {post?.url && (
         <Box
-          component="img"
-          width="100%"
-          height="auto"
-          alt="post"
           sx={{
+            mt: "0.75rem",
             borderRadius: "0.75rem",
-            marginTop: "0.75rem",
-            display: "block",
+            overflow: "hidden",
+            bgcolor: "action.hover",
+            maxHeight: { xs: "min(360px, 50vh)", sm: "min(420px, 55vh)" },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
-          src={mediaUrl(post.url)}
-        />
+        >
+          <Box
+            component="img"
+            alt="post"
+            src={mediaUrl(post.url)}
+            sx={{
+              display: "block",
+              width: "100%",
+              maxHeight: { xs: "min(360px, 50vh)", sm: "min(420px, 55vh)" },
+              objectFit: "contain",
+            }}
+          />
+        </Box>
       )}
       <FlexBetween sx={{ mt: "0.25rem" }}>
         <FlexBetween sx={{ gap: "1rem" }}>

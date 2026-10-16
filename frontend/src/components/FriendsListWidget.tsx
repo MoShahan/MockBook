@@ -52,14 +52,14 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
   }
 
   return (
-    <WidgetWrapper>
+    <WidgetWrapper sx={{ overflow: "hidden" }}>
       <Typography variant="h5" sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1.5rem" }}>
         List of Friends
       </Typography>
       {!friends.length ? (
         <Typography sx={{ color: theme.palette.neutral.medium }}>No friends yet.</Typography>
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%", minWidth: 0 }}>
           {friends.map(friend => {
             const id = friendIdOf(friend)
             return (

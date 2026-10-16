@@ -13,6 +13,7 @@ import { setLogout, toggleMode } from "../state"
 import BrandLogo from "./BrandLogo"
 import FlexBetween from "./FlexBetween"
 import NotificationsMenu from "./NotificationsMenu"
+import { PAGE_MAX_WIDTH } from "./PageShell"
 
 const COMING_SOON = "This feature is coming soon"
 
@@ -66,10 +67,9 @@ const Navbar = () => {
   )
 
   return (
-    <FlexBetween
+    <Box
       component="header"
       sx={{
-        padding: { xs: "0.85rem 1rem", sm: "1rem 5%", md: "1rem 6%" },
         position: "sticky",
         top: 0,
         zIndex: theme.zIndex.appBar,
@@ -80,28 +80,37 @@ const Navbar = () => {
         WebkitBackdropFilter: "saturate(1.2) blur(14px)",
       }}
     >
-      <BrandLogo size="nav" onClick={handleGoToHome} />
+      <FlexBetween
+        sx={{
+          width: "100%",
+          maxWidth: PAGE_MAX_WIDTH,
+          margin: "0 auto",
+          padding: { xs: "0.85rem 1rem", sm: "1rem 1.5rem", md: "1rem 2rem" },
+        }}
+      >
+        <BrandLogo size="nav" onClick={handleGoToHome} />
 
-      {isNonMobileScreens ? (
-        <FlexBetween sx={{ gap: "1rem" }}>
-          <IconButton onClick={() => dispatch(toggleMode())} aria-label="Toggle theme">
-            {theme.palette.mode === "dark" ? (
-              <DarkMode sx={{ fontSize: "25px" }} />
-            ) : (
-              <LightMode sx={{ color: dark, fontSize: "25px" }} />
-            )}
+        {isNonMobileScreens ? (
+          <FlexBetween sx={{ gap: "1rem" }}>
+            <IconButton onClick={() => dispatch(toggleMode())} aria-label="Toggle theme">
+              {theme.palette.mode === "dark" ? (
+                <DarkMode sx={{ fontSize: "25px" }} />
+              ) : (
+                <LightMode sx={{ color: dark, fontSize: "25px" }} />
+              )}
+            </IconButton>
+            <NotificationsMenu />
+            <IconButton onClick={showComingSoon} aria-label="Help">
+              <Help sx={{ fontSize: "25px" }} />
+            </IconButton>
+            {accountActions}
+          </FlexBetween>
+        ) : (
+          <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)} aria-label="Open menu">
+            <Menu />
           </IconButton>
-          <NotificationsMenu />
-          <IconButton onClick={showComingSoon} aria-label="Help">
-            <Help sx={{ fontSize: "25px" }} />
-          </IconButton>
-          {accountActions}
-        </FlexBetween>
-      ) : (
-        <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)} aria-label="Open menu">
-          <Menu />
-        </IconButton>
-      )}
+        )}
+      </FlexBetween>
 
       {!isNonMobileScreens && isMobileMenuToggled && (
         <Box
@@ -138,7 +147,7 @@ const Navbar = () => {
           </FlexBetween>
         </Box>
       )}
-    </FlexBetween>
+    </Box>
   )
 }
 

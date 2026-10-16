@@ -33,9 +33,10 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
   const { success, error: toastError } = useToast()
 
   const theme = useTheme()
-  const pLight = theme.palette.primary.light
   const main = theme.palette.neutral.main
   const medium = theme.palette.neutral.medium
+  // primary.light is too pale on light backgrounds — use main for readable hover.
+  const nameHover = theme.palette.primary.main
 
   const isSelf = sameUserId(user?._id, id)
   const isFriend = Boolean(user?.friends?.some(friend => sameUserId(friendIdOf(friend), id)))
@@ -64,32 +65,56 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
   }
 
   return (
-    <FlexBetween>
-      <FlexBetween sx={{ gap: "1rem" }}>
-        <Box onClick={handleGoToProfile} sx={{ cursor: id ? "pointer" : "default" }}>
+    <FlexBetween sx={{ width: "100%", gap: 1, minWidth: 0 }}>
+      <FlexBetween sx={{ gap: "0.75rem", flex: "1 1 auto", minWidth: 0 }}>
+        <Box
+          onClick={handleGoToProfile}
+          sx={{ cursor: id ? "pointer" : "default", flexShrink: 0 }}
+        >
           <UserImage image={url} name={name} size="55px" />
         </Box>
-        <Box onClick={handleGoToProfile}>
+        <Box onClick={handleGoToProfile} sx={{ minWidth: 0, flex: "1 1 auto", overflow: "hidden" }}>
           <Typography
             variant="h5"
+            noWrap
+            title={name}
             sx={{
               color: main,
               fontWeight: "500",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
               "&:hover": {
                 cursor: id ? "pointer" : "default",
-                color: id ? pLight : main,
+                color: id ? nameHover : main,
               },
             }}
           >
             {name}
           </Typography>
-          {subtitle ? <Typography sx={{ color: medium, fontSize: "0.75rem" }}>{subtitle}</Typography> : null}
+          {subtitle ? (
+            <Typography
+              noWrap
+              title={subtitle}
+              sx={{
+                color: medium,
+                fontSize: "0.75rem",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {subtitle}
+            </Typography>
+          ) : null}
         </Box>
       </FlexBetween>
-      {showFriendButton && id && !isSelf && (
-        <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
-      )}
-      {endAction}
+      {(showFriendButton && id && !isSelf) || endAction ? (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
+          {showFriendButton && id && !isSelf ? (
+            <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
+          ) : null}
+          {endAction}
+        </Box>
+      ) : null}
     </FlexBetween>
   )
 }

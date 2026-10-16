@@ -46,7 +46,7 @@ MockBook/
 
 ### Posts & feed
 
-- Create text and/or image posts
+- Create text and/or image posts (emoji picker on the compose bar; image dropzone with preview)
 - Home feed with author name, avatar, and relative time
 - Infinite scroll on home feed and profile Posts tab (`?limit=&cursor=`)
 - Home feed tabs: **Friends** (you + friends) and **Everyone** (`GET /posts?scope=friends|all`)
@@ -87,6 +87,8 @@ MockBook/
 ### UX & client architecture
 
 - Light / dark mode (persisted)
+- Stone-first theme + Fraunces / Source Sans 3; MockBook logo in the header
+- Split **login/register** layout (`AuthLayout`): wave backdrop (`auth-wave-*.jpg`) + café/social panel on the left (`auth-panel-*.jpg`)
 - Toast / snackbar feedback for key actions
 - Formik + Yup validation with visible field errors
 - Shared **axios** client + Bearer request interceptor
@@ -105,11 +107,8 @@ MockBook/
 
 ### Planned next (see `PROJECT_PLAN.md`)
 
-- Home **Add people** rail (recent users + search; search lives in that widget, not the navbar)
-- Profile editing (location, occupation, avatar) + social links
-- MockBook **logo** in the header; **login/register** atmosphere images
 - Help/FAQ page
-- Infinite-scroll feed; UI overhaul; tests; production deploy
+- Further UI polish (Part 5); tests; production deploy
 - Messaging / DMs — **out of scope**
 
 ## Requirements

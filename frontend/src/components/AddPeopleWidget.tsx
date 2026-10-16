@@ -44,7 +44,7 @@ const AddPeopleWidget = () => {
   }, [debounced])
 
   return (
-    <WidgetWrapper>
+    <WidgetWrapper sx={{ overflow: "hidden" }}>
       <Typography
         variant="h5"
         sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1rem" }}
@@ -69,7 +69,7 @@ const AddPeopleWidget = () => {
           {debounced ? "No users found" : "No people to show yet."}
         </Typography>
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "1.25rem", width: "100%", minWidth: 0 }}>
           {users.map(u => (
             <Friend
               key={u._id}

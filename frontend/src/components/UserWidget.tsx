@@ -154,7 +154,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
                 fontWeight: "500",
                 ...(!alreadyOnThisProfile && {
                   "&:hover": {
-                    color: palette.primary.light,
+                    color: palette.primary.main,
                   },
                 }),
               }}

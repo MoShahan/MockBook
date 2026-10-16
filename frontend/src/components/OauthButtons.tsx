@@ -1,6 +1,6 @@
 "use client"
 
-import { type ReactNode,useEffect, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 import { GitHub } from "@mui/icons-material"
 import { Box, Button, Divider, SvgIcon, Typography, useTheme } from "@mui/material"
 
@@ -47,28 +47,10 @@ function DiscordIcon() {
   )
 }
 
-const PROVIDER_UI: Record<
-  OauthProvider,
-  { label: string; icon: ReactNode; border: string; hoverBg: string }
-> = {
-  google: {
-    label: "Continue with Google",
-    icon: <GoogleIcon />,
-    border: "rgba(66, 133, 244, 0.45)",
-    hoverBg: "rgba(66, 133, 244, 0.08)",
-  },
-  github: {
-    label: "Continue with GitHub",
-    icon: <GitHub fontSize="small" />,
-    border: "rgba(255, 255, 255, 0.28)",
-    hoverBg: "rgba(255, 255, 255, 0.06)",
-  },
-  discord: {
-    label: "Continue with Discord",
-    icon: <DiscordIcon />,
-    border: "rgba(88, 101, 242, 0.55)",
-    hoverBg: "rgba(88, 101, 242, 0.1)",
-  },
+const PROVIDER_UI: Record<OauthProvider, { label: string; icon: ReactNode }> = {
+  google: { label: "Google", icon: <GoogleIcon /> },
+  github: { label: "GitHub", icon: <GitHub fontSize="small" /> },
+  discord: { label: "Discord", icon: <DiscordIcon /> },
 }
 
 const OauthButtons = ({ oauthError }: OauthButtonsProps) => {
@@ -105,45 +87,52 @@ const OauthButtons = ({ oauthError }: OauthButtonsProps) => {
           {oauthError}
         </Typography>
       ) : null}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: providers.length === 1 ? "1fr" : `repeat(${Math.min(providers.length, 3)}, 1fr)`,
+          gap: 1,
+        }}
+      >
         {providers.map(p => {
           const ui = PROVIDER_UI[p]
-          const githubBorder = isDark ? ui.border : "rgba(0, 0, 0, 0.22)"
-          const githubHover = isDark ? ui.hoverBg : "rgba(0, 0, 0, 0.04)"
-          const borderColor = p === "github" ? githubBorder : ui.border
-          const hoverBg = p === "github" ? githubHover : ui.hoverBg
 
           return (
             <Button
               key={p}
               variant="outlined"
-              fullWidth
-              startIcon={ui.icon}
               onClick={() => {
                 window.location.assign(apiUrl(`/auth/${p}`))
               }}
+              aria-label={`Continue with ${ui.label}`}
               sx={{
-                py: 1.15,
-                px: 2,
-                justifyContent: "flex-start",
-                gap: 1,
+                minHeight: 44,
+                px: 1.5,
+                py: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 0.5,
                 textTransform: "none",
                 fontWeight: 600,
-                fontSize: "0.95rem",
+                fontSize: "0.8rem",
                 letterSpacing: 0,
-                borderColor,
+                lineHeight: 1.2,
+                borderColor: theme.palette.divider,
                 color: theme.palette.text.primary,
-                bgcolor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
-                "& .MuiButton-startIcon": {
-                  marginRight: 1.25,
-                  marginLeft: 0.25,
-                },
+                bgcolor: isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.55)",
+                boxShadow: "none",
                 "&:hover": {
-                  borderColor,
-                  bgcolor: hoverBg,
+                  borderColor: theme.palette.primary.main,
+                  bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.85)",
+                  boxShadow: "none",
                 },
               }}
             >
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 0 }}>
+                {ui.icon}
+              </Box>
               {ui.label}
             </Button>
           )

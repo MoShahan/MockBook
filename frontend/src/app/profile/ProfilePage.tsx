@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo } from "react"
-import { Box, Tab, Tabs, useMediaQuery } from "@mui/material"
+import { Box, CircularProgress, Tab, Tabs, useMediaQuery } from "@mui/material"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import FriendsListWidget from "@/components/FriendsListWidget"
@@ -55,11 +55,16 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
-  // Single GET /users/:id lives in UserWidget so profile visits are not double-counted.
+  // Token present but user not hydrated yet (OAuth race) — avoid a blank shell.
   if (!profileId) {
     return (
       <Box>
         <Navbar />
+        <PageShell>
+          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }} role="status">
+            <CircularProgress size={32} />
+          </Box>
+        </PageShell>
       </Box>
     )
   }
@@ -70,13 +75,20 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
       <PageShell>
         <Box
           sx={{
-            gap: "2rem",
-            justifyContent: "center",
+            gap: { xs: "1.5rem", md: "2rem" },
             width: "100%",
             display: isNonMobileScreens ? "flex" : "block",
+            alignItems: "flex-start",
           }}
         >
-          <Box sx={{ flexBasis: isNonMobileScreens ? "26%" : undefined }}>
+          <Box
+            sx={{
+              flex: isNonMobileScreens ? "0 0 360px" : undefined,
+              width: isNonMobileScreens ? 360 : "100%",
+              maxWidth: "100%",
+              minWidth: 0,
+            }}
+          >
             <UserWidget
               url={isOwnProfile ? (loggedInUser?.picturePath ?? "") : ""}
               userId={profileId}
@@ -87,7 +99,9 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
           </Box>
           <Box
             sx={{
-              flexBasis: isNonMobileScreens ? "42%" : undefined,
+              flex: isNonMobileScreens ? "1 1 auto" : undefined,
+              minWidth: 0,
+              width: "100%",
               mt: isNonMobileScreens ? undefined : "2rem",
             }}
           >

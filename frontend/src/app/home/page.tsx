@@ -28,12 +28,12 @@ const HomePage = () => {
         <Box
           sx={{
             display: isWide ? "flex" : "block",
-            gap: "2rem",
-            justifyContent: "center",
+            gap: { xs: "1.5rem", md: "2rem" },
             alignItems: "flex-start",
+            width: "100%",
           }}
         >
-          <Box sx={{ flexBasis: isWide ? "60%" : undefined, maxWidth: "680px", width: "100%" }}>
+          <Box sx={{ flex: isWide ? "1 1 auto" : undefined, minWidth: 0, width: "100%" }}>
             <MyPostWidget url={user?.picturePath ?? ""} />
             <Divider sx={{ margin: "1rem 0" }} />
             <Tabs
@@ -48,11 +48,11 @@ const HomePage = () => {
             <PostsWidget key={listKind} list={listKind} userId={user?._id ?? ""} />
           </Box>
           {isWide ? (
-            <Box sx={{ flexBasis: "28%", maxWidth: "340px", position: "sticky", top: "5.5rem" }}>
+            <Box sx={{ flex: "0 0 360px", width: 360, maxWidth: "100%", position: "sticky", top: "5.5rem" }}>
               <AddPeopleWidget />
             </Box>
           ) : (
-            <Box sx={{ mt: "1.5rem", maxWidth: "680px", width: "100%" }}>
+            <Box sx={{ mt: "1.5rem", width: "100%" }}>
               <AddPeopleWidget />
             </Box>
           )}

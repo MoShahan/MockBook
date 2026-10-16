@@ -21,7 +21,8 @@ const FriendToggleButton = ({ isFriend, onClick }: FriendToggleButtonProps) => {
         onClick={onClick}
         aria-label={isFriend ? "Remove friend" : "Add friend"}
         sx={{
-          p: "0.6rem",
+          p: "0.5rem",
+          flexShrink: 0,
           color: contrast,
           backgroundColor: isFriend ? removeBg : addBg,
           "&:hover": {

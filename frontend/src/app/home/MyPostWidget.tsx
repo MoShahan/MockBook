@@ -1,13 +1,23 @@
 "use client"
 
-import React, { useState } from "react"
-import { DeleteOutlined, EditOutlined, ImageOutlined } from "@mui/icons-material"
-import { Box, Button, Divider, IconButton, InputBase, Typography, useTheme } from "@mui/material"
+import React, { useEffect, useRef, useState } from "react"
+import { CloseOutlined, ImageOutlined } from "@mui/icons-material"
+import {
+  alpha,
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  InputBase,
+  Typography,
+  useTheme,
+} from "@mui/material"
 import { Formik, type FormikHelpers } from "formik"
 import DropZone from "react-dropzone"
 import type { ObjectSchema } from "yup"
 import * as yup from "yup"
 
+import EmojiPickerButton, { insertEmojiAtCursor } from "@/components/EmojiPickerButton"
 import FlexBetween from "@/components/FlexBetween"
 import UserImage from "@/components/UserImage"
 import WidgetWrapper from "@/components/WidgetWrapper"
@@ -20,15 +30,84 @@ import { useAppDispatch, useAppSelector } from "../hooks"
 
 type MyPostWidgetProps = { url: string }
 
+type ImagePreviewProps = {
+  file: File
+  disabled?: boolean
+  onRemove: () => void
+}
+
+const ImagePreview = ({ file, disabled, onRemove }: ImagePreviewProps) => {
+  const [previewUrl, setPreviewUrl] = useState("")
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file)
+    setPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [file])
+
+  return (
+    <Box sx={{ position: "relative", width: "100%", bgcolor: "background.default" }}>
+      <Box
+        component="img"
+        src={previewUrl}
+        alt={file.name}
+        sx={{
+          display: "block",
+          width: "100%",
+          maxHeight: 320,
+          objectFit: "contain",
+          bgcolor: "background.default",
+        }}
+      />
+      <IconButton
+        onClick={e => {
+          e.stopPropagation()
+          onRemove()
+        }}
+        disabled={disabled}
+        aria-label="Remove photo"
+        size="small"
+        sx={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          bgcolor: "rgba(28,25,23,0.72)",
+          color: "common.white",
+          "&:hover": { bgcolor: "rgba(28,25,23,0.88)" },
+        }}
+      >
+        <CloseOutlined fontSize="small" />
+      </IconButton>
+      <Typography
+        sx={{
+          px: 1.5,
+          py: 0.75,
+          fontSize: "0.75rem",
+          color: "text.secondary",
+          borderTop: 1,
+          borderColor: "divider",
+          bgcolor: "background.alt",
+        }}
+        noWrap
+        title={file.name}
+      >
+        {file.name} · click to replace
+      </Typography>
+    </Box>
+  )
+}
+
+const POST_EMPTY_MESSAGE = "Add some text or a photo before posting."
+
 const createPostSchema: ObjectSchema<CreatePostFormValues> = yup.object({
   description: yup
     .string()
-    .defined()
-    .test("has-content", "Add text or a photo to post", function (value) {
+    .default("")
+    .test("has-content", POST_EMPTY_MESSAGE, function (value) {
       const picture = (this.parent as CreatePostFormValues).picture
       return Boolean(value?.trim()) || picture instanceof File
     }),
-  picture: yup.mixed<File>().nullable().defined(),
+  picture: yup.mixed<File>().nullable().default(null),
 })
 
 const createPostInitVals: CreatePostFormValues = {
@@ -44,6 +123,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   const medium = palette.neutral.medium
 
   const [isImage, setIsImage] = useState(false)
+  const descriptionInputRef = useRef<HTMLInputElement>(null)
 
   const handleCreatePost = async (vals: CreatePostFormValues, helpers: FormikHelpers<CreatePostFormValues>) => {
     if (!user?._id) {
@@ -89,10 +169,13 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
           submitCount,
           isSubmitting,
         }) => {
-          const descriptionError =
-            (Boolean(touched.description) || submitCount > 0) && errors.description
-              ? String(errors.description)
-              : undefined
+          const showContentError =
+            submitCount > 0 && Boolean(errors.description || errors.picture)
+          const contentErrorMessage = errors.description
+            ? String(errors.description)
+            : errors.picture
+              ? String(errors.picture)
+              : POST_EMPTY_MESSAGE
 
           return (
             <form onSubmit={handleSubmit} noValidate>
@@ -104,12 +187,15 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                 <InputBase
                   name="description"
                   placeholder="What's on your mind?"
+                  inputRef={descriptionInputRef}
+                  aria-invalid={showContentError}
+                  aria-describedby={showContentError ? "create-post-error" : undefined}
                   sx={{
                     width: "100%",
                     borderRadius: "2rem",
                     padding: "1rem 2rem",
                     backgroundColor: palette.neutral.light,
-                    border: descriptionError ? `1px solid ${palette.error.main}` : undefined,
+                    border: showContentError ? `1px solid ${palette.error.main}` : undefined,
                   }}
                   value={values.description}
                   onBlur={handleBlur}
@@ -117,52 +203,85 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                   disabled={isSubmitting}
                 />
               </FlexBetween>
-              {descriptionError && (
-                <Typography sx={{ color: "error.main", mt: "0.5rem", fontSize: "0.75rem", pl: "4.5rem" }} role="alert">
-                  {descriptionError}
+              {showContentError && (
+                <Typography
+                  id="create-post-error"
+                  role="alert"
+                  sx={{
+                    color: "error.main",
+                    mt: "0.65rem",
+                    ml: { xs: 0, sm: "4.5rem" },
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {contentErrorMessage}
                 </Typography>
               )}
 
               {isImage && (
-                <Box sx={{ border: `1px solid ${medium}`, borderRadius: "4px", mt: "1rem", p: "1rem" }}>
+                <Box sx={{ mt: "1rem" }}>
                   <DropZone
                     multiple={false}
-                    accept={{ "image/*": [] }}
+                    accept={{ "image/jpeg": [], "image/png": [], "image/gif": [], "image/webp": [] }}
                     disabled={isSubmitting}
                     onDrop={acceptedFiles => setFieldValue("picture", acceptedFiles[0] ?? null)}
                   >
-                    {({ getRootProps, getInputProps }) => (
-                      <FlexBetween>
-                        <Box
-                          {...getRootProps()}
-                          sx={{
-                            border: `2px dashed ${palette.primary.main}`,
-                            p: "1rem",
-                            width: "100%",
-                            "&:hover": { cursor: isSubmitting ? "default" : "pointer" },
-                          }}
-                        >
-                          <input {...getInputProps()} />
-                          {!values.picture ? (
-                            <p>Add photo here</p>
-                          ) : (
-                            <FlexBetween>
-                              <Typography>{values.picture.name}</Typography>
-                              <EditOutlined />
-                            </FlexBetween>
-                          )}
-                        </Box>
-                        {values.picture && (
-                          <IconButton
-                            onClick={() => setFieldValue("picture", null)}
-                            sx={{ width: "15%" }}
+                    {({ getRootProps, getInputProps, isDragActive }) => (
+                      <Box
+                        {...getRootProps()}
+                        sx={{
+                          position: "relative",
+                          width: "100%",
+                          borderRadius: 2,
+                          overflow: "hidden",
+                          border: `1px dashed ${
+                            isDragActive ? palette.primary.main : alpha(palette.neutral.medium, 0.7)
+                          }`,
+                          bgcolor: isDragActive
+                            ? alpha(palette.primary.main, 0.06)
+                            : alpha(palette.neutral.light, 0.55),
+                          cursor: isSubmitting ? "default" : "pointer",
+                          transition: "border-color 0.15s ease, background-color 0.15s ease",
+                          "&:hover": {
+                            borderColor: isSubmitting ? undefined : palette.primary.main,
+                            bgcolor: isSubmitting
+                              ? undefined
+                              : alpha(palette.primary.main, 0.04),
+                          },
+                        }}
+                      >
+                        <input {...getInputProps()} />
+                        {values.picture ? (
+                          <ImagePreview
+                            file={values.picture}
                             disabled={isSubmitting}
-                            aria-label="Remove photo"
+                            onRemove={() => setFieldValue("picture", null)}
+                          />
+                        ) : (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 0.75,
+                              py: 3.5,
+                              px: 2,
+                              textAlign: "center",
+                            }}
                           >
-                            <DeleteOutlined />
-                          </IconButton>
+                            <ImageOutlined sx={{ fontSize: 36, color: medMain }} />
+                            <Typography sx={{ fontWeight: 600, color: palette.neutral.dark }}>
+                              {isDragActive ? "Drop photo here" : "Add a photo"}
+                            </Typography>
+                            <Typography sx={{ fontSize: "0.85rem", color: medium }}>
+                              Drag and drop, or click to browse · JPEG, PNG, GIF, WebP
+                            </Typography>
+                          </Box>
                         )}
-                      </FlexBetween>
+                      </Box>
                     )}
                   </DropZone>
                   {(touched.picture || submitCount > 0) && errors.picture && (
@@ -175,28 +294,50 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
 
               <Divider sx={{ margin: "1.25rem 0" }} />
               <FlexBetween>
-                <FlexBetween
-                  onClick={() => {
-                    if (isSubmitting) return
-                    setIsImage(prev => {
-                      if (prev) void setFieldValue("picture", null)
-                      return !prev
-                    })
-                  }}
-                  sx={{ gap: "0.25rem", cursor: isSubmitting ? "default" : "pointer" }}
-                >
-                  <ImageOutlined sx={{ color: medMain }} />
-                  <Typography
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <FlexBetween
+                    onClick={() => {
+                      if (isSubmitting) return
+                      setIsImage(prev => {
+                        if (prev) void setFieldValue("picture", null)
+                        return !prev
+                      })
+                    }}
                     sx={{
-                      color: medMain,
-                      "&:hover": {
-                        color: medium,
-                      },
+                      gap: "0.35rem",
+                      cursor: isSubmitting ? "default" : "pointer",
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1.5,
+                      bgcolor: isImage ? alpha(palette.primary.main, 0.1) : "transparent",
                     }}
                   >
-                    Image
-                  </Typography>
-                </FlexBetween>
+                    <ImageOutlined sx={{ color: isImage ? palette.primary.main : medMain }} />
+                    <Typography
+                      sx={{
+                        color: isImage ? palette.primary.main : medMain,
+                        fontWeight: isImage ? 600 : 500,
+                        "&:hover": {
+                          color: isImage ? palette.primary.main : medium,
+                        },
+                      }}
+                    >
+                      Image
+                    </Typography>
+                  </FlexBetween>
+                  <EmojiPickerButton
+                    showLabel
+                    disabled={isSubmitting}
+                    onSelect={emoji =>
+                      insertEmojiAtCursor(
+                        descriptionInputRef.current,
+                        values.description,
+                        emoji,
+                        next => void setFieldValue("description", next)
+                      )
+                    }
+                  />
+                </Box>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
