@@ -41,16 +41,43 @@ export const createPost = async (req, res, next) => {
   }
 }
 
+/**
+ * Home feed. Query `scope`:
+ * - `all` (default): every post, newest first
+ * - `friends`: posts by the logged-in user and their friends only
+ */
 export const getFeed = async (req, res, next) => {
   try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim().toLowerCase() : "all"
+    const scope = scopeRaw === "friends" ? "friends" : "all"
+
     const { limit, cursorDate } = parseCursorPagination(req.query)
     const filter = cursorDate ? { createdAt: { $lt: cursorDate } } : {}
+
+    if (scope === "friends") {
+      const me = await User.findById(userId).select("friends")
+      if (!me) {
+        return res.status(401).json({ error: "Unauthenticated" })
+      }
+      const authorIds = [
+        String(userId),
+        ...(me.friends || []).map(id => String(id)),
+      ]
+      filter.userId = { $in: authorIds }
+    }
+
     const docs = await Post.find(filter).sort({ createdAt: -1 }).limit(limit + 1)
     const { pageDocs, nextCursor, hasMore } = pageFromDocs(docs, limit)
     res.status(200).json({
       posts: await withAuthors(pageDocs),
       nextCursor,
       hasMore,
+      scope,
     })
   } catch (e) {
     next(e)

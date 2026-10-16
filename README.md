@@ -49,6 +49,7 @@ MockBook/
 - Create text and/or image posts
 - Home feed with author name, avatar, and relative time
 - Infinite scroll on home feed and profile Posts tab (`?limit=&cursor=`)
+- Home feed tabs: **Friends** (you + friends) and **Everyone** (`GET /posts?scope=friends|all`)
 - Like / unlike posts (count updates in UI)
 - View who liked a post (click like count → list with profiles)
 - Save / unsave posts (bookmark on post cards; list via `GET /posts/saved`)
@@ -241,7 +242,7 @@ npm run start -w backend
 | `GET`    | `/users/:id/friends`         | Get that user’s friends (formatted)                              |
 | `PATCH`  | `/users/friends/:friendId`   | Add or remove a friend (JWT user only)                           |
 | `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit); `{ post }` |
-| `GET`    | `/posts`                     | Home feed page (`?limit=&cursor=` → `{ posts, nextCursor, hasMore }`) |
+| `GET`    | `/posts`                     | Home feed (`?scope=all\|friends&limit=&cursor=` → `{ posts, nextCursor, hasMore, scope }`) |
 | `GET`    | `/posts/saved`               | Logged-in user’s saved posts (newest save first)                 |
 | `GET`    | `/posts/liked`               | Logged-in user’s liked posts (`createdAt` desc)                  |
 | `GET`    | `/posts/commented`           | Posts the user commented on (`createdAt` desc; distinct)         |

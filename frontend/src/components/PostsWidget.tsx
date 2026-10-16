@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from "../app/hooks"
 import PostWidget from "./PostWidget"
 
 /** Which post list to load. */
-export type PostsListKind = "feed" | "authored" | "saved" | "liked" | "commented"
+export type PostsListKind = "feed" | "friends" | "authored" | "saved" | "liked" | "commented"
 
 type PostsWidgetProps = {
   list?: PostsListKind
@@ -24,6 +24,7 @@ type PostsWidgetProps = {
 
 const EMPTY_COPY: Record<PostsListKind, string> = {
   feed: "No posts in the feed yet.",
+  friends: "No posts from you or your friends yet. Add people or switch to Everyone.",
   authored: "No posts yet.",
   saved: "No saved posts yet.",
   liked: "No liked posts yet.",
@@ -38,7 +39,7 @@ function resolveList(list: PostsListKind | undefined, isProfile: boolean): Posts
 }
 
 function usesCursorPagination(kind: PostsListKind): boolean {
-  return kind === "feed" || kind === "authored"
+  return kind === "feed" || kind === "friends" || kind === "authored"
 }
 
 function pathForList(kind: PostsListKind, userId: string, cursor?: string | null): string {
@@ -47,6 +48,10 @@ function pathForList(kind: PostsListKind, userId: string, cursor?: string | null
 
   switch (kind) {
     case "feed":
+      params.set("scope", "all")
+      return `/posts?${params}`
+    case "friends":
+      params.set("scope", "friends")
       return `/posts?${params}`
     case "authored":
       return `/posts/${userId}/posts?${params}`

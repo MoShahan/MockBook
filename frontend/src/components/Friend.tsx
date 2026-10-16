@@ -1,8 +1,7 @@
 "use client"
 
 import React from "react"
-import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material"
-import { Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material"
+import { Box, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -13,6 +12,7 @@ import type { Friend as FriendData } from "@/types/models"
 import { friendIdOf, sameUserId } from "@/types/models"
 
 import FlexBetween from "./FlexBetween"
+import FriendToggleButton from "./FriendToggleButton"
 import UserImage from "./UserImage"
 
 type FriendProps = {
@@ -87,15 +87,7 @@ const Friend = ({ id, name, subtitle, url, showFriendButton = true, endAction }:
         </Box>
       </FlexBetween>
       {showFriendButton && id && !isSelf && (
-        <Tooltip title={isFriend ? "Remove friend" : "Add friend"}>
-          <IconButton
-            sx={{ backgroundColor: pLight, p: "0.6rem" }}
-            onClick={patchFriend}
-            aria-label={isFriend ? "Remove friend" : "Add friend"}
-          >
-            {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
-          </IconButton>
-        </Tooltip>
+        <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
       )}
       {endAction}
     </FlexBetween>

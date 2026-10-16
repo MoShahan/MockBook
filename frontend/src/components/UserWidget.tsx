@@ -7,8 +7,6 @@ import {
   LinkedIn,
   LocationOnOutlined,
   ManageAccountsOutlined,
-  PersonAddOutlined,
-  PersonRemoveOutlined,
   WorkOutlineOutlined,
   X,
 } from "@mui/icons-material"
@@ -25,6 +23,7 @@ import { friendIdOf, sameUserId } from "@/types/models"
 
 import EditProfileDialog from "./EditProfileDialog"
 import FlexBetween from "./FlexBetween"
+import FriendToggleButton from "./FriendToggleButton"
 import UserImage from "./UserImage"
 import WidgetWrapper from "./WidgetWrapper"
 
@@ -52,7 +51,6 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
   const main = palette.neutral.main
-  const pLight = palette.primary.light
 
   const [fetched, setFetched] = useState<User | null>(null)
   const [editOpen, setEditOpen] = useState(false)
@@ -177,15 +175,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
             </IconButton>
           </Tooltip>
         ) : (
-          <Tooltip title={isFriend ? "Remove friend" : "Add friend"}>
-            <IconButton
-              sx={{ backgroundColor: pLight, p: "0.6rem" }}
-              onClick={patchFriend}
-              aria-label={isFriend ? "Remove friend" : "Add friend"}
-            >
-              {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
-            </IconButton>
-          </Tooltip>
+          <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
         )}
       </FlexBetween>
 
