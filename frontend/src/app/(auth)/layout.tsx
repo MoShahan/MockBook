@@ -20,7 +20,7 @@ export default function AuthRouteLayout({ children }: { children: ReactNode }) {
       supporting={
         isRegister
           ? "Create an account and start sharing with friends in minutes."
-          : "Share moments, follow friends, and pick up conversations — all in one calm place."
+          : "Share moments, follow friends, and pick up conversations - all in one calm place."
       }
     >
       {children}

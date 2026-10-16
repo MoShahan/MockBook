@@ -53,8 +53,8 @@ const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
     <>
       {!embedded ? (
         <Typography
-          variant="h5"
-          sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1rem" }}
+          variant="subtitle1"
+          sx={{ fontWeight: 600, color: theme.palette.neutral.dark, mb: "0.75rem" }}
         >
           Add people
         </Typography>
@@ -66,7 +66,7 @@ const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
         value={query}
         onChange={e => setQuery(e.target.value)}
         slotProps={{ htmlInput: { "aria-label": "Search people" } }}
-        sx={{ mb: "1rem" }}
+        sx={{ mb: "0.75rem" }}
       />
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 2 }} role="status">
@@ -82,7 +82,7 @@ const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
           }
         />
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "1.25rem", width: "100%", minWidth: 0 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "0.85rem", width: "100%", minWidth: 0 }}>
           {users.map(u => (
             <Friend
               key={u._id}

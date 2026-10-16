@@ -26,7 +26,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
     ),
   },
   {
-    q: "I forgot my password — what can I do?",
+    q: "I forgot my password - what can I do?",
     a: "Password reset by email is not available yet. If you signed up with Google, GitHub, or Discord, use that same provider to sign in again.",
   },
   {

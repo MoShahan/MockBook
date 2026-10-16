@@ -185,10 +185,11 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
 
           return (
             <form onSubmit={handleSubmit} noValidate>
-              <FlexBetween sx={{ gap: "1.5rem", alignItems: "center" }}>
+              <FlexBetween sx={{ gap: "0.85rem", alignItems: "center" }}>
                 <UserImage
                   image={url}
                   name={[user?.firstName, user?.lastName].filter(Boolean).join(" ")}
+                  size="44px"
                   bgColor={user?.avatarColor}
                 />
                 <InputBase
@@ -199,13 +200,14 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                   aria-describedby={showContentError ? "create-post-error" : undefined}
                   sx={{
                     width: "100%",
-                    borderRadius: "2rem",
-                    padding: "1rem 2rem",
+                    borderRadius: "1.5rem",
+                    padding: "0.7rem 1.15rem",
+                    fontSize: "0.9rem",
                     backgroundColor: palette.neutral.light,
                     border: showContentError ? `1px solid ${palette.error.main}` : undefined,
                   }}
                   value={values.description ?? ""}
-                  // Avoid Formik handleChange/handleBlur — they call event.persist and crash
+                  // Avoid Formik handleChange/handleBlur - they call event.persist and crash
                   // when MUI/React 19 invokes the handler without a synthetic event.
                   onBlur={() => void setFieldTouched("description", true)}
                   onChange={e => void setFieldValue("description", e.target.value)}
@@ -219,8 +221,8 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                   sx={{
                     color: "error.main",
                     mt: "0.65rem",
-                    ml: { xs: 0, sm: "4.5rem" },
-                    fontSize: "0.875rem",
+                    ml: { xs: 0, sm: "3.5rem" },
+                    fontSize: "0.8125rem",
                     fontWeight: 500,
                     lineHeight: 1.4,
                   }}
@@ -287,17 +289,17 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                               flexDirection: "column",
                               alignItems: "center",
                               justifyContent: "center",
-                              gap: 0.75,
-                              py: 3.5,
-                              px: 2,
+                              gap: 0.5,
+                              py: 2.25,
+                              px: 1.5,
                               textAlign: "center",
                             }}
                           >
-                            <ImageOutlined sx={{ fontSize: 36, color: medMain }} />
-                            <Typography sx={{ fontWeight: 600, color: palette.neutral.dark }}>
+                            <ImageOutlined sx={{ fontSize: 28, color: medMain }} />
+                            <Typography variant="subtitle2" sx={{ color: palette.neutral.dark }}>
                               {isDragActive ? "Drop photo here" : "Add a photo"}
                             </Typography>
-                            <Typography sx={{ fontSize: "0.85rem", color: medium }}>
+                            <Typography variant="caption" sx={{ color: medium }}>
                               Drag and drop, or click to browse · JPEG, PNG, GIF, WebP
                             </Typography>
                           </Box>
@@ -313,16 +315,14 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                 </Box>
               )}
 
-              <Divider sx={{ margin: "1.25rem 0" }} />
+              <Divider sx={{ margin: "0.85rem 0" }} />
               <FlexBetween>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                   <FlexBetween
                     onClick={() => {
                       if (isSubmitting) return
-                      setIsImage(prev => {
-                        if (prev) void setFieldValue("picture", null)
-                        return !prev
-                      })
+                      if (isImage) void setFieldValue("picture", null)
+                      setIsImage(prev => !prev)
                     }}
                     sx={{
                       gap: "0.35rem",

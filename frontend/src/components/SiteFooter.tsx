@@ -27,8 +27,8 @@ const SiteFooter = ({ compact = false }: SiteFooterProps) => {
     <Box
       component="footer"
       sx={{
-        mt: compact ? 2.5 : 4,
-        pt: compact ? 2 : 3,
+        mt: compact ? 2 : 3,
+        pt: compact ? 1.5 : 2,
         borderTop: `1px solid ${theme.palette.divider}`,
       }}
     >
@@ -38,7 +38,7 @@ const SiteFooter = ({ compact = false }: SiteFooterProps) => {
           maxWidth: compact ? "100%" : PAGE_MAX_WIDTH,
           margin: "0 auto",
           px: compact ? 0 : { xs: 2, sm: 3, md: 4 },
-          pb: compact ? 0 : 3,
+          pb: compact ? 0 : 2,
           display: "flex",
           flexWrap: "wrap",
           gap: { xs: 1.5, sm: 2.5 },

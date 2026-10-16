@@ -1,7 +1,7 @@
 import { alpha, type ThemeOptions } from "@mui/material/styles"
 
 /**
- * MockBook design tokens — stone-first UI, muted forest green as accent only (Step 5.1).
+ * MockBook design tokens - stone-first UI, muted forest green as accent only (Step 5.1).
  * Typography families come from CSS variables set in `layout.tsx` (next/font).
  */
 export const colorTokens = {
@@ -19,7 +19,7 @@ export const colorTokens = {
     900: "#1C1917",
     950: "#0C0A09",
   },
-  /** Desaturated olive — accent for brand / primary actions, not page chrome. */
+  /** Desaturated olive - accent for brand / primary actions, not page chrome. */
   forest: {
     50: "#F3F6F3",
     100: "#E4EBE4",
@@ -71,7 +71,7 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
         light: colorTokens.stone[100],
       }
 
-  // Neutral charcoal/stone surfaces — not green-tinted pages.
+  // Neutral charcoal/stone surfaces - not green-tinted pages.
   const background = isDark
     ? { default: colorTokens.stone[950], alt: colorTokens.stone[900] }
     : { default: colorTokens.stone[100], alt: colorTokens.stone[0] }
@@ -118,60 +118,62 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
       htmlFontSize: 16,
       h1: {
         fontFamily: fontDisplay,
-        fontSize: "2.5rem",
+        fontSize: "2.1rem",
         fontWeight: 650,
         letterSpacing: "-0.02em",
         lineHeight: 1.15,
       },
       h2: {
         fontFamily: fontDisplay,
-        fontSize: "2rem",
+        fontSize: "1.7rem",
         fontWeight: 650,
         letterSpacing: "-0.02em",
         lineHeight: 1.2,
       },
       h3: {
         fontFamily: fontDisplay,
-        fontSize: "1.5rem",
+        fontSize: "1.35rem",
         fontWeight: 600,
         letterSpacing: "-0.015em",
         lineHeight: 1.25,
       },
       h4: {
         fontFamily: fontDisplay,
-        fontSize: "1.25rem",
+        fontSize: "1.15rem",
         fontWeight: 600,
         letterSpacing: "-0.01em",
         lineHeight: 1.3,
       },
       h5: {
         fontFamily: fontBody,
-        fontSize: "1.05rem",
+        fontSize: "0.95rem",
         fontWeight: 600,
         lineHeight: 1.35,
       },
       h6: {
         fontFamily: fontBody,
-        fontSize: "0.95rem",
+        fontSize: "0.875rem",
         fontWeight: 600,
         lineHeight: 1.4,
       },
-      body1: { fontSize: "0.95rem", lineHeight: 1.55 },
-      body2: { fontSize: "0.875rem", lineHeight: 1.5 },
+      body1: { fontSize: "0.9rem", lineHeight: 1.5 },
+      body2: { fontSize: "0.8125rem", lineHeight: 1.45 },
       button: {
         fontFamily: fontBody,
         fontWeight: 600,
+        fontSize: "0.875rem",
         textTransform: "none" as const,
         letterSpacing: "0.01em",
       },
-      subtitle1: { fontFamily: fontBody, fontWeight: 600 },
-      caption: { fontSize: "0.75rem", lineHeight: 1.4 },
+      subtitle1: { fontFamily: fontBody, fontWeight: 600, fontSize: "0.9rem" },
+      subtitle2: { fontFamily: fontBody, fontWeight: 600, fontSize: "0.8125rem" },
+      caption: { fontSize: "0.72rem", lineHeight: 1.4 },
     },
     components: {
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            // Soft stone wash only — avoid green wash across the whole app.
+            // Soft stone wash only - avoid green wash across the whole app.
             backgroundImage: isDark
               ? `radial-gradient(900px 480px at 8% -8%, ${alpha(colorTokens.stone[700], 0.35)}, transparent 55%)`
               : `radial-gradient(900px 480px at 8% -8%, ${alpha(colorTokens.stone[200], 0.7)}, transparent 55%)`,
@@ -188,8 +190,8 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
         styleOverrides: {
           root: {
             borderRadius: 10,
-            paddingInline: 16,
-            paddingBlock: 8,
+            paddingInline: 14,
+            paddingBlock: 6,
             boxShadow: "none",
             transition: "background-color 0.15s ease, color 0.15s ease, transform 0.12s ease",
             "&:hover": { boxShadow: "none" },
@@ -201,6 +203,7 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
         styleOverrides: {
           root: {
             borderRadius: 10,
+            padding: 8,
             transition: "background-color 0.15s ease, color 0.15s ease, transform 0.12s ease",
             "&:hover": {
               backgroundColor: isDark
@@ -216,6 +219,8 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
           root: {
             borderRadius: 8,
             marginInline: 4,
+            minHeight: 36,
+            fontSize: "0.875rem",
             transition: "background-color 0.12s ease",
             "&:hover": {
               backgroundColor: isDark
@@ -230,7 +235,9 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
           root: {
             textTransform: "none",
             fontWeight: 600,
-            minHeight: 44,
+            fontSize: "0.875rem",
+            minHeight: 40,
+            paddingInline: 12,
             transition: "color 0.15s ease",
           },
         },

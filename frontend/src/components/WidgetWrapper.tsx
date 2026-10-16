@@ -2,7 +2,7 @@
 
 import { Box, type BoxProps, useTheme } from "@mui/material"
 
-/** Solid card surface (not glassy) — navbar owns the blur treatment. */
+/** Solid card surface (not glassy) - navbar owns the blur treatment. */
 const WidgetWrapper = ({ children, sx, ...props }: BoxProps) => {
   const theme = useTheme()
 
@@ -10,9 +10,9 @@ const WidgetWrapper = ({ children, sx, ...props }: BoxProps) => {
     <Box
       {...props}
       sx={{
-        padding: "1.5rem 1.5rem 0.75rem 1.5rem",
+        padding: "1.15rem 1.15rem 0.85rem 1.15rem",
         backgroundColor: "background.alt",
-        borderRadius: `${Number(theme.shape.borderRadius) * 1.25}px`,
+        borderRadius: `${Number(theme.shape.borderRadius) * 1.15}px`,
         border: `1px solid ${theme.palette.divider}`,
         boxShadow:
           theme.palette.mode === "dark"

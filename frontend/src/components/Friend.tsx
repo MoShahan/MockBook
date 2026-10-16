@@ -22,7 +22,7 @@ type FriendProps = {
   name: string
   /** Initials avatar background when no photo. */
   avatarColor?: string
-  /** Avatar size — lists use 48px; post headers keep 55px. */
+  /** Avatar size - lists use 48px; post headers keep 55px. */
   avatarSize?: string
   /** When false, hide add/remove-friend (e.g. post cards). Default true. */
   showFriendButton?: boolean
@@ -36,7 +36,7 @@ const Friend = ({
   subtitle,
   url,
   avatarColor,
-  avatarSize = "48px",
+  avatarSize = "42px",
   showFriendButton = true,
   endAction,
 }: FriendProps) => {
@@ -78,7 +78,7 @@ const Friend = ({
 
   return (
     <FlexBetween sx={{ width: "100%", gap: 1, minWidth: 0, alignItems: "center" }}>
-      <FlexBetween sx={{ gap: "0.75rem", flex: "1 1 auto", minWidth: 0 }}>
+        <FlexBetween sx={{ gap: "0.65rem", flex: "1 1 auto", minWidth: 0 }}>
         <Box
           onClick={handleGoToProfile}
           onKeyDown={e => {
@@ -116,7 +116,6 @@ const Friend = ({
           sx={{
             minWidth: 0,
             flex: "1 1 auto",
-            overflow: "hidden",
             borderRadius: 1,
             "&:focus-visible": {
               outline: `2px solid ${theme.palette.primary.main}`,
@@ -125,16 +124,18 @@ const Friend = ({
           }}
         >
           <Typography
-            variant="h5"
-            noWrap
             title={name}
             sx={{
               color: main,
               fontWeight: 600,
-              fontSize: "0.95rem",
-              lineHeight: 1.3,
+              fontSize: "0.9rem",
+              lineHeight: 1.45,
+              display: "block",
+              whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              // Padding keeps glyph tops (e.g. “B”) inside the overflow clip box.
+              py: "0.1em",
               transition: "color 0.15s ease",
               "&:hover": {
                 cursor: id ? "pointer" : "default",
@@ -146,15 +147,16 @@ const Friend = ({
           </Typography>
           {subtitle ? (
             <Typography
-              noWrap
               title={subtitle}
               sx={{
                 color: medium,
                 fontSize: "0.75rem",
-                lineHeight: 1.35,
-                mt: "0.1rem",
+                lineHeight: 1.4,
+                display: "block",
+                whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
+                py: "0.05em",
               }}
             >
               {subtitle}

@@ -102,7 +102,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     return fetched
   }, [fetched, userId, isOwnProfile, loggedInUser])
 
-  // Already on this profile (own `/profile` or `/profile/:id`) — don't re-navigate.
+  // Already on this profile (own `/profile` or `/profile/:id`) - don't re-navigate.
   const alreadyOnThisProfile =
     Boolean(userId) &&
     (pathname === `/profile/${userId}` || (isOwnProfile && (pathname === "/profile" || pathname === `/profile/${userId}`)))
@@ -160,19 +160,19 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     <WidgetWrapper sx={{ p: 0, overflow: "visible" }}>
       <Box
         sx={{
-          height: { xs: 88, sm: 104 },
+          height: { xs: 72, sm: 84 },
           bgcolor: coverColor,
           position: "relative",
           borderTopLeftRadius: coverRadius,
           borderTopRightRadius: coverRadius,
         }}
       >
-        <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}>
+        <Box sx={{ position: "absolute", top: 6, right: 6, zIndex: 2 }}>
           {isOwnProfile ? (
             <Tooltip title="Edit profile">
               <IconButton
+                size="small"
                 sx={{
-                  p: "0.5rem",
                   bgcolor: "rgba(0,0,0,0.28)",
                   color: "#FAFAF9",
                   "&:hover": { bgcolor: "rgba(0,0,0,0.42)" },
@@ -180,7 +180,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
                 onClick={() => setEditOpen(true)}
                 aria-label="Edit profile"
               >
-                <ManageAccountsOutlined />
+                <ManageAccountsOutlined fontSize="small" />
               </IconButton>
             </Tooltip>
           ) : (
@@ -189,11 +189,11 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
         </Box>
       </Box>
 
-      <Box sx={{ px: "1.5rem", pb: "1.5rem", pt: 0, position: "relative", zIndex: 1 }}>
-        <FlexBetween sx={{ gap: "0.5rem", pb: "1.1rem", mt: "-2.25rem" }}>
+      <Box sx={{ px: "1.15rem", pb: "1.15rem", pt: 0, position: "relative", zIndex: 1 }}>
+        <FlexBetween sx={{ gap: "0.5rem", pb: "0.85rem", mt: "-1.85rem" }}>
           <FlexBetween
             onClick={handleGoToProfile}
-            sx={{ gap: "1rem", cursor: alreadyOnThisProfile ? "default" : "pointer", minWidth: 0 }}
+            sx={{ gap: "0.75rem", cursor: alreadyOnThisProfile ? "default" : "pointer", minWidth: 0 }}
           >
             <Box
               sx={{
@@ -208,17 +208,19 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               <UserImage
                 image={displayUrl}
                 name={`${user.firstName} ${user.lastName}`}
+                size="52px"
                 bgColor={avatarColor}
               />
             </Box>
-            <Box sx={{ minWidth: 0, pt: "2.85rem" }}>
+            <Box sx={{ minWidth: 0, pt: "2.35rem" }}>
               <Typography
                 variant="h4"
                 noWrap
                 sx={{
                   color: dark,
-                  fontWeight: "500",
+                  fontWeight: 600,
                   lineHeight: 1.25,
+                  fontSize: "1.1rem",
                   ...(!alreadyOnThisProfile && {
                     "&:hover": {
                       color: palette.primary.main,
@@ -228,56 +230,68 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               >
                 {user.firstName} {user.lastName}
               </Typography>
-              <Typography sx={{ color: medium, mt: 0.25 }}>{friendCount} friends</Typography>
+              <Typography variant="body2" sx={{ color: medium, mt: 0.15 }}>
+                {friendCount} friends
+              </Typography>
             </Box>
           </FlexBetween>
         </FlexBetween>
 
       <Divider />
 
-      <Box sx={{ p: "1rem 0" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: "1rem", mb: "0.5rem" }}>
-          <LocationOnOutlined sx={{ fontSize: "large", color: main }} />
-          <Typography sx={{ color: medium }}>{user.location?.trim() || "—"}</Typography>
+      <Box sx={{ py: "0.75rem" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "0.65rem", mb: "0.4rem" }}>
+          <LocationOnOutlined sx={{ fontSize: "1.15rem", color: main }} />
+          <Typography variant="body2" sx={{ color: medium }}>
+            {user.location?.trim() || "-"}
+          </Typography>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <WorkOutlineOutlined sx={{ fontSize: "large", color: main }} />
-          <Typography sx={{ color: medium }}>{user.occupation?.trim() || "—"}</Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+          <WorkOutlineOutlined sx={{ fontSize: "1.15rem", color: main }} />
+          <Typography variant="body2" sx={{ color: medium }}>
+            {user.occupation?.trim() || "-"}
+          </Typography>
         </Box>
       </Box>
 
       <Divider />
 
-      <Box sx={{ p: "1rem 0" }}>
+      <Box sx={{ py: "0.75rem" }}>
         <FlexBetween>
-          <Typography sx={{ color: medium }}>Profile visits</Typography>
-          <Typography sx={{ color: main, fontWeight: "500" }}>{user.viewedProfile || 0}</Typography>
+          <Typography variant="body2" sx={{ color: medium }}>
+            Profile visits
+          </Typography>
+          <Typography variant="body2" sx={{ color: main, fontWeight: 600 }}>
+            {user.viewedProfile || 0}
+          </Typography>
         </FlexBetween>
       </Box>
 
       {activeSocials.length > 0 ? (
         <>
           <Divider />
-          <Box sx={{ p: "1rem 0" }}>
-            <Typography sx={{ color: main, mb: "1rem", fontSize: "1rem", fontWeight: "500" }}>
+          <Box sx={{ py: "0.75rem" }}>
+            <Typography variant="subtitle2" sx={{ color: main, mb: "0.65rem" }}>
               Social Profiles
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
               {activeSocials.map(item =>
                 item.href ? (
-                  <FlexBetween key={item.key} sx={{ gap: "1rem" }}>
-                    <FlexBetween sx={{ gap: "1rem", minWidth: 0 }}>
-                      <Box sx={{ color: main, display: "flex" }} aria-hidden>
+                  <FlexBetween key={item.key} sx={{ gap: "0.75rem" }}>
+                    <FlexBetween sx={{ gap: "0.65rem", minWidth: 0 }}>
+                      <Box sx={{ color: main, display: "flex", "& svg": { fontSize: "1.15rem" } }} aria-hidden>
                         {SOCIAL_ICONS[item.key]}
                       </Box>
                       <Box sx={{ minWidth: 0 }}>
-                        <Typography sx={{ color: main, fontWeight: "500" }}>{item.label}</Typography>
+                        <Typography variant="body2" sx={{ color: main, fontWeight: 600 }}>
+                          {item.label}
+                        </Typography>
                         <Link
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
                           underline="hover"
-                          sx={{ color: medium, fontWeight: 500 }}
+                          sx={{ color: medium, fontWeight: 500, fontSize: "0.8125rem" }}
                         >
                           @{item.handle}
                         </Link>

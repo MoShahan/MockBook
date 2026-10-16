@@ -37,7 +37,7 @@ const PrivacyPage = () => {
       <Section title="2. Information we collect">
         <Typography component="p">Depending on how you use MockBook, we may store:</Typography>
         <Box component="ul" sx={{ pl: 2.5, m: 0, "& li": { mb: 0.75 } }}>
-          <li>Account details you provide (name, email, password hash — never your raw password).</li>
+          <li>Account details you provide (name, email, password hash - never your raw password).</li>
           <li>Profile fields you choose (location, occupation, avatar, social handles).</li>
           <li>Content you create (posts, images, comments, likes, saves, friend connections).</li>
           <li>OAuth identifiers if you sign in with Google, GitHub, or Discord.</li>
@@ -70,7 +70,7 @@ const PrivacyPage = () => {
       <Section title="5. Retention & security">
         <Typography component="p">
           Data remains while your account exists on this deployment. Passwords are hashed; access uses Bearer
-          JWTs. No system is perfectly secure — treat this as a demo and avoid sharing highly sensitive data.
+          JWTs. No system is perfectly secure - treat this as a demo and avoid sharing highly sensitive data.
         </Typography>
       </Section>
 

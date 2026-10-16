@@ -34,7 +34,7 @@ const EMPTY_COPY: Record<PostsListKind, { title: string; description: string }> 
   },
   authored: {
     title: "No posts yet",
-    description: "Share something from Home — it will appear here on this profile.",
+    description: "Share something from Home - it will appear here on this profile.",
   },
   saved: {
     title: "No saved posts",
@@ -206,7 +206,7 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
       {posts.map((post, index) => (
         <Box
           key={post._id}

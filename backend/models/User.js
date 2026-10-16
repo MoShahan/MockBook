@@ -12,7 +12,7 @@ const UserSchema = new Schema(
     firstName: { type: String, required: true, minlength: 2, maxlength: 50 },
     lastName: { type: String, required: true, minlength: 2, maxlength: 50 },
     email: { type: String, required: true, maxlength: 100, unique: true },
-    // Hash only — never select by default; plaintext policy enforced in auth controller.
+    // Hash only - never select by default; plaintext policy enforced in auth controller.
     // OAuth-only accounts still store a random unusable hash.
     password: { type: String, required: true, select: false },
     /** Linked social login providers (Google / GitHub / Discord). */

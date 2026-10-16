@@ -101,7 +101,7 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
           boxSizing: "border-box",
         }}
       >
-        {/* Left: café image — flush to left / top / bottom (no gap) */}
+        {/* Left: café image - flush to left / top / bottom (no gap) */}
         <Box
           component="aside"
           sx={{
@@ -161,7 +161,7 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
                   color: "common.white",
                   textShadow: "0 2px 18px rgba(0,0,0,0.35)",
                   mb: 1,
-                  fontSize: { xs: "1.75rem", md: "2.35rem" },
+                  fontSize: { xs: "1.5rem", md: "1.95rem" },
                 }}
               >
                 {headline}
@@ -170,7 +170,7 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
                 sx={{
                   color: "rgba(255,255,255,0.88)",
                   textShadow: "0 1px 10px rgba(0,0,0,0.3)",
-                  fontSize: { xs: "0.95rem", md: "1.05rem" },
+                  fontSize: { xs: "0.875rem", md: "0.95rem" },
                   lineHeight: 1.5,
                 }}
               >

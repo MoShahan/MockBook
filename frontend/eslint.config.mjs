@@ -41,7 +41,7 @@ const eslintConfig = [
             ["^\\u0000"],
             // Node builtins
             ["^node:"],
-            // External packages (react first, then the rest A–Z)
+            // External packages (react first, then the rest A-Z)
             ["^react$", "^react-dom$", "^react/", "^@?\\w"],
             // Internal alias
             ["^@/"],

@@ -38,7 +38,7 @@ const RegisterPage = () => {
         Create your account
       </Typography>
       <Typography sx={{ color: "text.secondary", mb: 3, lineHeight: 1.5 }}>
-        Just a few details — you can add more on your profile later.
+        Just a few details - you can add more on your profile later.
       </Typography>
       <Form initVals={registerInitVals} type="register" validationSchema={registerSchema} />
     </>

@@ -137,7 +137,7 @@ export const updateProfile = async (req, res, next) => {
 
 /**
  * Discover users: recent registrants by default, or name/email search when `q` is set.
- * Excludes the authenticated user. Limit 10–20.
+ * Excludes the authenticated user. Limit 10-20.
  */
 export const discoverUsers = async (req, res, next) => {
   try {

@@ -1,4 +1,4 @@
-# MockBook — Agent Instructions
+# MockBook - Agent Instructions
 
 ## Project mission
 
@@ -43,7 +43,7 @@ If a check cannot run, say why. Never claim tests passed unless they were actual
 - Use functional React components and hooks. Avoid class components for new code.
 - Keep components focused. Separate reusable UI, feature-level components, API access, hooks, and types where doing so improves clarity.
 - Reuse the project's Material UI theme, design tokens, and existing component patterns. Avoid one-off styling values when a shared theme token is appropriate.
-- Keep API calls out of presentational components when a shared API helper is appropriate. Use the shared **axios** client in `frontend/src/lib/api.ts` (base URL from `NEXT_PUBLIC_API_URL`) for all Express API calls — do not use raw `fetch` for the API once Step 2.0 is done. Prefer an axios **request interceptor** to attach `Authorization: Bearer <token>` from Redux (Step 2.0b) instead of repeating auth headers at every call site. Do not introduce RTK Query mid-feature without explicit approval.
+- Keep API calls out of presentational components when a shared API helper is appropriate. Use the shared **axios** client in `frontend/src/lib/api.ts` (base URL from `NEXT_PUBLIC_API_URL`) for all Express API calls - do not use raw `fetch` for the API once Step 2.0 is done. Prefer an axios **request interceptor** to attach `Authorization: Bearer <token>` from Redux (Step 2.0b) instead of repeating auth headers at every call site. Do not introduce RTK Query mid-feature without explicit approval.
 - Use Redux Toolkit for genuinely shared client state (auth user, token, posts, theme).
 - Keep **Formik + Yup** for forms unless the user explicitly approves a different form/validation library.
 - Auth today uses a **Bearer JWT** stored in Redux (and currently persisted via redux-persist). Do not casually change token storage or break login during unrelated features. Improving persistence/expiry belongs in a dedicated auth-hardening task (see `PROJECT_PLAN.md` Part 3). Never persist password hashes. Prefer not to widen what is persisted.
@@ -93,7 +93,7 @@ If a check cannot run, say why. Never claim tests passed unless they were actual
 - Validate MongoDB ObjectIds and handle missing records explicitly.
 - Never run destructive migrations or drop collections without explicit user approval and a backup/rollback plan.
 - Keep secrets in environment variables; maintain sanitized `.env.example` files with placeholders only.
-- Backend env (actual names in code/examples): `PORT`, `MONGODB_URI` (required), `ACCESS_TOKEN_SECRET`; optional reference-only `MONGODB_USERNAME` / `MONGODB_PASSWORD`. Do not invent `MONGODB_URL` — the code uses `MONGODB_URI`.
+- Backend env (actual names in code/examples): `PORT`, `MONGODB_URI` (required), `ACCESS_TOKEN_SECRET`; optional reference-only `MONGODB_USERNAME` / `MONGODB_PASSWORD`. Do not invent `MONGODB_URL` - the code uses `MONGODB_URI`.
 - Frontend env: `NEXT_PUBLIC_API_URL` (for browser-visible API base URL when wired).
 
 ## Code quality

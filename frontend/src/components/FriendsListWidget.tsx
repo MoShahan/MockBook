@@ -51,11 +51,14 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
   if (friends == null) {
     return (
       <WidgetWrapper sx={{ overflow: "hidden" }}>
-        <Typography variant="h5" sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1.5rem" }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 600, color: theme.palette.neutral.dark, mb: "0.85rem" }}
+        >
           Friends
         </Typography>
-        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }} role="status">
-          <CircularProgress size={28} />
+        <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }} role="status">
+          <CircularProgress size={24} />
         </Box>
       </WidgetWrapper>
     )
@@ -63,7 +66,10 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
 
   return (
     <WidgetWrapper sx={{ overflow: "hidden" }}>
-      <Typography variant="h5" sx={{ fontWeight: "500", color: theme.palette.neutral.dark, mb: "1.5rem" }}>
+      <Typography
+        variant="subtitle1"
+        sx={{ fontWeight: 600, color: theme.palette.neutral.dark, mb: "0.85rem" }}
+      >
         Friends
       </Typography>
       {!friends.length ? (
@@ -72,7 +78,7 @@ const FriendsListWidget = ({ userId }: FriendsListWidgetProps) => {
           description="Find people from Home → Add people, or visit a profile and add them."
         />
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%", minWidth: 0 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "0.85rem", width: "100%", minWidth: 0 }}>
           {friends.map(friend => {
             const id = friendIdOf(friend)
             return (

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { SentimentSatisfiedAltOutlined } from "@mui/icons-material"
 import { alpha, Box, IconButton, Popover, Tooltip, Typography, useTheme } from "@mui/material"
 
-/** Curated set — covers common reactions without a heavy emoji library. */
+/** Curated set - covers common reactions without a heavy emoji library. */
 const EMOJIS = [
   "😀",
   "😃",
@@ -166,7 +166,7 @@ type EmojiPickerButtonProps = {
 }
 
 /**
- * Lightweight emoji popover — no extra package; inserts via parent callback.
+ * Lightweight emoji popover - no extra package; inserts via parent callback.
  */
 const EmojiPickerButton = ({
   onSelect,

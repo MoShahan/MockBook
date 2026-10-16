@@ -1,6 +1,6 @@
 # MockBook
 
-Social app built with the MERN stack: a Next.js frontend and an Express API backed by MongoDB. Register, post (text + images), like, comment, friend others, and browse profiles — with light/dark mode and a hardened auth API.
+Social app built with the MERN stack: a Next.js frontend and an Express API backed by MongoDB. Register, post (text + images), like, comment, friend others, and browse profiles - with light/dark mode and a hardened auth API.
 
 By Mohammed Shahan.
 
@@ -36,7 +36,7 @@ MockBook/
 - Auto-login after register (lands on home)
 - Log in / log out
 - Password show/hide on auth forms
-- Client + server password policy on register (8–24 chars; upper, lower, number, symbol)
+- Client + server password policy on register (8-24 chars; upper, lower, number, symbol)
 - Protected routes (`AuthProvider`); guests redirected to login
 - Bearer **access JWT** (default expiry **1 day**) + **refresh JWT** (default **7 days**)
 - Silent token refresh on API `401` (axios interceptor); logout if refresh fails
@@ -69,8 +69,8 @@ MockBook/
 - **Add people** discovery widget on `/home` (sticky right rail on wide screens; collapsible “Find people” on mobile) with recent users + name search
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
 - Edit own profile (name, location, occupation, avatar, social handles, **avatar color**, **cover color**) via manage-account control
-- Solid color profile header (`coverColor`) and initials avatar color (`avatarColor`) when no photo — allowlisted swatches only
-- Optional public social links (Facebook, X, LinkedIn, Instagram) — shown only when set
+- Solid color profile header (`coverColor`) and initials avatar color (`avatarColor`) when no photo - allowlisted swatches only
+- Optional public social links (Facebook, X, LinkedIn, Instagram) - shown only when set
 - Profile visit counter (`viewedProfile`) increments when another user loads your profile
 - In-app notifications (likes, comments, friend adds) via navbar bell + `/notifications` page
 - Optional OAuth sign-in: Google, GitHub, Discord (when configured in backend env)
@@ -90,7 +90,7 @@ MockBook/
 - Light / dark mode (persisted)
 - Stone-first theme + Fraunces / Source Sans 3; MockBook logo in the header
 - Split **login/register** layout (`AuthLayout`): wave backdrop (`auth-wave-*.jpg`) + café/social panel on the left (`auth-panel-*.jpg`)
-- **Help & FAQ** (`/help`) with Contact section; **Privacy** (`/privacy`) and **Terms** (`/terms`) — linked from navbar Help and auth footers
+- **Help & FAQ** (`/help`) with Contact section; **Privacy** (`/privacy`) and **Terms** (`/terms`) - linked from navbar Help and auth footers
 - Mobile nav uses a finished side drawer (account, profile, help, theme, log out)
 - Toast / snackbar feedback for key actions
 - Formik + Yup validation with visible field errors
@@ -111,7 +111,7 @@ MockBook/
 ### Planned next (see `PROJECT_PLAN.md`)
 
 - Further UI polish (Part 5); tests; production deploy
-- Messaging / DMs — **out of scope**
+- Messaging / DMs - **out of scope**
 
 ## Requirements
 
@@ -138,7 +138,7 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 ```
 
-**Backend** (`backend/.env`) — see also `backend/.env.example`:
+**Backend** (`backend/.env`) - see also `backend/.env.example`:
 
 ```text
 PORT=5000
@@ -169,7 +169,7 @@ FRONTEND_URL=http://localhost:3000
 
 The backend currently connects with `process.env.MONGODB_URI` only. Username/password env vars are handy notes; they are not read by the code unless you wire them in later.
 
-**Frontend** (`frontend/.env.local`) — see also `frontend/.env.example`:
+**Frontend** (`frontend/.env.local`) - see also `frontend/.env.example`:
 
 | Variable              | Required | Purpose                                                                 |
 | --------------------- | -------- | ----------------------------------------------------------------------- |

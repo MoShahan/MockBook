@@ -8,7 +8,7 @@ import { DEFAULT_AVATAR_COLOR, normalizeProfileColor } from "@/lib/profileColors
 
 type UserImageProps = {
   image: string
-  /** Full name or "First Last" — used for initials when there is no photo. */
+  /** Full name or "First Last" - used for initials when there is no photo. */
   name?: string
   size?: string
   /** Solid background when showing initials (allowlisted hex). */
@@ -26,7 +26,7 @@ export function getInitials(name?: string): string {
   return `${first}${last}`.toUpperCase()
 }
 
-const UserImage = ({ image, name, size = "60px", bgColor }: UserImageProps) => {
+const UserImage = ({ image, name, size = "48px", bgColor }: UserImageProps) => {
   const src = mediaUrl(image)
   const [imgFailed, setImgFailed] = useState(false)
   const showImage = Boolean(src) && !imgFailed

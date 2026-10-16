@@ -1,6 +1,6 @@
 import multer from "multer"
 
-/** Central API error handler — no stack traces or secrets to clients. */
+/** Central API error handler - no stack traces or secrets to clients. */
 export function errorHandler(err, _req, res, _next) {
   if (err instanceof multer.MulterError) {
     const msg = err.code === "LIMIT_FILE_SIZE" ? "Image must be 5MB or smaller" : "Upload failed"

@@ -16,8 +16,8 @@ const EmptyState = ({ title, description }: EmptyStateProps) => {
       role="status"
       sx={{
         textAlign: "center",
-        py: { xs: 3, sm: 4 },
-        px: 2,
+        py: { xs: 2, sm: 2.5 },
+        px: 1.5,
         borderRadius: 2,
         border: `1px dashed ${theme.palette.divider}`,
         bgcolor:
@@ -27,17 +27,20 @@ const EmptyState = ({ title, description }: EmptyStateProps) => {
       }}
     >
       <Typography
-        variant="h6"
+        variant="subtitle1"
         sx={{
           color: theme.palette.neutral.dark,
           fontWeight: 600,
-          mb: description ? 0.75 : 0,
+          mb: description ? 0.5 : 0,
         }}
       >
         {title}
       </Typography>
       {description ? (
-        <Typography sx={{ color: theme.palette.neutral.medium, maxWidth: 360, mx: "auto" }}>
+        <Typography
+          variant="body2"
+          sx={{ color: theme.palette.neutral.medium, maxWidth: 320, mx: "auto" }}
+        >
           {description}
         </Typography>
       ) : null}

@@ -15,7 +15,7 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
   const primary = theme.palette.primary.main
   const pLight = theme.palette.primary.light
   const isNav = size === "nav"
-  const markPx = isNav ? 36 : 48
+  const markPx = isNav ? 32 : 44
 
   return (
     <Box
@@ -67,7 +67,7 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
           fontWeight: 700,
           letterSpacing: "-0.03em",
           lineHeight: 1,
-          fontSize: isNav ? "clamp(1.15rem, 2.2vw, 1.65rem)" : "clamp(1.5rem, 3vw, 2rem)",
+          fontSize: isNav ? "clamp(1.05rem, 1.8vw, 1.35rem)" : "clamp(1.35rem, 2.5vw, 1.75rem)",
           color: primary,
           transition: "color 0.15s ease",
           userSelect: "none",

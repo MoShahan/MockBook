@@ -148,11 +148,8 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
                   border: theme => `1px solid ${theme.palette.divider}`,
                 }}
               >
-                <Box
-                  sx={{ height: 72, bgcolor: values.coverColor }}
-                  aria-hidden
-                />
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2, px: 2, py: 1.5, mt: -4 }}>
+                <Box sx={{ height: 56, bgcolor: values.coverColor }} aria-hidden />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 1.5, py: 1.25, mt: -3 }}>
                   <Box
                     sx={{
                       borderRadius: "50%",
@@ -162,7 +159,7 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
                     <UserImage
                       image={previewUrl || user.picturePath || ""}
                       name={`${values.firstName} ${values.lastName}`}
-                      size="72px"
+                      size="56px"
                       bgColor={values.avatarColor}
                     />
                   </Box>

@@ -140,8 +140,8 @@ const NotificationsPage = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 2,
-            mb: 2,
+            gap: 1.5,
+            mb: 1.5,
             flexWrap: "wrap",
           }}
         >
@@ -150,12 +150,12 @@ const NotificationsPage = () => {
               Notifications
             </Typography>
             {unread > 0 ? (
-              <Typography sx={{ color: theme.palette.neutral.medium, mt: 0.5 }}>
+              <Typography variant="body2" sx={{ color: theme.palette.neutral.medium, mt: 0.35 }}>
                 {unread} unread
               </Typography>
             ) : null}
           </Box>
-          <Button variant="outlined" onClick={() => void handleMarkAll()} disabled={!unread}>
+          <Button size="small" variant="outlined" onClick={() => void handleMarkAll()} disabled={!unread}>
             Mark all read
           </Button>
         </Box>

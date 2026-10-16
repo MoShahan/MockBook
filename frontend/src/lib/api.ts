@@ -47,7 +47,7 @@ export function mediaUrl(src: string | undefined | null): string {
   return trimmed
 }
 
-/** @deprecated Prefer `mediaUrl` — uploads are absolute ImageKit URLs now. */
+/** @deprecated Prefer `mediaUrl` - uploads are absolute ImageKit URLs now. */
 export const assetUrl = mediaUrl
 
 /** Shared axios instance for all Express API calls. */

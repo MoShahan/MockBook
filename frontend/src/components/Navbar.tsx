@@ -149,7 +149,7 @@ const Navbar = () => {
           width: "100%",
           maxWidth: PAGE_MAX_WIDTH,
           margin: "0 auto",
-          padding: { xs: "0.85rem 1rem", sm: "1rem 1.5rem", md: "1rem 2rem" },
+          padding: { xs: "0.65rem 0.85rem", sm: "0.75rem 1.25rem", md: "0.8rem 1.75rem" },
         }}
       >
         <BrandLogo size="nav" onClick={handleGoToHome} />

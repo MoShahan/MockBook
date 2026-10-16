@@ -55,7 +55,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
-  // Token present but user not hydrated yet (OAuth race) — avoid a blank shell.
+  // Token present but user not hydrated yet (OAuth race) - avoid a blank shell.
   if (!profileId) {
     return (
       <Box>
@@ -75,7 +75,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
       <PageShell>
         <Box
           sx={{
-            gap: { xs: "1.5rem", md: "2rem" },
+            gap: { xs: "1.15rem", md: "1.5rem" },
             width: "100%",
             display: isNonMobileScreens ? "flex" : "block",
             alignItems: "flex-start",
@@ -83,8 +83,8 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
         >
           <Box
             sx={{
-              flex: isNonMobileScreens ? "0 0 360px" : undefined,
-              width: isNonMobileScreens ? 360 : "100%",
+              flex: isNonMobileScreens ? "0 0 320px" : undefined,
+              width: isNonMobileScreens ? 320 : "100%",
               maxWidth: "100%",
               minWidth: 0,
             }}
@@ -94,7 +94,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
               userId={profileId}
               isOwnProfile={isOwnProfile}
             />
-            <Box sx={{ mt: { xs: "1.25rem", md: "1.5rem" } }}>
+            <Box sx={{ mt: { xs: "1rem", md: "1.15rem" } }}>
               <FriendsListWidget userId={profileId} />
             </Box>
           </Box>
@@ -103,7 +103,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
               flex: isNonMobileScreens ? "1 1 auto" : undefined,
               minWidth: 0,
               width: "100%",
-              mt: isNonMobileScreens ? undefined : "1.75rem",
+              mt: isNonMobileScreens ? undefined : "1.25rem",
             }}
           >
             {isOwnProfile ? (
@@ -114,7 +114,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
                   variant="scrollable"
                   scrollButtons="auto"
                   aria-label="Profile content sections"
-                  sx={{ mb: "1rem", borderBottom: 1, borderColor: "divider" }}
+                  sx={{ mb: "0.85rem", borderBottom: 1, borderColor: "divider", minHeight: 40 }}
                 >
                   {OWN_TABS.map(tab => (
                     <Tab key={tab.value} value={tab.value} label={tab.label} />

@@ -17,7 +17,7 @@ type InfoPageShellProps = {
 }
 
 /**
- * Shell for Help / Privacy / Terms — Navbar when signed in, minimal header when public.
+ * Shell for Help / Privacy / Terms - Navbar when signed in, minimal header when public.
  */
 const InfoPageShell = ({ title, subtitle, children }: InfoPageShellProps) => {
   const theme = useTheme()
@@ -42,7 +42,7 @@ const InfoPageShell = ({ title, subtitle, children }: InfoPageShellProps) => {
               maxWidth: PAGE_MAX_WIDTH,
               margin: "0 auto",
               px: { xs: 2, sm: 3, md: 4 },
-              py: 1.5,
+              py: 1.15,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -51,10 +51,15 @@ const InfoPageShell = ({ title, subtitle, children }: InfoPageShellProps) => {
           >
             <BrandLogo size="nav" onClick={() => router.push("/login")} />
             <Box sx={{ display: "flex", gap: 1 }}>
-              <Button onClick={() => router.push("/login")} sx={{ textTransform: "none" }}>
+              <Button size="small" onClick={() => router.push("/login")} sx={{ textTransform: "none" }}>
                 Sign in
               </Button>
-              <Button variant="contained" onClick={() => router.push("/register")} sx={{ textTransform: "none" }}>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => router.push("/register")}
+                sx={{ textTransform: "none" }}
+              >
                 Create account
               </Button>
             </Box>
@@ -63,13 +68,15 @@ const InfoPageShell = ({ title, subtitle, children }: InfoPageShellProps) => {
       )}
 
       <PageShell narrow sx={{ flex: 1 }}>
-        <Typography variant="h3" sx={{ mb: 1, fontWeight: 600 }}>
+        <Typography variant="h3" sx={{ mb: 0.75, fontWeight: 600 }}>
           {title}
         </Typography>
         {subtitle ? (
-          <Typography sx={{ color: "text.secondary", mb: 3, lineHeight: 1.6 }}>{subtitle}</Typography>
+          <Typography variant="body1" sx={{ color: "text.secondary", mb: 2.25, lineHeight: 1.55 }}>
+            {subtitle}
+          </Typography>
         ) : (
-          <Box sx={{ mb: 3 }} />
+          <Box sx={{ mb: 2.25 }} />
         )}
         {children}
       </PageShell>

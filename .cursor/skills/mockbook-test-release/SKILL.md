@@ -43,10 +43,10 @@ Provide evidence that a change works and identify what remains unverified.
 Use this structure:
 
 - **Change under test**
-- **Checks executed** — exact commands and pass/fail results
+- **Checks executed** - exact commands and pass/fail results
 - **Manual scenarios verified**
-- **Not run / blocked** — explain why
+- **Not run / blocked** - explain why
 - **Known risks**
-- **Release recommendation** — Ready / Ready with caveats / Not ready
+- **Release recommendation** - Ready / Ready with caveats / Not ready
 
 Never state that a check passed unless it actually completed successfully. A successful build is not proof that runtime behavior is correct.

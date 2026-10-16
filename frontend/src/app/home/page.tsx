@@ -41,19 +41,19 @@ const HomePage = () => {
         <Box
           sx={{
             display: isWide ? "flex" : "block",
-            gap: { xs: "1.5rem", md: "2rem" },
+            gap: { xs: "1.15rem", md: "1.5rem" },
             alignItems: "flex-start",
             width: "100%",
           }}
         >
           <Box sx={{ flex: isWide ? "1 1 auto" : undefined, minWidth: 0, width: "100%" }}>
             <MyPostWidget url={user?.picturePath ?? ""} />
-            <Divider sx={{ margin: "1.25rem 0 1rem" }} />
+            <Divider sx={{ margin: "0.85rem 0 0.65rem" }} />
             <Tabs
               value={tab}
               onChange={(_, value: HomeTab) => setTab(value)}
               aria-label="Home feed"
-              sx={{ mb: "1.25rem", borderBottom: 1, borderColor: "divider" }}
+              sx={{ mb: "0.85rem", borderBottom: 1, borderColor: "divider", minHeight: 40 }}
             >
               <Tab value="everyone" label="Everyone" />
               <Tab value="friends" label="Friends" />
@@ -63,8 +63,8 @@ const HomePage = () => {
           {isWide ? (
             <Box
               sx={{
-                flex: "0 0 360px",
-                width: 360,
+                flex: "0 0 300px",
+                width: 300,
                 maxWidth: "100%",
                 position: "sticky",
                 top: "5.5rem",
@@ -77,7 +77,7 @@ const HomePage = () => {
               disableGutters
               elevation={0}
               sx={{
-                mt: "1.75rem",
+                mt: "1.25rem",
                 width: "100%",
                 bgcolor: "transparent",
                 "&:before": { display: "none" },
@@ -87,11 +87,12 @@ const HomePage = () => {
               }}
             >
               <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
+                expandIcon={<ExpandMoreIcon fontSize="small" />}
                 aria-controls="add-people-content"
                 id="add-people-header"
+                sx={{ minHeight: 44, "& .MuiAccordionSummary-content": { my: 0.75 } }}
               >
-                <Typography sx={{ fontWeight: 600, color: theme.palette.neutral.dark }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: theme.palette.neutral.dark }}>
                   Find people
                 </Typography>
               </AccordionSummary>

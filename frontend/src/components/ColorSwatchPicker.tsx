@@ -47,8 +47,8 @@ const ColorSwatchPicker = ({ label, value, onChange, hint }: ColorSwatchPickerPr
               title={colorLabel}
               onClick={() => onChange(hex)}
               sx={{
-                width: 32,
-                height: 32,
+                width: 28,
+                height: 28,
                 borderRadius: "50%",
                 bgcolor: hex,
                 border: theme =>

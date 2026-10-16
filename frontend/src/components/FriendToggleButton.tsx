@@ -20,8 +20,9 @@ const FriendToggleButton = ({ isFriend, onClick }: FriendToggleButtonProps) => {
       <IconButton
         onClick={onClick}
         aria-label={isFriend ? "Remove friend" : "Add friend"}
+        size="small"
         sx={{
-          p: "0.45rem",
+          p: "0.35rem",
           flexShrink: 0,
           color: contrast,
           backgroundColor: isFriend ? removeBg : addBg,
@@ -36,9 +37,9 @@ const FriendToggleButton = ({ isFriend, onClick }: FriendToggleButtonProps) => {
         }}
       >
         {isFriend ? (
-          <PersonRemoveOutlined sx={{ fontSize: "1.2rem" }} />
+          <PersonRemoveOutlined sx={{ fontSize: "1.05rem" }} />
         ) : (
-          <PersonAddOutlined sx={{ fontSize: "1.2rem" }} />
+          <PersonAddOutlined sx={{ fontSize: "1.05rem" }} />
         )}
       </IconButton>
     </Tooltip>

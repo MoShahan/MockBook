@@ -326,7 +326,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
         subtitle={formatPostTime(post.createdAt)}
         url={post.user?.picturePath || ""}
         avatarColor={post.user?.avatarColor}
-        avatarSize="55px"
+        avatarSize="44px"
         showFriendButton={false}
         endAction={
           isOwnPost ? (
@@ -376,52 +376,38 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           maxWords={40}
           typographySx={{
             color: neutral,
-            mt: "0.85rem",
-            fontSize: "0.98rem",
-            lineHeight: 1.55,
+            mt: "0.65rem",
+            fontSize: "0.9rem",
+            lineHeight: 1.5,
           }}
           buttonSx={{ color: primary, ml: 0 }}
         />
       ) : null}
-      {post?.url && (
+      {post?.url ? (
         <Box
+          component="img"
+          alt="Post image"
+          src={mediaUrl(post.url)}
           sx={{
-            mt: "0.85rem",
-            borderRadius: "0.75rem",
-            overflow: "hidden",
-            bgcolor: "action.hover",
-            border: theme => `1px solid ${theme.palette.divider}`,
-            aspectRatio: "16 / 10",
-            maxHeight: { xs: "min(360px, 50vh)", sm: "min(420px, 55vh)" },
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            display: "block",
+            width: "100%",
+            mt: "0.65rem",
+            borderRadius: "0.65rem",
+            maxHeight: { xs: "min(300px, 45vh)", sm: "min(360px, 50vh)" },
+            objectFit: "contain",
           }}
-        >
-          <Box
-            component="img"
-            alt="Post image"
-            src={mediaUrl(post.url)}
-            sx={{
-              display: "block",
-              width: "100%",
-              height: "100%",
-              maxHeight: { xs: "min(360px, 50vh)", sm: "min(420px, 55vh)" },
-              objectFit: "contain",
-            }}
-          />
-        </Box>
-      )}
-      <Divider sx={{ mt: "0.85rem", mb: "0.15rem" }} />
-      <FlexBetween sx={{ py: "0.15rem" }}>
-        <FlexBetween sx={{ gap: "0.35rem" }}>
-          <FlexBetween sx={{ gap: "0.15rem" }}>
+        />
+      ) : null}
+      <Divider sx={{ mt: "0.65rem", mb: "0.1rem" }} />
+      <FlexBetween sx={{ py: 0 }}>
+        <FlexBetween sx={{ gap: "0.2rem" }}>
+          <FlexBetween sx={{ gap: "0.1rem" }}>
             <Tooltip title={isLiked ? "Unlike" : "Like"}>
-              <IconButton onClick={patchLike} aria-label={isLiked ? "Unlike" : "Like"}>
+              <IconButton size="small" onClick={patchLike} aria-label={isLiked ? "Unlike" : "Like"}>
                 {isLiked ? (
-                  <FavoriteOutlined sx={{ color: primary }} />
+                  <FavoriteOutlined sx={{ color: primary, fontSize: "1.2rem" }} />
                 ) : (
-                  <FavoriteBorderOutlined />
+                  <FavoriteBorderOutlined sx={{ fontSize: "1.2rem" }} />
                 )}
               </IconButton>
             </Tooltip>
@@ -433,14 +419,14 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               sx={{
                 border: 0,
                 background: "none",
-                padding: "0.25rem 0.35rem",
+                padding: "0.2rem 0.3rem",
                 margin: 0,
-                minWidth: "1.25rem",
+                minWidth: "1.1rem",
                 cursor: "pointer",
                 color: isLiked ? primary : "inherit",
                 font: "inherit",
                 fontWeight: 600,
-                fontSize: "0.875rem",
+                fontSize: "0.8125rem",
                 borderRadius: 1,
                 transition: "color 0.15s ease",
                 "&:hover": { textDecoration: "underline", color: primary },
@@ -450,9 +436,10 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             </Typography>
           </FlexBetween>
 
-          <FlexBetween sx={{ gap: "0.15rem" }}>
+          <FlexBetween sx={{ gap: "0.1rem" }}>
             <Tooltip title={isComments ? "Hide comments" : "Comments"}>
               <IconButton
+                size="small"
                 onClick={() => {
                   setIsComments(prev => {
                     if (prev) setVisibleCommentCount(COMMENTS_INITIAL_VISIBLE)
@@ -463,14 +450,14 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                 aria-expanded={isComments}
                 sx={isComments ? { color: primary } : undefined}
               >
-                <ChatBubbleOutlineOutlined />
+                <ChatBubbleOutlineOutlined sx={{ fontSize: "1.2rem" }} />
               </IconButton>
             </Tooltip>
             <Typography
               sx={{
                 fontWeight: 600,
-                fontSize: "0.875rem",
-                minWidth: "1.25rem",
+                fontSize: "0.8125rem",
+                minWidth: "1.1rem",
                 color: isComments ? primary : "inherit",
               }}
             >
@@ -478,24 +465,30 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             </Typography>
           </FlexBetween>
         </FlexBetween>
-        <FlexBetween sx={{ gap: "0.1rem" }}>
+        <FlexBetween sx={{ gap: 0 }}>
           <Tooltip title={isSaved ? "Unsave" : "Save"}>
             <IconButton
+              size="small"
               onClick={() => void toggleSave()}
               aria-label={isSaved ? "Unsave post" : "Save post"}
               aria-pressed={isSaved}
             >
-              {isSaved ? <Bookmark sx={{ color: primary }} /> : <BookmarkBorder />}
+              {isSaved ? (
+                <Bookmark sx={{ color: primary, fontSize: "1.2rem" }} />
+              ) : (
+                <BookmarkBorder sx={{ fontSize: "1.2rem" }} />
+              )}
             </IconButton>
           </Tooltip>
           <Tooltip title="Share">
             <IconButton
+              size="small"
               aria-label="Share"
               aria-haspopup="true"
               aria-expanded={Boolean(shareAnchor)}
               onClick={e => setShareAnchor(e.currentTarget)}
             >
-              <ShareOutlined />
+              <ShareOutlined sx={{ fontSize: "1.2rem" }} />
             </IconButton>
           </Tooltip>
         </FlexBetween>
