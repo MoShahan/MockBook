@@ -211,13 +211,14 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
                 bgColor={avatarColor}
               />
             </Box>
-            <Box sx={{ minWidth: 0, pt: "2rem" }}>
+            <Box sx={{ minWidth: 0, pt: "2.85rem" }}>
               <Typography
                 variant="h4"
                 noWrap
                 sx={{
                   color: dark,
                   fontWeight: "500",
+                  lineHeight: 1.25,
                   ...(!alreadyOnThisProfile && {
                     "&:hover": {
                       color: palette.primary.main,
@@ -227,7 +228,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               >
                 {user.firstName} {user.lastName}
               </Typography>
-              <Typography sx={{ color: medium }}>{friendCount} friends</Typography>
+              <Typography sx={{ color: medium, mt: 0.25 }}>{friendCount} friends</Typography>
             </Box>
           </FlexBetween>
         </FlexBetween>

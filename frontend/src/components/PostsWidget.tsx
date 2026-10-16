@@ -207,8 +207,20 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      {posts.map(post => (
-        <PostWidget key={post._id} post={post} />
+      {posts.map((post, index) => (
+        <Box
+          key={post._id}
+          sx={{
+            "@keyframes postEnter": {
+              from: { opacity: 0, transform: "translateY(8px)" },
+              to: { opacity: 1, transform: "translateY(0)" },
+            },
+            animation: "postEnter 0.35s ease both",
+            animationDelay: `${Math.min(index, 8) * 40}ms`,
+          }}
+        >
+          <PostWidget post={post} />
+        </Box>
       ))}
       {paginated && hasMore ? (
         <Box

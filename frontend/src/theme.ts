@@ -191,7 +191,9 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
             paddingInline: 16,
             paddingBlock: 8,
             boxShadow: "none",
+            transition: "background-color 0.15s ease, color 0.15s ease, transform 0.12s ease",
             "&:hover": { boxShadow: "none" },
+            "&:active": { transform: "scale(0.98)" },
           },
         },
       },
@@ -199,6 +201,27 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
         styleOverrides: {
           root: {
             borderRadius: 10,
+            transition: "background-color 0.15s ease, color 0.15s ease, transform 0.12s ease",
+            "&:hover": {
+              backgroundColor: isDark
+                ? alpha(colorTokens.stone[0], 0.08)
+                : alpha(colorTokens.stone[900], 0.06),
+            },
+            "&:active": { transform: "scale(0.94)" },
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            marginInline: 4,
+            transition: "background-color 0.12s ease",
+            "&:hover": {
+              backgroundColor: isDark
+                ? alpha(colorTokens.stone[0], 0.08)
+                : alpha(colorTokens.stone[900], 0.06),
+            },
           },
         },
       },
@@ -208,6 +231,7 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
             textTransform: "none",
             fontWeight: 600,
             minHeight: 44,
+            transition: "color 0.15s ease",
           },
         },
       },
@@ -229,6 +253,10 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
           root: {
             borderRadius: 10,
             backgroundColor: isDark ? alpha(colorTokens.stone[0], 0.03) : colorTokens.stone[0],
+            transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+            "&.Mui-focused": {
+              boxShadow: `0 0 0 3px ${alpha(primary.main, isDark ? 0.28 : 0.18)}`,
+            },
           },
         },
       },
@@ -240,6 +268,9 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
             boxShadow: isDark
               ? `0 12px 40px ${alpha("#000", 0.45)}`
               : `0 12px 32px ${alpha(colorTokens.stone[900], 0.12)}`,
+          },
+          list: {
+            paddingBlock: 4,
           },
         },
       },

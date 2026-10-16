@@ -22,6 +22,8 @@ type FriendProps = {
   name: string
   /** Initials avatar background when no photo. */
   avatarColor?: string
+  /** Avatar size — lists use 48px; post headers keep 55px. */
+  avatarSize?: string
   /** When false, hide add/remove-friend (e.g. post cards). Default true. */
   showFriendButton?: boolean
   /** Optional trailing control (e.g. post ⋮ menu). */
@@ -34,6 +36,7 @@ const Friend = ({
   subtitle,
   url,
   avatarColor,
+  avatarSize = "48px",
   showFriendButton = true,
   endAction,
 }: FriendProps) => {
@@ -45,7 +48,6 @@ const Friend = ({
   const theme = useTheme()
   const main = theme.palette.neutral.main
   const medium = theme.palette.neutral.medium
-  // primary.light is too pale on light backgrounds — use main for readable hover.
   const nameHover = theme.palette.primary.main
 
   const isSelf = sameUserId(user?._id, id)
@@ -75,24 +77,65 @@ const Friend = ({
   }
 
   return (
-    <FlexBetween sx={{ width: "100%", gap: 1, minWidth: 0 }}>
+    <FlexBetween sx={{ width: "100%", gap: 1, minWidth: 0, alignItems: "center" }}>
       <FlexBetween sx={{ gap: "0.75rem", flex: "1 1 auto", minWidth: 0 }}>
         <Box
           onClick={handleGoToProfile}
-          sx={{ cursor: id ? "pointer" : "default", flexShrink: 0 }}
+          onKeyDown={e => {
+            if (!id) return
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              handleGoToProfile()
+            }
+          }}
+          role={id ? "link" : undefined}
+          tabIndex={id ? 0 : undefined}
+          sx={{
+            cursor: id ? "pointer" : "default",
+            flexShrink: 0,
+            borderRadius: "50%",
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 2,
+            },
+          }}
         >
-          <UserImage image={url} name={name} size="55px" bgColor={avatarColor} />
+          <UserImage image={url} name={name} size={avatarSize} bgColor={avatarColor} />
         </Box>
-        <Box onClick={handleGoToProfile} sx={{ minWidth: 0, flex: "1 1 auto", overflow: "hidden" }}>
+        <Box
+          onClick={handleGoToProfile}
+          onKeyDown={e => {
+            if (!id) return
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              handleGoToProfile()
+            }
+          }}
+          role={id ? "link" : undefined}
+          tabIndex={id ? 0 : undefined}
+          sx={{
+            minWidth: 0,
+            flex: "1 1 auto",
+            overflow: "hidden",
+            borderRadius: 1,
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 2,
+            },
+          }}
+        >
           <Typography
             variant="h5"
             noWrap
             title={name}
             sx={{
               color: main,
-              fontWeight: "500",
+              fontWeight: 600,
+              fontSize: "0.95rem",
+              lineHeight: 1.3,
               overflow: "hidden",
               textOverflow: "ellipsis",
+              transition: "color 0.15s ease",
               "&:hover": {
                 cursor: id ? "pointer" : "default",
                 color: id ? nameHover : main,
@@ -108,6 +151,8 @@ const Friend = ({
               sx={{
                 color: medium,
                 fontSize: "0.75rem",
+                lineHeight: 1.35,
+                mt: "0.1rem",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
               }}
@@ -118,7 +163,7 @@ const Friend = ({
         </Box>
       </FlexBetween>
       {(showFriendButton && id && !isSelf) || endAction ? (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
           {showFriendButton && id && !isSelf ? (
             <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
           ) : null}

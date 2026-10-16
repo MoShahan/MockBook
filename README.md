@@ -91,6 +91,7 @@ MockBook/
 - Stone-first theme + Fraunces / Source Sans 3; MockBook logo in the header
 - Split **login/register** layout (`AuthLayout`): wave backdrop (`auth-wave-*.jpg`) + café/social panel on the left (`auth-panel-*.jpg`)
 - **Help & FAQ** (`/help`) with Contact section; **Privacy** (`/privacy`) and **Terms** (`/terms`) — linked from navbar Help and auth footers
+- Mobile nav uses a finished side drawer (account, profile, help, theme, log out)
 - Toast / snackbar feedback for key actions
 - Formik + Yup validation with visible field errors
 - Shared **axios** client + Bearer request interceptor

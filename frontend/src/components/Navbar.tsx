@@ -1,8 +1,31 @@
 "use client"
 
 import React, { useState } from "react"
-import { Close, DarkMode, Help, LightMode, LogoutOutlined, Menu } from "@mui/icons-material"
-import { alpha, Box, Button, IconButton, Tooltip, useMediaQuery, useTheme } from "@mui/material"
+import {
+  Close,
+  DarkMode,
+  Help,
+  LightMode,
+  LogoutOutlined,
+  Menu,
+  PersonOutlined,
+} from "@mui/icons-material"
+import {
+  alpha,
+  Box,
+  Button,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -14,9 +37,10 @@ import BrandLogo from "./BrandLogo"
 import FlexBetween from "./FlexBetween"
 import NotificationsMenu from "./NotificationsMenu"
 import { PAGE_MAX_WIDTH } from "./PageShell"
+import UserImage from "./UserImage"
 
 const Navbar = () => {
-  const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const dispatch = useAppDispatch()
   const router = useRouter()
   const user = useAppSelector(state => state.user)
@@ -24,42 +48,83 @@ const Navbar = () => {
   const { success } = useToast()
 
   const theme = useTheme()
-  const nLight = theme.palette.neutral.light
   const dark = theme.palette.neutral.dark
+  const medium = theme.palette.neutral.medium
   const alt = theme.palette.background.alt
+  const isDark = theme.palette.mode === "dark"
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : "Profile"
+
+  const closeMobile = () => setMobileOpen(false)
 
   const handleGoToHome = () => {
     router.push("/home")
   }
 
   const handleGoToProfile = () => {
-    setIsMobileMenuToggled(false)
+    closeMobile()
     router.push("/profile")
   }
 
   const handleLogout = () => {
-    setIsMobileMenuToggled(false)
+    closeMobile()
     dispatch(setLogout())
     success("Signed out")
     router.push("/login")
   }
 
   const handleGoToHelp = () => {
-    setIsMobileMenuToggled(false)
+    closeMobile()
     router.push("/help")
   }
 
-  const accountActions = (
+  const handleToggleMode = () => {
+    dispatch(toggleMode())
+  }
+
+  const themeToggle = (
+    <Tooltip title={isDark ? "Light mode" : "Dark mode"}>
+      <IconButton
+        onClick={handleToggleMode}
+        aria-label="Toggle theme"
+        sx={{
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 2,
+          "& .theme-icon": {
+            transition: "transform 0.35s ease, opacity 0.2s ease",
+          },
+          "&:active .theme-icon": {
+            transform: "rotate(180deg)",
+          },
+        }}
+      >
+        {isDark ? (
+          <DarkMode className="theme-icon" sx={{ fontSize: "22px" }} />
+        ) : (
+          <LightMode className="theme-icon" sx={{ color: dark, fontSize: "22px" }} />
+        )}
+      </IconButton>
+    </Tooltip>
+  )
+
+  const desktopAccount = (
     <>
-      <Button onClick={handleGoToProfile} sx={{ color: dark, textTransform: "none", fontWeight: 500 }}>
+      <Button
+        onClick={handleGoToProfile}
+        sx={{
+          color: dark,
+          textTransform: "none",
+          fontWeight: 500,
+          px: 1.25,
+          minWidth: 0,
+        }}
+      >
         {fullName}
       </Button>
       <Button
         onClick={handleLogout}
         startIcon={<LogoutOutlined />}
-        sx={{ color: dark, textTransform: "none" }}
+        sx={{ color: dark, textTransform: "none", flexShrink: 0 }}
       >
         Log Out
       </Button>
@@ -74,8 +139,7 @@ const Navbar = () => {
         top: 0,
         zIndex: theme.zIndex.appBar,
         borderBottom: `1px solid ${theme.palette.divider}`,
-        // Glassy navbar only — page cards stay solid (Step 5.1 / 3C).
-        bgcolor: alpha(alt, theme.palette.mode === "dark" ? 0.72 : 0.78),
+        bgcolor: alpha(alt, isDark ? 0.72 : 0.78),
         backdropFilter: "saturate(1.2) blur(14px)",
         WebkitBackdropFilter: "saturate(1.2) blur(14px)",
       }}
@@ -92,72 +156,122 @@ const Navbar = () => {
 
         {isNonMobileScreens ? (
           <FlexBetween sx={{ gap: "0.75rem" }}>
-            <Tooltip title={theme.palette.mode === "dark" ? "Light mode" : "Dark mode"}>
-              <IconButton
-                onClick={() => dispatch(toggleMode())}
-                aria-label="Toggle theme"
-                sx={{
-                  border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: 2,
-                }}
-              >
-                {theme.palette.mode === "dark" ? (
-                  <DarkMode sx={{ fontSize: "22px" }} />
-                ) : (
-                  <LightMode sx={{ color: dark, fontSize: "22px" }} />
-                )}
-              </IconButton>
-            </Tooltip>
+            {themeToggle}
             <NotificationsMenu />
             <Tooltip title="Help & FAQ">
               <IconButton onClick={handleGoToHelp} aria-label="Help">
                 <Help sx={{ fontSize: "25px" }} />
               </IconButton>
             </Tooltip>
-            {accountActions}
+            {desktopAccount}
           </FlexBetween>
         ) : (
-          <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)} aria-label="Open menu">
-            <Menu />
-          </IconButton>
+          <FlexBetween sx={{ gap: 0.5 }}>
+            <NotificationsMenu />
+            <IconButton
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-nav-drawer"
+            >
+              <Menu />
+            </IconButton>
+          </FlexBetween>
         )}
       </FlexBetween>
 
-      {!isNonMobileScreens && isMobileMenuToggled && (
-        <Box
-          sx={{
-            position: "fixed",
-            right: "0",
-            bottom: "0",
-            height: "100%",
-            zIndex: "10",
-            maxWidth: "500px",
-            minWidth: "300px",
-            bgcolor: nLight,
-          }}
-        >
-          <Box sx={{ display: "flex", justifyContent: "flex-end", p: "1rem" }}>
-            <IconButton onClick={() => setIsMobileMenuToggled(prev => !prev)} aria-label="Close menu">
+      <Drawer
+        id="mobile-nav-drawer"
+        anchor="right"
+        open={!isNonMobileScreens && mobileOpen}
+        onClose={closeMobile}
+        slotProps={{
+          paper: {
+            sx: {
+              width: "min(320px, 88vw)",
+              bgcolor: alt,
+              borderLeft: `1px solid ${theme.palette.divider}`,
+              backgroundImage: "none",
+            },
+          },
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <FlexBetween sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: dark }}>
+              Menu
+            </Typography>
+            <IconButton onClick={closeMobile} aria-label="Close menu">
               <Close />
             </IconButton>
-          </Box>
-
-          <FlexBetween sx={{ gap: "2rem", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-            <IconButton onClick={() => dispatch(toggleMode())} aria-label="Toggle theme">
-              {theme.palette.mode === "dark" ? (
-                <DarkMode sx={{ fontSize: "25px" }} />
-              ) : (
-                <LightMode sx={{ color: dark, fontSize: "25px" }} />
-              )}
-            </IconButton>
-            <NotificationsMenu />
-            <IconButton onClick={handleGoToHelp} aria-label="Help">
-              <Help sx={{ fontSize: "25px" }} />
-            </IconButton>
-            {accountActions}
           </FlexBetween>
+          <Divider />
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              px: 2,
+              py: 2,
+            }}
+          >
+            <UserImage
+              image={user?.picturePath || ""}
+              name={fullName}
+              size="48px"
+              bgColor={user?.avatarColor}
+            />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography noWrap sx={{ fontWeight: 600, color: dark }}>
+                {fullName}
+              </Typography>
+              <Typography variant="body2" sx={{ color: medium }}>
+                Your account
+              </Typography>
+            </Box>
+          </Box>
+          <Divider />
+
+          <List sx={{ px: 1, py: 1, flex: 1 }}>
+            <ListItemButton onClick={handleGoToProfile} sx={{ borderRadius: 2 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <PersonOutlined />
+              </ListItemIcon>
+              <ListItemText primary="Profile" />
+            </ListItemButton>
+            <ListItemButton onClick={handleGoToHelp} sx={{ borderRadius: 2 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <Help />
+              </ListItemIcon>
+              <ListItemText primary="Help & FAQ" />
+            </ListItemButton>
+            <ListItemButton onClick={handleToggleMode} sx={{ borderRadius: 2 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                {isDark ? <LightMode /> : <DarkMode />}
+              </ListItemIcon>
+              <ListItemText primary={isDark ? "Light mode" : "Dark mode"} />
+            </ListItemButton>
+          </List>
+
+          <Divider />
+          <Box sx={{ p: 1.5 }}>
+            <Button
+              fullWidth
+              onClick={handleLogout}
+              startIcon={<LogoutOutlined />}
+              sx={{
+                color: theme.palette.error.main,
+                textTransform: "none",
+                justifyContent: "flex-start",
+                px: 1.5,
+              }}
+            >
+              Log out
+            </Button>
+          </Box>
         </Box>
-      )}
+      </Drawer>
     </Box>
   )
 }
