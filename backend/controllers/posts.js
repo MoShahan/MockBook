@@ -170,6 +170,79 @@ export const likeComment = async (req, res, next) => {
   }
 }
 
+export const editComment = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const { postId, commentId } = req.params
+    const text = typeof req.body.text === "string" ? req.body.text.trim() : ""
+    if (!text) {
+      return res.status(400).json({ error: "Comment text is required" })
+    }
+    if (text.length > 2000) {
+      return res.status(400).json({ error: "Comment is too long" })
+    }
+
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    const comment = post.comments.id(commentId)
+    if (!comment) {
+      return res.status(404).json({ error: "Comment not found" })
+    }
+
+    if (String(comment.userId) !== String(userId)) {
+      return res.status(403).json({ error: "You can only edit your own comments" })
+    }
+
+    comment.text = text
+    post.markModified("comments")
+    await post.save()
+
+    const [formatted] = await withAuthors([post])
+    res.status(200).json({ message: "Comment updated", updatedPost: formatted })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const deleteComment = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const { postId, commentId } = req.params
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    const comment = post.comments.id(commentId)
+    if (!comment) {
+      return res.status(404).json({ error: "Comment not found" })
+    }
+
+    if (String(comment.userId) !== String(userId)) {
+      return res.status(403).json({ error: "You can only delete your own comments" })
+    }
+
+    comment.deleteOne()
+    await post.save()
+
+    const [formatted] = await withAuthors([post])
+    res.status(200).json({ message: "Comment deleted", updatedPost: formatted })
+  } catch (e) {
+    next(e)
+  }
+}
+
 export const deletePost = async (req, res, next) => {
   try {
     const userId = req.user?.id

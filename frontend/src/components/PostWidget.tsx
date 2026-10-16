@@ -5,6 +5,7 @@ import {
   ChatBubbleOutlineOutlined,
   ContentCopy,
   DeleteOutlined,
+  EditOutlined,
   FavoriteBorderOutlined,
   FavoriteOutlined,
   MoreVert,
@@ -28,6 +29,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material"
+
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api, mediaUrl } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
@@ -35,7 +37,7 @@ import { buildShareText, buildShareUrls, openShareWindow } from "@/lib/share"
 import { formatPostTime } from "@/lib/time"
 import { useToast } from "@/providers/ToastProvider"
 import { removePost, setPost } from "@/state"
-import type { Post } from "@/types/models"
+import { type Post,sameUserId } from "@/types/models"
 
 import FlexBetween from "./FlexBetween"
 import Friend from "./Friend"
@@ -69,6 +71,15 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
   const [shareAnchor, setShareAnchor] = useState<null | HTMLElement>(null)
+  const [commentMenu, setCommentMenu] = useState<{ anchor: HTMLElement; commentId: string } | null>(
+    null
+  )
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+  const [editCommentText, setEditCommentText] = useState("")
+  const [editCommentError, setEditCommentError] = useState<string | undefined>()
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
+  const [confirmDeleteCommentId, setConfirmDeleteCommentId] = useState<string | null>(null)
+  const [isDeletingComment, setIsDeletingComment] = useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -141,6 +152,64 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const shareTo = (url: string) => {
     setShareAnchor(null)
     openShareWindow(url)
+  }
+
+  const startEditComment = (commentId: string, currentText: string) => {
+    setCommentMenu(null)
+    setEditingCommentId(commentId)
+    setEditCommentText(currentText)
+    setEditCommentError(undefined)
+  }
+
+  const cancelEditComment = () => {
+    setEditingCommentId(null)
+    setEditCommentText("")
+    setEditCommentError(undefined)
+  }
+
+  const saveEditComment = async (commentId: string) => {
+    const text = editCommentText.trim()
+    if (!text) {
+      setEditCommentError("Write a comment")
+      return
+    }
+    if (text.length > 2000) {
+      setEditCommentError("Comment is too long")
+      return
+    }
+    try {
+      setIsSavingEdit(true)
+      setEditCommentError(undefined)
+      const { data } = await api.patch<{ message: string; updatedPost: Post }>(
+        `/posts/${post._id}/comments/${commentId}`,
+        { text }
+      )
+      dispatch(setPost({ post: data.updatedPost }))
+      cancelEditComment()
+      success("Comment updated")
+    } catch (err: unknown) {
+      setEditCommentError(getErrorMessage(err, "Failed to update comment"))
+    } finally {
+      setIsSavingEdit(false)
+    }
+  }
+
+  const handleDeleteComment = async () => {
+    if (!confirmDeleteCommentId) return
+    try {
+      setIsDeletingComment(true)
+      const { data } = await api.delete<{ message: string; updatedPost: Post }>(
+        `/posts/${post._id}/comments/${confirmDeleteCommentId}`
+      )
+      dispatch(setPost({ post: data.updatedPost }))
+      setConfirmDeleteCommentId(null)
+      if (editingCommentId === confirmDeleteCommentId) cancelEditComment()
+      success("Comment deleted")
+    } catch (err: unknown) {
+      toastError(getErrorMessage(err, "Failed to delete comment"))
+    } finally {
+      setIsDeletingComment(false)
+    }
   }
 
   return (
@@ -268,40 +337,97 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             const commentLikes = comment.likes ?? {}
             const isCommentLiked = Boolean(user?._id && commentLikes[user._id])
             const commentLikesCount = Object.keys(commentLikes).length
+            const isOwnComment = Boolean(comment._id && sameUserId(user?._id, comment.userId))
+            const isEditing = Boolean(comment._id && editingCommentId === comment._id)
             return (
               <Box key={comment._id || `${post._id}-c-${index}`}>
                 <Divider />
                 <Box sx={{ display: "flex", gap: "0.75rem", m: "0.75rem 0", pl: "0.25rem", alignItems: "flex-start" }}>
                   <UserImage image={comment.user?.picturePath || ""} name={name} size="36px" />
                   <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography
-                      sx={{
-                        color: theme.palette.neutral.dark,
-                        fontWeight: 600,
-                        fontSize: "0.8125rem",
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {name}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: neutral,
-                        fontWeight: 400,
-                        fontSize: "0.9375rem",
-                        mt: "0.15rem",
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {comment.text}
-                    </Typography>
+                    <FlexBetween sx={{ alignItems: "flex-start" }}>
+                      <Typography
+                        sx={{
+                          color: theme.palette.neutral.dark,
+                          fontWeight: 600,
+                          fontSize: "0.8125rem",
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {name}
+                      </Typography>
+                      {isOwnComment && comment._id && !isEditing && (
+                        <IconButton
+                          size="small"
+                          aria-label="Comment options"
+                          aria-haspopup="true"
+                          aria-expanded={commentMenu?.commentId === comment._id}
+                          onClick={e => setCommentMenu({ anchor: e.currentTarget, commentId: comment._id! })}
+                          sx={{ p: "0.15rem", ml: "0.25rem" }}
+                        >
+                          <MoreVert sx={{ fontSize: "1.1rem" }} />
+                        </IconButton>
+                      )}
+                    </FlexBetween>
+                    {isEditing && comment._id ? (
+                      <Box sx={{ mt: "0.35rem" }}>
+                        <InputBase
+                          fullWidth
+                          multiline
+                          maxRows={4}
+                          value={editCommentText}
+                          onChange={e => {
+                            setEditCommentText(e.target.value)
+                            if (editCommentError) setEditCommentError(undefined)
+                          }}
+                          disabled={isSavingEdit}
+                          sx={{
+                            backgroundColor: theme.palette.neutral.light,
+                            borderRadius: "0.75rem",
+                            padding: "0.5rem 0.75rem",
+                            fontSize: "0.9375rem",
+                            border: editCommentError ? `1px solid ${theme.palette.error.main}` : undefined,
+                          }}
+                        />
+                        {editCommentError && (
+                          <Typography sx={{ color: "error.main", mt: "0.25rem", fontSize: "0.75rem" }} role="alert">
+                            {editCommentError}
+                          </Typography>
+                        )}
+                        <Box sx={{ display: "flex", gap: "0.5rem", mt: "0.5rem" }}>
+                          <Button
+                            size="small"
+                            disabled={isSavingEdit}
+                            onClick={() => saveEditComment(comment._id!)}
+                            sx={{ color: theme.palette.background.alt, backgroundColor: primary }}
+                          >
+                            {isSavingEdit ? "Saving…" : "Save"}
+                          </Button>
+                          <Button size="small" disabled={isSavingEdit} onClick={cancelEditComment}>
+                            Cancel
+                          </Button>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Typography
+                        sx={{
+                          color: neutral,
+                          fontWeight: 400,
+                          fontSize: "0.9375rem",
+                          mt: "0.15rem",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {comment.text}
+                      </Typography>
+                    )}
                     <FlexBetween sx={{ mt: "0.2rem", justifyContent: "flex-start", gap: "0.75rem" }}>
                       {comment.createdAt && (
                         <Typography sx={{ color: medium, fontSize: "0.75rem" }}>
                           {formatPostTime(comment.createdAt)}
                         </Typography>
                       )}
-                      {comment._id && (
+                      {comment._id && !isEditing && (
                         <FlexBetween sx={{ gap: "0.15rem" }}>
                           <IconButton
                             size="small"
@@ -326,6 +452,37 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               </Box>
             )
           })}
+          <Menu
+            anchorEl={commentMenu?.anchor ?? null}
+            open={Boolean(commentMenu)}
+            onClose={() => setCommentMenu(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <MenuItem
+              onClick={() => {
+                const target = comments.find(c => c._id === commentMenu?.commentId)
+                if (target?._id) startEditComment(target._id, target.text)
+              }}
+            >
+              <ListItemIcon>
+                <EditOutlined fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Edit</ListItemText>
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                const id = commentMenu?.commentId
+                setCommentMenu(null)
+                if (id) setConfirmDeleteCommentId(id)
+              }}
+            >
+              <ListItemIcon>
+                <DeleteOutlined fontSize="small" color="error" />
+              </ListItemIcon>
+              <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>Delete</ListItemText>
+            </MenuItem>
+          </Menu>
           <Divider sx={{ mb: "0.75rem" }} />
           <Box component="form" onSubmit={submitComment} noValidate>
             <FlexBetween sx={{ gap: "0.5rem" }}>
@@ -373,6 +530,24 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           </Button>
           <Button onClick={handleDelete} color="error" disabled={isDeleting} autoFocus>
             {isDeleting ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(confirmDeleteCommentId)}
+        onClose={() => !isDeletingComment && setConfirmDeleteCommentId(null)}
+      >
+        <DialogTitle>Delete comment?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>This cannot be undone.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDeleteCommentId(null)} disabled={isDeletingComment}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteComment} color="error" disabled={isDeletingComment} autoFocus>
+            {isDeletingComment ? "Deleting…" : "Delete"}
           </Button>
         </DialogActions>
       </Dialog>

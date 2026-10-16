@@ -3,7 +3,9 @@ import express from "express"
 import {
   addComment,
   createPost,
+  deleteComment,
   deletePost,
+  editComment,
   getFeed,
   getPost,
   getUserPosts,
@@ -34,6 +36,22 @@ router.patch(
   requireObjectId("postId"),
   requireObjectId("commentId"),
   likeComment
+)
+
+router.patch(
+  "/:postId/comments/:commentId",
+  verifyAccessToken,
+  requireObjectId("postId"),
+  requireObjectId("commentId"),
+  editComment
+)
+
+router.delete(
+  "/:postId/comments/:commentId",
+  verifyAccessToken,
+  requireObjectId("postId"),
+  requireObjectId("commentId"),
+  deleteComment
 )
 
 router.delete("/:postId", verifyAccessToken, requireObjectId("postId"), deletePost)

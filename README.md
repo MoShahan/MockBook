@@ -50,6 +50,7 @@ MockBook/
 - Home feed with author name, avatar, and relative time
 - Like / unlike posts (count updates in UI)
 - Comment on posts (add + list with author)
+- Edit / delete **own** comments (⋮ menu; confirm on delete)
 - Like / unlike comments (heart + count on each comment)
 - Delete **own** posts (⋮ menu + confirm dialog)
 - Single-post page at `/post/[postId]`; Share menu (copy link, X, Facebook, LinkedIn, WhatsApp)
@@ -93,7 +94,7 @@ MockBook/
 
 ### Planned next (see `PROJECT_PLAN.md`)
 
-- Edit own posts; edit/delete own comments
+- Edit own posts
 - Who liked a post / comment (own + others’); save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
 - Home **Add people** rail (recent users + search; search lives in that widget, not the navbar)
 - Profile editing (location, occupation, avatar) + social links
@@ -226,6 +227,8 @@ npm run start -w backend
 | `GET`    | `/posts/:postId`             | Single post                                                      |
 | `PATCH`  | `/posts/:postId/like`        | Like or unlike                                                   |
 | `POST`   | `/posts/:postId/comments`    | Add a comment                                                    |
+| `PATCH`  | `/posts/:postId/comments/:commentId` | Edit own comment                                           |
+| `DELETE` | `/posts/:postId/comments/:commentId` | Delete own comment                                       |
 | `PATCH`  | `/posts/:postId/comments/:commentId/like` | Like or unlike a comment                                |
 | `DELETE` | `/posts/:postId`             | Delete own post                                                  |
 
