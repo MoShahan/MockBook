@@ -14,6 +14,7 @@ const initialState: AuthState = {
 function sanitizeUser(user: User): User {
   const { ...safe } = user as User & { password?: unknown }
   delete (safe as { password?: unknown }).password
+  safe.savedPosts = (safe.savedPosts || []).map(id => String(id))
   return safe
 }
 
@@ -49,6 +50,13 @@ export const authSlice = createSlice({
         console.warn("User does not exist, cannot set Friends")
       }
     },
+    setSavedPosts: (state, action: PayloadAction<{ savedPosts: string[] }>) => {
+      if (state.user) {
+        state.user.savedPosts = action.payload.savedPosts.map(id => String(id))
+      } else {
+        console.warn("User does not exist, cannot set saved posts")
+      }
+    },
     setPosts: (state, action: PayloadAction<{ posts: Post[] }>) => {
       state.posts = action.payload.posts
     },
@@ -73,6 +81,7 @@ export const authSlice = createSlice({
 export const {
   toggleMode,
   setFriends,
+  setSavedPosts,
   setLogin,
   setTokens,
   setPost,

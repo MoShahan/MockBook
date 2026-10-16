@@ -8,6 +8,7 @@ import User from "../models/User.js"
 const toSafeUser = userDoc => {
   const user = userDoc.toObject ? userDoc.toObject() : { ...userDoc }
   delete user.password
+  user.savedPosts = (user.savedPosts || []).map(id => String(id))
   return user
 }
 
@@ -44,6 +45,7 @@ export const register = async (req, res, next) => {
       password: hashedPass,
       picturePath: "",
       friends: [],
+      savedPosts: [],
       location: "",
       occupation: "",
       viewedProfile: 0,

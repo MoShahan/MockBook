@@ -6,6 +6,7 @@ import {
   withAuthors,
 } from "../lib/posts.js"
 import Post from "../models/Post.js"
+import User from "../models/User.js"
 
 export const createPost = async (req, res, next) => {
   try {
@@ -305,8 +306,106 @@ export const deletePost = async (req, res, next) => {
     }
 
     await Post.findByIdAndDelete(postId)
+    // Drop deleted post from everyone's bookmarks.
+    await User.updateMany({ savedPosts: postId }, { $pull: { savedPosts: postId } })
     res.status(200).json({ message: "Post deleted", postId })
   } catch (e) {
     res.status(500).json({ error: e.message })
+  }
+}
+
+/** Idempotent save: add post to JWT user's savedPosts (own or others’). */
+export const savePost = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const { postId } = req.params
+    const post = await Post.findById(postId).select("_id")
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { savedPosts: post._id } },
+      { new: true }
+    ).select("savedPosts")
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    res.status(200).json({
+      message: "Post saved",
+      saved: true,
+      savedPosts: (user.savedPosts || []).map(id => String(id)),
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+
+/** Remove post from JWT user's savedPosts. */
+export const unsavePost = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const { postId } = req.params
+    const post = await Post.findById(postId).select("_id")
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { savedPosts: post._id } },
+      { new: true }
+    ).select("savedPosts")
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    res.status(200).json({
+      message: "Post unsaved",
+      saved: false,
+      savedPosts: (user.savedPosts || []).map(id => String(id)),
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+
+/** List posts the JWT user has saved (newest save first). Private to owner. */
+export const getSavedPosts = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const user = await User.findById(userId).select("savedPosts")
+    if (!user) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const idsNewestFirst = [...(user.savedPosts || [])].reverse().map(id => String(id))
+    if (idsNewestFirst.length === 0) {
+      return res.status(200).json([])
+    }
+
+    const posts = await Post.find({ _id: { $in: idsNewestFirst } })
+    const byId = Object.fromEntries(posts.map(p => [String(p._id), p]))
+    const ordered = idsNewestFirst.map(id => byId[id]).filter(Boolean)
+
+    res.status(200).json(await withAuthors(ordered))
+  } catch (e) {
+    next(e)
   }
 }

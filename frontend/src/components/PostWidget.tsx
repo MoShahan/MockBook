@@ -2,6 +2,8 @@
 
 import React, { useState } from "react"
 import {
+  Bookmark,
+  BookmarkBorder,
   ChatBubbleOutlineOutlined,
   ContentCopy,
   DeleteOutlined,
@@ -36,7 +38,7 @@ import { getErrorMessage } from "@/lib/errors"
 import { buildShareText, buildShareUrls, openShareWindow } from "@/lib/share"
 import { formatPostTime } from "@/lib/time"
 import { useToast } from "@/providers/ToastProvider"
-import { removePost, setPost } from "@/state"
+import { removePost, setPost, setSavedPosts } from "@/state"
 import { type Post,sameUserId } from "@/types/models"
 
 import ExpandableText from "./ExpandableText"
@@ -64,6 +66,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const likesCount = Object.keys(likes).length
   const comments = post.comments ?? []
   const isOwnPost = Boolean(user?._id && String(user._id) === String(post.userId))
+  const isSaved = Boolean(user?.savedPosts?.some(id => String(id) === String(post._id)))
 
   const theme = useTheme()
   const primary = theme.palette.primary.main
@@ -97,6 +100,22 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const patchLike = async () => {
     const { data } = await api.patch<{ message: string; updatedPost: Post }>(`/posts/${post._id}/like`)
     dispatch(setPost({ post: data.updatedPost }))
+  }
+
+  const toggleSave = async () => {
+    try {
+      const { data } = isSaved
+        ? await api.delete<{ message: string; saved: boolean; savedPosts: string[] }>(
+            `/posts/${post._id}/save`
+          )
+        : await api.put<{ message: string; saved: boolean; savedPosts: string[] }>(
+            `/posts/${post._id}/save`
+          )
+      dispatch(setSavedPosts({ savedPosts: data.savedPosts }))
+      success(data.message || (data.saved ? "Post saved" : "Post unsaved"))
+    } catch (err: unknown) {
+      toastError(getErrorMessage(err, isSaved ? "Failed to unsave post" : "Failed to save post"))
+    }
   }
 
   const patchCommentLike = async (commentId: string) => {
@@ -328,14 +347,23 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             <Typography>{comments.length}</Typography>
           </FlexBetween>
         </FlexBetween>
-        <IconButton
-          aria-label="Share"
-          aria-haspopup="true"
-          aria-expanded={Boolean(shareAnchor)}
-          onClick={e => setShareAnchor(e.currentTarget)}
-        >
-          <ShareOutlined />
-        </IconButton>
+        <FlexBetween sx={{ gap: "0.15rem" }}>
+          <IconButton
+            onClick={() => void toggleSave()}
+            aria-label={isSaved ? "Unsave post" : "Save post"}
+            aria-pressed={isSaved}
+          >
+            {isSaved ? <Bookmark sx={{ color: primary }} /> : <BookmarkBorder />}
+          </IconButton>
+          <IconButton
+            aria-label="Share"
+            aria-haspopup="true"
+            aria-expanded={Boolean(shareAnchor)}
+            onClick={e => setShareAnchor(e.currentTarget)}
+          >
+            <ShareOutlined />
+          </IconButton>
+        </FlexBetween>
         <Menu
           anchorEl={shareAnchor}
           open={Boolean(shareAnchor)}

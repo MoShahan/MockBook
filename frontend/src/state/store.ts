@@ -7,13 +7,24 @@ import authReducer from "@/state"
 const persistConfig = {
   key: "root",
   storage,
-  // v2: refreshToken added; rehydrate may leave refreshToken null until next login
-  version: 2,
+  // v2: refreshToken; v3: ensure user.savedPosts exists after bookmark feature
+  version: 3,
   migrate: async (state: unknown) => {
     if (!state || typeof state !== "object") return state as never
     const s = state as Record<string, unknown>
+    const user = s.user
+    let nextUser = user
+    if (user && typeof user === "object") {
+      const u = user as Record<string, unknown>
+      const rawSaved = u.savedPosts
+      nextUser = {
+        ...u,
+        savedPosts: Array.isArray(rawSaved) ? rawSaved.map(id => String(id)) : [],
+      }
+    }
     return {
       ...s,
+      user: nextUser,
       refreshToken: (s.refreshToken as string | null | undefined) ?? null,
     } as never
   },

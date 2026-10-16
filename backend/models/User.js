@@ -19,6 +19,11 @@ const UserSchema = new Schema(
       type: [{ type: Schema.Types.ObjectId, ref: "User" }],
       default: [],
     },
+    /** Bookmarked posts (own + others’). Private to this user. */
+    savedPosts: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+      default: [],
+    },
     location: { type: String, default: "" },
     occupation: { type: String, default: "" },
     viewedProfile: Number,

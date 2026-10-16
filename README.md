@@ -50,6 +50,7 @@ MockBook/
 - Home feed with author name, avatar, and relative time
 - Like / unlike posts (count updates in UI)
 - View who liked a post (click like count → list with profiles)
+- Save / unsave posts (bookmark on post cards; list via `GET /posts/saved`)
 - Comment on posts (add + list with author)
 - Edit / delete **own** comments (⋮ menu; confirm on delete)
 - Like / unlike comments (heart + count on each comment)
@@ -97,7 +98,7 @@ MockBook/
 ### Planned next (see `PROJECT_PLAN.md`)
 
 - Edit own posts
-- Save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
+- Profile Posts/Saved/Liked/Commented sections (Saved API ready; tabs in Step 4.3b)
 - Home **Add people** rail (recent users + search; search lives in that widget, not the navbar)
 - Profile editing (location, occupation, avatar) + social links
 - Help/FAQ page
@@ -225,8 +226,11 @@ npm run start -w backend
 | `PATCH`  | `/users/friends/:friendId`   | Add or remove a friend (JWT user only)                           |
 | `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit)          |
 | `GET`    | `/posts`                     | Home feed                                                        |
+| `GET`    | `/posts/saved`               | Logged-in user’s saved posts (newest save first)                 |
 | `GET`    | `/posts/:userId/posts`       | One user’s posts                                                 |
 | `GET`    | `/posts/:postId`             | Single post                                                      |
+| `PUT`    | `/posts/:postId/save`        | Save/bookmark a post (idempotent)                                |
+| `DELETE` | `/posts/:postId/save`        | Unsave a post                                                    |
 | `GET`    | `/posts/:postId/likes`       | Users who liked the post (`?page=&limit=`, default 20, max 50)   |
 | `PATCH`  | `/posts/:postId/like`        | Like or unlike                                                   |
 | `POST`   | `/posts/:postId/comments`    | Add a comment                                                    |

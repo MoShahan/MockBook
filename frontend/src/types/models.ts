@@ -19,6 +19,8 @@ export type User = {
   email?: string
   picturePath: string
   friends: Friend[]
+  /** Post ids the user has bookmarked (private). */
+  savedPosts?: string[]
   location?: string
   occupation?: string
   viewedProfile?: number
