@@ -231,8 +231,8 @@ const EmojiPickerButton = ({
               border: `1px solid ${theme.palette.divider}`,
               boxShadow:
                 theme.palette.mode === "dark"
-                  ? "0 12px 40px rgba(0,0,0,0.45)"
-                  : "0 12px 36px rgba(28,25,23,0.12)",
+                  ? `0 12px 40px ${alpha(theme.palette.common.black, 0.45)}`
+                  : `0 12px 36px ${alpha(theme.palette.common.black, 0.12)}`,
             },
           },
         }}

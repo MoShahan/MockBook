@@ -10,7 +10,7 @@ import {
   WorkOutlineOutlined,
   X,
 } from "@mui/icons-material"
-import { Box, Divider, IconButton, Link, Tooltip, Typography, useTheme } from "@mui/material"
+import { alpha, Box, Divider, IconButton, Link, Tooltip, Typography, useTheme } from "@mui/material"
 import { usePathname, useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
@@ -173,9 +173,9 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               <IconButton
                 size="small"
                 sx={{
-                  bgcolor: "rgba(0,0,0,0.28)",
-                  color: "#FAFAF9",
-                  "&:hover": { bgcolor: "rgba(0,0,0,0.42)" },
+                  bgcolor: theme => alpha(theme.palette.common.black, 0.28),
+                  color: "common.white",
+                  "&:hover": { bgcolor: theme => alpha(theme.palette.common.black, 0.42) },
                 }}
                 onClick={() => setEditOpen(true)}
                 aria-label="Edit profile"

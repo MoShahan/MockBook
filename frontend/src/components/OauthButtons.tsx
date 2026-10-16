@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect, useState } from "react"
 import { GitHub } from "@mui/icons-material"
-import { Box, Button, Divider, SvgIcon, Typography, useTheme } from "@mui/material"
+import { alpha, Box, Button, Divider, SvgIcon, Typography, useTheme } from "@mui/material"
 
 import { api, apiUrl } from "@/lib/api"
 
@@ -121,11 +121,11 @@ const OauthButtons = ({ oauthError }: OauthButtonsProps) => {
                 lineHeight: 1.2,
                 borderColor: theme.palette.divider,
                 color: theme.palette.text.primary,
-                bgcolor: isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.55)",
+                bgcolor: alpha(theme.palette.common.white, isDark ? 0.03 : 0.55),
                 boxShadow: "none",
                 "&:hover": {
                   borderColor: theme.palette.primary.main,
-                  bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.85)",
+                  bgcolor: alpha(theme.palette.common.white, isDark ? 0.06 : 0.85),
                   boxShadow: "none",
                 },
               }}

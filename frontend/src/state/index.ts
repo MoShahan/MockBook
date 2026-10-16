@@ -3,7 +3,8 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { AuthState, Friend, Post, User } from "@/types/models"
 
 const initialState: AuthState = {
-  mode: "dark",
+  /** SSR / first-paint fallback; ThemeInit may align to system before any user toggle. */
+  mode: "light",
   user: null,
   posts: [],
   accessToken: null,
@@ -24,6 +25,9 @@ export const authSlice = createSlice({
   reducers: {
     toggleMode: state => {
       state.mode = state.mode === "light" ? "dark" : "light"
+    },
+    setMode: (state, action: PayloadAction<"light" | "dark">) => {
+      state.mode = action.payload
     },
     setLogin: (
       state,
@@ -110,6 +114,7 @@ export const authSlice = createSlice({
 
 export const {
   toggleMode,
+  setMode,
   setFriends,
   setSavedPosts,
   setUser,

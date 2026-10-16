@@ -87,8 +87,9 @@ MockBook/
 
 ### UX & client architecture
 
-- Light / dark mode (persisted)
-- Stone-first theme + Fraunces / Source Sans 3; MockBook logo in the header
+- Light / dark mode (persisted via redux-persist; first visit follows system preference)
+- Stone-first theme + Fraunces / Source Sans 3; MockBook logo + mark in the header; tab favicon / apple-touch icon
+
 - Split **login/register** layout (`AuthLayout`): wave backdrop (`auth-wave-*.jpg`) + café/social panel on the left (`auth-panel-*.jpg`)
 - **Help & FAQ** (`/help`) with Contact section; **Privacy** (`/privacy`) and **Terms** (`/terms`) - linked from navbar Help and auth footers
 - Mobile nav uses a finished side drawer (account, profile, help, theme, log out)

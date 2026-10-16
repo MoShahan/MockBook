@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, type BoxProps, useTheme } from "@mui/material"
+import { alpha, Box, type BoxProps, useTheme } from "@mui/material"
 
 /** Solid card surface (not glassy) - navbar owns the blur treatment. */
 const WidgetWrapper = ({ children, sx, ...props }: BoxProps) => {
@@ -16,8 +16,8 @@ const WidgetWrapper = ({ children, sx, ...props }: BoxProps) => {
         border: `1px solid ${theme.palette.divider}`,
         boxShadow:
           theme.palette.mode === "dark"
-            ? "0 1px 0 rgba(255,255,255,0.04)"
-            : "0 1px 2px rgba(28, 25, 23, 0.04)",
+            ? `0 1px 0 ${alpha(theme.palette.common.white, 0.04)}`
+            : `0 1px 2px ${alpha(theme.palette.common.black, 0.04)}`,
         ...((sx as object) || {}),
       }}
     >

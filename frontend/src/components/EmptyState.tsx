@@ -20,10 +20,7 @@ const EmptyState = ({ title, description }: EmptyStateProps) => {
         px: 1.5,
         borderRadius: 2,
         border: `1px dashed ${theme.palette.divider}`,
-        bgcolor:
-          theme.palette.mode === "dark"
-            ? "rgba(255,255,255,0.02)"
-            : "rgba(28, 25, 23, 0.02)",
+        bgcolor: "action.hover",
       }}
     >
       <Typography

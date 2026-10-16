@@ -74,9 +74,9 @@ const ImagePreview = ({ file, disabled, onRemove }: ImagePreviewProps) => {
           position: "absolute",
           top: 8,
           right: 8,
-          bgcolor: "rgba(28,25,23,0.72)",
+          bgcolor: theme => alpha(theme.palette.common.black, 0.72),
           color: "common.white",
-          "&:hover": { bgcolor: "rgba(28,25,23,0.88)" },
+          "&:hover": { bgcolor: theme => alpha(theme.palette.common.black, 0.88) },
         }}
       >
         <CloseOutlined fontSize="small" />

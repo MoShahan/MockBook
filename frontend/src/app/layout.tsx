@@ -23,8 +23,15 @@ const sourceSans = Source_Sans_3({
 })
 
 export const metadata: Metadata = {
-  title: "MockBook",
-  description: "by Mohammed Shahan",
+  title: {
+    default: "MockBook",
+    template: "%s · MockBook",
+  },
+  description: "MockBook - connect with friends, share posts, and stay in the loop.",
+  applicationName: "MockBook",
+  appleWebApp: {
+    title: "MockBook",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

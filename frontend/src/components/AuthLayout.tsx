@@ -85,8 +85,8 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
           inset: 0,
           zIndex: 0,
           background: isDark
-            ? "linear-gradient(135deg, rgba(12,10,9,0.45) 0%, rgba(12,10,9,0.3) 100%)"
-            : "linear-gradient(135deg, rgba(250,250,249,0.4) 0%, rgba(245,245,244,0.2) 100%)",
+            ? `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.45)} 0%, ${alpha(theme.palette.background.default, 0.3)} 100%)`
+            : `linear-gradient(135deg, ${alpha(theme.palette.common.white, 0.4)} 0%, ${alpha(theme.palette.background.default, 0.2)} 100%)`,
         }}
       />
 
@@ -133,8 +133,8 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
               position: "absolute",
               inset: 0,
               background: isDark
-                ? "linear-gradient(160deg, rgba(12,10,9,0.5) 10%, rgba(12,10,9,0.68) 100%)"
-                : "linear-gradient(160deg, rgba(28,25,23,0.3) 0%, rgba(28,25,23,0.48) 100%)",
+                ? `linear-gradient(160deg, ${alpha(theme.palette.common.black, 0.5)} 10%, ${alpha(theme.palette.common.black, 0.68)} 100%)`
+                : `linear-gradient(160deg, ${alpha(theme.palette.common.black, 0.3)} 0%, ${alpha(theme.palette.common.black, 0.48)} 100%)`,
             }}
           />
           <Box
@@ -159,7 +159,7 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
                 variant="h2"
                 sx={{
                   color: "common.white",
-                  textShadow: "0 2px 18px rgba(0,0,0,0.35)",
+                  textShadow: theme => `0 2px 18px ${alpha(theme.palette.common.black, 0.35)}`,
                   mb: 1,
                   fontSize: { xs: "1.5rem", md: "1.95rem" },
                 }}
@@ -168,8 +168,8 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
               </Typography>
               <Typography
                 sx={{
-                  color: "rgba(255,255,255,0.88)",
-                  textShadow: "0 1px 10px rgba(0,0,0,0.3)",
+                  color: theme => alpha(theme.palette.common.white, 0.88),
+                  textShadow: theme => `0 1px 10px ${alpha(theme.palette.common.black, 0.3)}`,
                   fontSize: { xs: "0.875rem", md: "0.95rem" },
                   lineHeight: 1.5,
                 }}
@@ -209,12 +209,14 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
               sx={{
                 p: { xs: 2.5, sm: 3.5 },
                 borderRadius: 3,
-                bgcolor: isDark ? "rgba(28,25,23,0.9)" : "rgba(255,255,255,0.94)",
+                bgcolor: isDark
+                  ? alpha(theme.palette.background.alt, 0.9)
+                  : alpha(theme.palette.common.white, 0.94),
                 backdropFilter: "blur(12px)",
                 border: `1px solid ${theme.palette.divider}`,
                 boxShadow: isDark
-                  ? "0 12px 40px rgba(0,0,0,0.35)"
-                  : "0 12px 36px rgba(28,25,23,0.08)",
+                  ? `0 12px 40px ${alpha(theme.palette.common.black, 0.35)}`
+                  : `0 12px 36px ${alpha(theme.palette.common.black, 0.08)}`,
               }}
             >
               {children}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Box, Typography } from "@mui/material"
+import { Box, Typography, useTheme } from "@mui/material"
 
 import { mediaUrl } from "@/lib/api"
 import { DEFAULT_AVATAR_COLOR, normalizeProfileColor } from "@/lib/profileColors"
@@ -27,6 +27,7 @@ export function getInitials(name?: string): string {
 }
 
 const UserImage = ({ image, name, size = "48px", bgColor }: UserImageProps) => {
+  const theme = useTheme()
   const src = mediaUrl(image)
   const [imgFailed, setImgFailed] = useState(false)
   const showImage = Boolean(src) && !imgFailed
@@ -69,7 +70,7 @@ const UserImage = ({ image, name, size = "48px", bgColor }: UserImageProps) => {
         <Typography
           component="span"
           sx={{
-            color: "#FAFAF9",
+            color: theme.palette.getContrastText(fill),
             fontWeight: 700,
             fontSize,
             lineHeight: 1,

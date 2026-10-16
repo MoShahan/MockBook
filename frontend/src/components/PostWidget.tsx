@@ -105,6 +105,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const [editRemoveImage, setEditRemoveImage] = useState(false)
   const [editError, setEditError] = useState<string | undefined>()
   const [isSavingEditPost, setIsSavingEditPost] = useState(false)
+  const [imageFailed, setImageFailed] = useState(false)
 
   const authorName =
     [post.user?.firstName, post.user?.lastName].filter(Boolean).join(" ").trim() || "Unknown user"
@@ -383,11 +384,12 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           buttonSx={{ color: primary, ml: 0 }}
         />
       ) : null}
-      {post?.url ? (
+      {post?.url && !imageFailed ? (
         <Box
           component="img"
           alt="Post image"
           src={mediaUrl(post.url)}
+          onError={() => setImageFailed(true)}
           sx={{
             display: "block",
             width: "100%",
@@ -395,6 +397,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             borderRadius: "0.65rem",
             maxHeight: { xs: "min(300px, 45vh)", sm: "min(360px, 50vh)" },
             objectFit: "contain",
+            bgcolor: "action.hover",
           }}
         />
       ) : null}

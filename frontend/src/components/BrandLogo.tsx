@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, useTheme } from "@mui/material"
+import { alpha, Box, Typography, useTheme } from "@mui/material"
 
 type BrandLogoProps = {
   /** Click handler (e.g. go home). */
@@ -55,8 +55,8 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
           transition: "transform 0.15s ease",
           boxShadow:
             theme.palette.mode === "dark"
-              ? "0 0 0 1px rgba(255,255,255,0.08)"
-              : "0 1px 2px rgba(0,0,0,0.08)",
+              ? `0 0 0 1px ${alpha(theme.palette.common.white, 0.08)}`
+              : `0 1px 2px ${alpha(theme.palette.common.black, 0.08)}`,
         }}
       />
       <Typography
