@@ -50,13 +50,13 @@ MockBook/
 - Home feed with author name, avatar, and relative time
 - Infinite scroll on home feed and profile Posts tab (`?limit=&cursor=`)
 - Home feed tabs: **Friends** (you + friends) and **Everyone** (`GET /posts?scope=friends|all`)
-- Like / unlike posts (count updates in UI)
+- Like / unlike posts (optimistic UI; rolls back on failure)
 - View who liked a post (click like count → list with profiles)
 - Save / unsave posts (bookmark on post cards; list via `GET /posts/saved`)
 - Own profile tabs: Posts / Saved / Liked / Commented (`?tab=`); other profiles show Posts only
-- Comment on posts (add + list with author)
+- Comment on posts (optimistic add + list with author; rolls back on failure)
 - Edit / delete **own** comments (⋮ menu; confirm on delete)
-- Like / unlike comments (heart + count on each comment)
+- Like / unlike comments (optimistic; heart + count on each comment)
 - View who liked a comment (click comment like count → list with profiles)
 - Edit **own** posts (⋮ → Edit; text + replace/remove image)
 - Delete **own** posts (⋮ menu + confirm dialog)
@@ -95,6 +95,7 @@ MockBook/
 - Mobile nav uses a finished side drawer (account, profile, help, theme, log out)
 - Toast / snackbar feedback for key actions
 - Formik + Yup validation with visible field errors
+- Accessibility basics: skip-to-content, labeled controls, `aria-pressed` on toggles, focus-visible rings, secondary text contrast
 - Shared **axios** client + Bearer request interceptor
 - Redux Toolkit for auth, posts, theme (redux-persist)
 - TypeScript frontend (no `any` in `frontend/src`)

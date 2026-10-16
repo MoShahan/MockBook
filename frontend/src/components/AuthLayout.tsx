@@ -182,7 +182,9 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
 
         {/* Right: form over wave */}
         <Box
-          component="section"
+          component="main"
+          id="main-content"
+          tabIndex={-1}
           sx={{
             flex: isWide ? "1 1 54%" : "1 1 auto",
             display: "flex",
@@ -193,6 +195,7 @@ const AuthLayout = ({ headline, supporting, children }: AuthLayoutProps) => {
             bgcolor: "transparent",
             minHeight: 0,
             overflow: isWide ? "auto" : "visible",
+            outline: "none",
           }}
         >
           <Box

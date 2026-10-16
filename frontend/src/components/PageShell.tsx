@@ -18,12 +18,15 @@ const PageShell = ({ children, narrow = false, sx, ...props }: PageShellProps) =
   return (
     <Box
       component="main"
+      id="main-content"
+      tabIndex={-1}
       {...props}
       sx={{
         width: "100%",
         maxWidth: narrow ? PAGE_MAX_WIDTH_NARROW : PAGE_MAX_WIDTH,
         margin: "0 auto",
         padding: { xs: "1rem 0.85rem 2rem", sm: "1.15rem 1.25rem 2.25rem", md: "1.25rem 1.75rem 2.5rem" },
+        outline: "none",
         ...((sx as object) || {}),
       }}
     >

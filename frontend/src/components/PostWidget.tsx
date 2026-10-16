@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import {
   Bookmark,
   BookmarkBorder,
@@ -49,7 +49,7 @@ import { buildShareText, buildShareUrls, openShareWindow } from "@/lib/share"
 import { formatPostTime } from "@/lib/time"
 import { useToast } from "@/providers/ToastProvider"
 import { removePost, setPost, setSavedPosts } from "@/state"
-import { type Post,sameUserId } from "@/types/models"
+import { type Post, sameUserId } from "@/types/models"
 
 import EmojiPickerButton, { insertEmojiAtCursor } from "./EmojiPickerButton"
 import ExpandableText from "./ExpandableText"
@@ -112,17 +112,30 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const [editError, setEditError] = useState<string | undefined>()
   const [isSavingEditPost, setIsSavingEditPost] = useState(false)
   const [imageFailed, setImageFailed] = useState(false)
-  const editDescriptionInputRef = React.useRef<HTMLInputElement>(null)
+  const editDescriptionInputRef = useRef<HTMLInputElement>(null)
+  const likeInFlight = useRef(false)
+  const commentLikeInFlight = useRef<Set<string>>(new Set())
 
   const authorName =
     [post.user?.firstName, post.user?.lastName].filter(Boolean).join(" ").trim() || "Unknown user"
 
   const patchLike = async () => {
+    if (!user?._id || likeInFlight.current) return
+    const uid = String(user._id)
+    const previous = post
+    const nextLikes = { ...(post.likes ?? {}) }
+    if (nextLikes[uid]) delete nextLikes[uid]
+    else nextLikes[uid] = true
+    likeInFlight.current = true
+    dispatch(setPost({ post: { ...post, likes: nextLikes } }))
     try {
       const { data } = await api.patch<{ message: string; updatedPost: Post }>(`/posts/${post._id}/like`)
       dispatch(setPost({ post: data.updatedPost }))
     } catch (err: unknown) {
+      dispatch(setPost({ post: previous }))
       toastError(getErrorMessage(err, "Failed to update like"))
+    } finally {
+      likeInFlight.current = false
     }
   }
 
@@ -152,13 +165,28 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   }
 
   const patchCommentLike = async (commentId: string) => {
+    if (!user?._id || commentLikeInFlight.current.has(commentId)) return
+    const uid = String(user._id)
+    const previous = post
+    const nextComments = (post.comments ?? []).map(c => {
+      if (String(c._id) !== String(commentId)) return c
+      const nextLikes = { ...(c.likes ?? {}) }
+      if (nextLikes[uid]) delete nextLikes[uid]
+      else nextLikes[uid] = true
+      return { ...c, likes: nextLikes }
+    })
+    commentLikeInFlight.current.add(commentId)
+    dispatch(setPost({ post: { ...post, comments: nextComments } }))
     try {
       const { data } = await api.patch<{ message: string; updatedPost: Post }>(
         `/posts/${post._id}/comments/${commentId}/like`
       )
       dispatch(setPost({ post: data.updatedPost }))
     } catch (err: unknown) {
+      dispatch(setPost({ post: previous }))
       toastError(getErrorMessage(err, "Failed to update comment like"))
+    } finally {
+      commentLikeInFlight.current.delete(commentId)
     }
   }
 
@@ -169,16 +197,39 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       setCommentError("Write a comment")
       return
     }
+    if (!user?._id) {
+      setCommentError("You must be signed in to comment")
+      return
+    }
+    const previous = post
+    const tempId = `temp-${Date.now()}`
+    const optimisticComment = {
+      _id: tempId,
+      userId: String(user._id),
+      text,
+      createdAt: new Date().toISOString(),
+      likes: {},
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        picturePath: user.picturePath,
+        avatarColor: user.avatarColor,
+      },
+    }
+    const optimisticComments = [...(post.comments ?? []), optimisticComment]
+    dispatch(setPost({ post: { ...post, comments: optimisticComments } }))
+    setCommentText("")
+    setVisibleCommentCount(optimisticComments.length)
+    setCommentError(undefined)
     try {
       setIsSubmittingComment(true)
-      setCommentError(undefined)
       const { data } = await api.post<{ updatedPost: Post }>(`/posts/${post._id}/comments`, { text })
       dispatch(setPost({ post: data.updatedPost }))
-      setCommentText("")
-      // Keep the new comment visible (comments are appended at the end).
       setVisibleCommentCount(data.updatedPost.comments?.length ?? COMMENTS_INITIAL_VISIBLE)
       success("Comment added")
     } catch (err: unknown) {
+      dispatch(setPost({ post: previous }))
+      setCommentText(text)
       const msg = getErrorMessage(err, "Failed to add comment")
       setCommentError(msg)
       toastError(msg)
@@ -434,8 +485,9 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             <Tooltip title={isLiked ? "Unlike" : "Like"}>
               <IconButton
                 size="small"
-                onClick={patchLike}
+                onClick={() => void patchLike()}
                 aria-label={isLiked ? "Unlike" : "Like"}
+                aria-pressed={isLiked}
                 sx={{
                   p: "0.35rem",
                   transition: "transform 0.15s ease",
@@ -800,6 +852,10 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                               multiline
                               maxRows={4}
                               autoFocus
+                              inputProps={{
+                                "aria-label": "Edit comment",
+                                "aria-invalid": Boolean(editCommentError),
+                              }}
                               value={editCommentText}
                               onChange={e => {
                                 setEditCommentText(e.target.value)
@@ -884,8 +940,9 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                               <Typography
                                 component="button"
                                 type="button"
-                                onClick={() => patchCommentLike(comment._id!)}
+                                onClick={() => void patchCommentLike(comment._id!)}
                                 aria-label={isCommentLiked ? "Unlike comment" : "Like comment"}
+                                aria-pressed={isCommentLiked}
                                 sx={{
                                   border: 0,
                                   background: "none",
@@ -901,6 +958,10 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                                   "&:hover": {
                                     color: primary,
                                     bgcolor: alpha(primary, 0.08),
+                                  },
+                                  "&:focus-visible": {
+                                    outline: `2px solid ${primary}`,
+                                    outlineOffset: 2,
                                   },
                                 }}
                               >
@@ -1049,6 +1110,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                   multiline
                   maxRows={4}
                   placeholder="Add a comment…"
+                  inputProps={{ "aria-label": "Add a comment", "aria-invalid": Boolean(commentError) }}
                   value={commentText}
                   onChange={e => {
                     setCommentText(e.target.value)

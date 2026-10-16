@@ -33,10 +33,17 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
         margin: 0,
         cursor: onClick ? "pointer" : "default",
         textAlign: "left",
+        borderRadius: onClick ? "0.5rem" : undefined,
         "&:hover .mockbook-wordmark": onClick
           ? { color: theme.palette.mode === "dark" ? pLight : theme.palette.primary.dark }
           : undefined,
         "&:hover .mockbook-mark": onClick ? { transform: "scale(1.04)" } : undefined,
+        "&:focus-visible": onClick
+          ? {
+              outline: `2px solid ${primary}`,
+              outlineOffset: 3,
+            }
+          : undefined,
       }}
     >
       <Box

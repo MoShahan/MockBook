@@ -77,10 +77,11 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
         light: colorTokens.stone[800],
       }
     : {
+        // medium / mediumMain sized for ~4.5:1+ on white (WCAG AA body secondary).
         dark: colorTokens.stone[700],
         main: colorTokens.stone[600],
-        mediumMain: colorTokens.stone[500],
-        medium: colorTokens.stone[400],
+        mediumMain: colorTokens.stone[600],
+        medium: colorTokens.stone[500],
         light: colorTokens.stone[100],
       }
 

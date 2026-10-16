@@ -38,6 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${fraunces.variable} ${sourceSans.variable}`}>
       <body className={sourceSans.className}>
+        <a href="#main-content" className="skip-to-content">
+          Skip to content
+        </a>
         <AppRouterCacheProvider>
           <ReduxProvider>
             <AuthProvider>
