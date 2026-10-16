@@ -1,5 +1,10 @@
 import { uploadImageBuffer } from "../lib/imagekit.js"
-import { withAuthors } from "../lib/posts.js"
+import {
+  likesMapKeys,
+  parseLikersPagination,
+  resolveLikersPage,
+  withAuthors,
+} from "../lib/posts.js"
 import Post from "../models/Post.js"
 
 export const createPost = async (req, res, next) => {
@@ -98,6 +103,23 @@ export const likePost = async (req, res, next) => {
   }
 }
 
+/** List users who liked a post (from the post likes map keys). Supports ?page=&limit=. */
+export const getPostLikers = async (req, res, next) => {
+  try {
+    const { postId } = req.params
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    const pagination = parseLikersPagination(req.query)
+    const result = await resolveLikersPage(likesMapKeys(post.likes), pagination)
+    res.status(200).json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
 export const addComment = async (req, res, next) => {
   try {
     const userId = req.user?.id
@@ -165,6 +187,28 @@ export const likeComment = async (req, res, next) => {
 
     const [formatted] = await withAuthors([post])
     res.status(200).json({ message, updatedPost: formatted })
+  } catch (e) {
+    next(e)
+  }
+}
+
+/** List users who liked a comment (from the comment likes map keys). Supports ?page=&limit=. */
+export const getCommentLikers = async (req, res, next) => {
+  try {
+    const { postId, commentId } = req.params
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    const comment = post.comments.id(commentId)
+    if (!comment) {
+      return res.status(404).json({ error: "Comment not found" })
+    }
+
+    const pagination = parseLikersPagination(req.query)
+    const result = await resolveLikersPage(likesMapKeys(comment.likes), pagination)
+    res.status(200).json(result)
   } catch (e) {
     next(e)
   }

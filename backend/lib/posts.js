@@ -16,6 +16,77 @@ export function serializeLikes(likes) {
   return {}
 }
 
+/** User ids that liked (keys of a likes Map / plain object). */
+export function likesMapKeys(likes) {
+  if (!likes) return []
+  if (likes instanceof Map) return [...likes.keys()].map(String)
+  if (typeof likes === "object") return Object.keys(likes).map(String)
+  return []
+}
+
+/**
+ * Resolve like-map user ids to public profile snapshots (no password).
+ * @param {string[]} ids
+ * @returns {Promise<{ _id: string, firstName: string, lastName: string, picturePath: string }[]>}
+ */
+export async function usersFromLikeIds(ids) {
+  const unique = [...new Set((ids || []).map(String).filter(Boolean))]
+  if (unique.length === 0) return []
+
+  const users = await User.find({ _id: { $in: unique } })
+    .select("_id firstName lastName picturePath")
+    .lean()
+
+  const byId = Object.fromEntries(users.map(u => [String(u._id), u]))
+  return unique
+    .map(id => byId[id])
+    .filter(Boolean)
+    .map(u => ({
+      _id: String(u._id),
+      firstName: u.firstName,
+      lastName: u.lastName,
+      picturePath: u.picturePath || "",
+    }))
+}
+
+const DEFAULT_LIKERS_LIMIT = 20
+const MAX_LIKERS_LIMIT = 50
+
+/**
+ * Parse page/limit query for likers lists.
+ * @param {Record<string, unknown>} query
+ */
+export function parseLikersPagination(query = {}) {
+  const rawPage = Number.parseInt(String(query.page ?? "1"), 10)
+  const rawLimit = Number.parseInt(String(query.limit ?? String(DEFAULT_LIKERS_LIMIT)), 10)
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
+  const limit = Math.min(
+    MAX_LIKERS_LIMIT,
+    Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : DEFAULT_LIKERS_LIMIT
+  )
+  return { page, limit, skip: (page - 1) * limit }
+}
+
+/**
+ * Page through like-map ids and resolve user snapshots.
+ * @param {string[]} ids
+ * @param {{ page: number, limit: number, skip: number }} pagination
+ */
+export async function resolveLikersPage(ids, pagination) {
+  const unique = [...new Set((ids || []).map(String).filter(Boolean))]
+  const total = unique.length
+  const { page, limit, skip } = pagination
+  const slice = unique.slice(skip, skip + limit)
+  const likers = await usersFromLikeIds(slice)
+  return {
+    likers,
+    page,
+    limit,
+    total,
+    hasMore: skip + limit < total,
+  }
+}
+
 function authorSnapshot(author) {
   if (!author) return null
   return {

@@ -6,8 +6,10 @@ import {
   deleteComment,
   deletePost,
   editComment,
+  getCommentLikers,
   getFeed,
   getPost,
+  getPostLikers,
   getUserPosts,
   likeComment,
   likePost,
@@ -26,9 +28,19 @@ router.get("/:userId/posts", verifyAccessToken, requireObjectId("userId"), getUs
 
 router.get("/:postId", verifyAccessToken, requireObjectId("postId"), getPost)
 
+router.get("/:postId/likes", verifyAccessToken, requireObjectId("postId"), getPostLikers)
+
 router.patch("/:postId/like", verifyAccessToken, requireObjectId("postId"), likePost)
 
 router.post("/:postId/comments", verifyAccessToken, requireObjectId("postId"), addComment)
+
+router.get(
+  "/:postId/comments/:commentId/likes",
+  verifyAccessToken,
+  requireObjectId("postId"),
+  requireObjectId("commentId"),
+  getCommentLikers
+)
 
 router.patch(
   "/:postId/comments/:commentId/like",

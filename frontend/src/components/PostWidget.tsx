@@ -39,8 +39,10 @@ import { useToast } from "@/providers/ToastProvider"
 import { removePost, setPost } from "@/state"
 import { type Post,sameUserId } from "@/types/models"
 
+import ExpandableText from "./ExpandableText"
 import FlexBetween from "./FlexBetween"
 import Friend from "./Friend"
+import LikersDialog from "./LikersDialog"
 import UserImage from "./UserImage"
 import WidgetWrapper from "./WidgetWrapper"
 
@@ -49,6 +51,9 @@ type PostWidgetProps = {
   /** Called after a successful delete (e.g. leave the single-post page). */
   onDeleted?: () => void
 }
+
+const COMMENTS_INITIAL_VISIBLE = 3
+const COMMENTS_LOAD_STEP = 5
 
 const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const dispatch = useAppDispatch()
@@ -66,6 +71,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const medium = theme.palette.neutral.medium
 
   const [isComments, setIsComments] = useState(false)
+  const [visibleCommentCount, setVisibleCommentCount] = useState(COMMENTS_INITIAL_VISIBLE)
   const [commentText, setCommentText] = useState("")
   const [commentError, setCommentError] = useState<string | undefined>()
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
@@ -82,6 +88,8 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const [isDeletingComment, setIsDeletingComment] = useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [likersOpen, setLikersOpen] = useState(false)
+  const [commentLikersId, setCommentLikersId] = useState<string | null>(null)
 
   const authorName =
     [post.user?.firstName, post.user?.lastName].filter(Boolean).join(" ").trim() || "Unknown user"
@@ -115,6 +123,8 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       const { data } = await api.post<{ updatedPost: Post }>(`/posts/${post._id}/comments`, { text })
       dispatch(setPost({ post: data.updatedPost }))
       setCommentText("")
+      // Keep the new comment visible (comments are appended at the end).
+      setVisibleCommentCount(data.updatedPost.comments?.length ?? COMMENTS_INITIAL_VISIBLE)
     } catch (err: unknown) {
       setCommentError(getErrorMessage(err, "Failed to add comment"))
     } finally {
@@ -254,7 +264,14 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           ) : undefined
         }
       />
-      <Typography sx={{ color: neutral, mt: "1rem" }}>{post?.description}</Typography>
+      {post?.description ? (
+        <ExpandableText
+          text={post.description}
+          maxWords={40}
+          typographySx={{ color: neutral, mt: "1rem" }}
+          buttonSx={{ color: primary, ml: 0 }}
+        />
+      ) : null}
       {post?.url && (
         <Box
           component="img"
@@ -275,12 +292,34 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             <IconButton onClick={patchLike} aria-label={isLiked ? "Unlike" : "Like"}>
               {isLiked ? <FavoriteOutlined sx={{ color: primary }} /> : <FavoriteBorderOutlined />}
             </IconButton>
-            <Typography>{likesCount}</Typography>
+            <Typography
+              component="button"
+              type="button"
+              onClick={() => setLikersOpen(true)}
+              aria-label={`View who liked this post (${likesCount})`}
+              sx={{
+                border: 0,
+                background: "none",
+                padding: 0,
+                margin: 0,
+                cursor: "pointer",
+                color: "inherit",
+                font: "inherit",
+                "&:hover": { textDecoration: "underline", color: primary },
+              }}
+            >
+              {likesCount}
+            </Typography>
           </FlexBetween>
 
           <FlexBetween sx={{ gap: "0.3rem" }}>
             <IconButton
-              onClick={() => setIsComments(prev => !prev)}
+              onClick={() => {
+                setIsComments(prev => {
+                  if (prev) setVisibleCommentCount(COMMENTS_INITIAL_VISIBLE)
+                  return !prev
+                })
+              }}
               aria-label={isComments ? "Hide comments" : "Show comments"}
               aria-expanded={isComments}
             >
@@ -331,7 +370,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               No comments yet
             </Typography>
           )}
-          {comments.map((comment, index) => {
+          {comments.slice(0, visibleCommentCount).map((comment, index) => {
             const name =
               [comment.user?.firstName, comment.user?.lastName].filter(Boolean).join(" ").trim() || "User"
             const commentLikes = comment.likes ?? {}
@@ -409,17 +448,18 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                         </Box>
                       </Box>
                     ) : (
-                      <Typography
-                        sx={{
+                      <ExpandableText
+                        text={comment.text}
+                        maxWords={30}
+                        typographySx={{
                           color: neutral,
                           fontWeight: 400,
                           fontSize: "0.9375rem",
                           mt: "0.15rem",
                           lineHeight: 1.4,
                         }}
-                      >
-                        {comment.text}
-                      </Typography>
+                        buttonSx={{ color: primary }}
+                      />
                     )}
                     <FlexBetween sx={{ mt: "0.2rem", justifyContent: "flex-start", gap: "0.75rem" }}>
                       {comment.createdAt && (
@@ -441,9 +481,26 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                               <FavoriteBorderOutlined sx={{ fontSize: "0.95rem", color: medium }} />
                             )}
                           </IconButton>
-                          {commentLikesCount > 0 && (
-                            <Typography sx={{ color: medium, fontSize: "0.75rem" }}>{commentLikesCount}</Typography>
-                          )}
+                          <Typography
+                            component="button"
+                            type="button"
+                            onClick={() => setCommentLikersId(comment._id!)}
+                            aria-label={`View who liked this comment (${commentLikesCount})`}
+                            sx={{
+                              border: 0,
+                              background: "none",
+                              padding: 0,
+                              margin: 0,
+                              cursor: "pointer",
+                              color: medium,
+                              fontSize: "0.75rem",
+                              fontFamily: "inherit",
+                              lineHeight: "inherit",
+                              "&:hover": { textDecoration: "underline", color: primary },
+                            }}
+                          >
+                            {commentLikesCount}
+                          </Typography>
                         </FlexBetween>
                       )}
                     </FlexBetween>
@@ -452,6 +509,21 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               </Box>
             )
           })}
+          {comments.length > visibleCommentCount && (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 0.5 }}>
+              <Button
+                size="small"
+                onClick={() =>
+                  setVisibleCommentCount(count =>
+                    Math.min(count + COMMENTS_LOAD_STEP, comments.length)
+                  )
+                }
+                sx={{ textTransform: "none", color: primary }}
+              >
+                View more ({comments.length - visibleCommentCount} more)
+              </Button>
+            </Box>
+          )}
           <Menu
             anchorEl={commentMenu?.anchor ?? null}
             open={Boolean(commentMenu)}
@@ -551,6 +623,22 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <LikersDialog
+        open={likersOpen}
+        onClose={() => setLikersOpen(false)}
+        fetchPath={likersOpen ? `/posts/${post._id}/likes` : null}
+        title="Liked by"
+      />
+
+      <LikersDialog
+        open={Boolean(commentLikersId)}
+        onClose={() => setCommentLikersId(null)}
+        fetchPath={
+          commentLikersId ? `/posts/${post._id}/comments/${commentLikersId}/likes` : null
+        }
+        title="Liked by"
+      />
     </WidgetWrapper>
   )
 }

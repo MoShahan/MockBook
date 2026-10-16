@@ -49,9 +49,11 @@ MockBook/
 - Create text and/or image posts
 - Home feed with author name, avatar, and relative time
 - Like / unlike posts (count updates in UI)
+- View who liked a post (click like count → list with profiles)
 - Comment on posts (add + list with author)
 - Edit / delete **own** comments (⋮ menu; confirm on delete)
 - Like / unlike comments (heart + count on each comment)
+- View who liked a comment (click comment like count → list with profiles)
 - Delete **own** posts (⋮ menu + confirm dialog)
 - Single-post page at `/post/[postId]`; Share menu (copy link, X, Facebook, LinkedIn, WhatsApp)
 - Profile feed shows that user’s posts only (`isProfile`)
@@ -95,7 +97,7 @@ MockBook/
 ### Planned next (see `PROJECT_PLAN.md`)
 
 - Edit own posts
-- Who liked a post / comment (own + others’); save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
+- Save/bookmark own + others’ posts; profile Posts/Saved/Liked/Commented sections
 - Home **Add people** rail (recent users + search; search lives in that widget, not the navbar)
 - Profile editing (location, occupation, avatar) + social links
 - Help/FAQ page
@@ -225,10 +227,12 @@ npm run start -w backend
 | `GET`    | `/posts`                     | Home feed                                                        |
 | `GET`    | `/posts/:userId/posts`       | One user’s posts                                                 |
 | `GET`    | `/posts/:postId`             | Single post                                                      |
+| `GET`    | `/posts/:postId/likes`       | Users who liked the post (`?page=&limit=`, default 20, max 50)   |
 | `PATCH`  | `/posts/:postId/like`        | Like or unlike                                                   |
 | `POST`   | `/posts/:postId/comments`    | Add a comment                                                    |
 | `PATCH`  | `/posts/:postId/comments/:commentId` | Edit own comment                                           |
 | `DELETE` | `/posts/:postId/comments/:commentId` | Delete own comment                                       |
+| `GET`    | `/posts/:postId/comments/:commentId/likes` | Users who liked a comment (`?page=&limit=`)           |
 | `PATCH`  | `/posts/:postId/comments/:commentId/like` | Like or unlike a comment                                |
 | `DELETE` | `/posts/:postId`             | Delete own post                                                  |
 
