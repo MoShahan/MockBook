@@ -23,7 +23,7 @@ const Navbar = () => {
   const router = useRouter()
   const user = useAppSelector(state => state.user)
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
-  const { info } = useToast()
+  const { info, success } = useToast()
 
   const theme = useTheme()
   const nLight = theme.palette.neutral.light
@@ -44,6 +44,7 @@ const Navbar = () => {
   const handleLogout = () => {
     setIsMobileMenuToggled(false)
     dispatch(setLogout())
+    success("Signed out")
     router.push("/login")
   }
 

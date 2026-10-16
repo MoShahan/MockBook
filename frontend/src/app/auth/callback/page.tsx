@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation"
 
 import { useAppDispatch } from "@/app/hooks"
 import { api } from "@/lib/api"
+import { useToast } from "@/providers/ToastProvider"
 import { setLogin, setTokens } from "@/state"
 import type { User } from "@/types/models"
 
 export default function OAuthCallbackPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const { success, error: toastError } = useToast()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,15 +37,19 @@ export default function OAuthCallbackPage() {
         dispatch(setLogin({ user: data.user, accessToken, refreshToken }))
         // Clear sensitive fragment from the address bar.
         window.history.replaceState(null, "", "/auth/callback")
+        success("Signed in")
         router.replace("/home")
       } catch {
-        if (!cancelled) setError("Could not complete sign-in")
+        if (!cancelled) {
+          setError("Could not complete sign-in")
+          toastError("Could not complete sign-in")
+        }
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [dispatch, router])
+  }, [dispatch, router, success, toastError])
 
   return (
     <Box

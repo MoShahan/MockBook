@@ -65,7 +65,7 @@ const COMMENTS_LOAD_STEP = 5
 const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const dispatch = useAppDispatch()
   const user = useAppSelector(state => state.user)
-  const { success, error: toastError } = useToast()
+  const { success, error: toastError, info } = useToast()
   const likes = post.likes ?? {}
   const isLiked = Boolean(user?._id && likes[user._id])
   const likesCount = Object.keys(likes).length
@@ -109,8 +109,12 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
     [post.user?.firstName, post.user?.lastName].filter(Boolean).join(" ").trim() || "Unknown user"
 
   const patchLike = async () => {
-    const { data } = await api.patch<{ message: string; updatedPost: Post }>(`/posts/${post._id}/like`)
-    dispatch(setPost({ post: data.updatedPost }))
+    try {
+      const { data } = await api.patch<{ message: string; updatedPost: Post }>(`/posts/${post._id}/like`)
+      dispatch(setPost({ post: data.updatedPost }))
+    } catch (err: unknown) {
+      toastError(getErrorMessage(err, "Failed to update like"))
+    }
   }
 
   const toggleSave = async () => {
@@ -155,8 +159,11 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       setCommentText("")
       // Keep the new comment visible (comments are appended at the end).
       setVisibleCommentCount(data.updatedPost.comments?.length ?? COMMENTS_INITIAL_VISIBLE)
+      success("Comment added")
     } catch (err: unknown) {
-      setCommentError(getErrorMessage(err, "Failed to add comment"))
+      const msg = getErrorMessage(err, "Failed to add comment")
+      setCommentError(msg)
+      toastError(msg)
     } finally {
       setIsSubmittingComment(false)
     }
@@ -247,6 +254,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const shareTo = (url: string) => {
     setShareAnchor(null)
     openShareWindow(url)
+    info("Opening share…")
   }
 
   const startEditComment = (commentId: string, currentText: string) => {
@@ -283,7 +291,9 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       cancelEditComment()
       success("Comment updated")
     } catch (err: unknown) {
-      setEditCommentError(getErrorMessage(err, "Failed to update comment"))
+      const msg = getErrorMessage(err, "Failed to update comment")
+      setEditCommentError(msg)
+      toastError(msg)
     } finally {
       setIsSavingEdit(false)
     }

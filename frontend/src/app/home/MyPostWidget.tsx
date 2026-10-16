@@ -23,8 +23,11 @@ import UserImage from "@/components/UserImage"
 import WidgetWrapper from "@/components/WidgetWrapper"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import { useToast } from "@/providers/ToastProvider"
 import { prependPost } from "@/state"
 import type { CreatePostFormValues, Post } from "@/types/models"
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 import { useAppDispatch, useAppSelector } from "../hooks"
 
@@ -124,6 +127,7 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
 
   const [isImage, setIsImage] = useState(false)
   const descriptionInputRef = useRef<HTMLInputElement>(null)
+  const { success, error: toastError } = useToast()
 
   const handleCreatePost = async (vals: CreatePostFormValues, helpers: FormikHelpers<CreatePostFormValues>) => {
     if (!user?._id) {
@@ -143,8 +147,11 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
       dispatch(prependPost({ post: data.post }))
       helpers.resetForm()
       setIsImage(false)
+      success("Post created")
     } catch (e: unknown) {
-      helpers.setStatus(getErrorMessage(e, "Failed to create post"))
+      const msg = getErrorMessage(e, "Failed to create post")
+      helpers.setStatus(msg)
+      toastError(msg)
     }
   }
 
@@ -224,9 +231,21 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                 <Box sx={{ mt: "1rem" }}>
                   <DropZone
                     multiple={false}
+                    maxSize={MAX_IMAGE_BYTES}
                     accept={{ "image/jpeg": [], "image/png": [], "image/gif": [], "image/webp": [] }}
                     disabled={isSubmitting}
-                    onDrop={acceptedFiles => setFieldValue("picture", acceptedFiles[0] ?? null)}
+                    onDrop={(acceptedFiles, fileRejections) => {
+                      if (fileRejections.length > 0) {
+                        const code = fileRejections[0]?.errors?.[0]?.code
+                        toastError(
+                          code === "file-too-large"
+                            ? "Image must be 5MB or smaller"
+                            : "Use a JPEG, PNG, GIF, or WebP image"
+                        )
+                        return
+                      }
+                      void setFieldValue("picture", acceptedFiles[0] ?? null)
+                    }}
                   >
                     {({ getRootProps, getInputProps, isDragActive }) => (
                       <Box

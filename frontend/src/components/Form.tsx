@@ -20,6 +20,7 @@ import { useAppDispatch } from "@/app/hooks"
 import OauthButtons from "@/components/OauthButtons"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import { useToast } from "@/providers/ToastProvider"
 import { setLogin } from "@/state"
 import type { LoginFormValues, RegisterFormValues, User } from "@/types/models"
 
@@ -42,6 +43,7 @@ type FormProps =
 const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const { success, error: toastError } = useToast()
   const isNonMobile = useMediaQuery("(min-width:600px)")
   const isLogin = type === "login"
   const isRegister = type === "register"
@@ -69,7 +71,9 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
       )
       router.push("/home")
     } catch (e: unknown) {
-      onSubmitProps.setStatus(getErrorMessage(e, "Invalid credentials"))
+      const msg = getErrorMessage(e, "Invalid credentials")
+      onSubmitProps.setStatus(msg)
+      toastError(msg)
     }
   }
 
@@ -93,9 +97,12 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
           refreshToken: data.refreshToken,
         })
       )
+      success("Welcome to MockBook!")
       router.push("/home")
     } catch (e: unknown) {
-      onSubmitProps.setStatus(getErrorMessage(e, "Registration failed"))
+      const msg = getErrorMessage(e, "Registration failed")
+      onSubmitProps.setStatus(msg)
+      toastError(msg)
     }
   }
 
