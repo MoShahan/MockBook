@@ -314,6 +314,60 @@ export const deletePost = async (req, res, next) => {
   }
 }
 
+/** Update own post description and/or image (multipart optional `picture`). */
+export const updatePost = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthenticated" })
+    }
+
+    const { postId } = req.params
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    if (String(post.userId) !== String(userId)) {
+      return res.status(403).json({ error: "You can only edit your own posts" })
+    }
+
+    const hasDescriptionField = typeof req.body.description === "string"
+    const description = hasDescriptionField ? req.body.description.trim() : (post.description || "").trim()
+
+    const removeImageRaw = req.body.removeImage
+    const removeImage =
+      removeImageRaw === true ||
+      removeImageRaw === "true" ||
+      removeImageRaw === "1"
+
+    let url = post.url || ""
+    if (removeImage) {
+      url = ""
+    }
+    if (req.file?.buffer) {
+      const uploaded = await uploadImageBuffer(req.file.buffer, req.file.originalname, "/mockbook/posts")
+      url = uploaded.url || ""
+    }
+
+    if (!description && !url) {
+      return res.status(400).json({ error: "Post must include text or an image" })
+    }
+
+    post.description = description
+    post.url = url
+    await post.save()
+
+    const [formatted] = await withAuthors([post])
+    res.status(200).json({ message: "Post updated", updatedPost: formatted })
+  } catch (e) {
+    if (e.message?.includes("IMAGEKIT_PRIVATE_KEY")) {
+      return res.status(503).json({ error: "Image upload is not configured" })
+    }
+    next(e)
+  }
+}
+
 /** Idempotent save: add post to JWT user's savedPosts (own or others’). */
 export const savePost = async (req, res, next) => {
   try {

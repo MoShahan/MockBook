@@ -18,6 +18,7 @@ import {
   likePost,
   savePost,
   unsavePost,
+  updatePost,
 } from "../controllers/posts.js"
 import { requireObjectId } from "../lib/objectId.js"
 import { verifyAccessToken } from "../middleware/auth.js"
@@ -79,6 +80,8 @@ router.delete(
   requireObjectId("commentId"),
   deleteComment
 )
+
+router.patch("/:postId", verifyAccessToken, requireObjectId("postId"), uploadPicture, updatePost)
 
 router.delete("/:postId", verifyAccessToken, requireObjectId("postId"), deletePost)
 

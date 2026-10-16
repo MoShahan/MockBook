@@ -10,6 +10,7 @@ import {
   EditOutlined,
   FavoriteBorderOutlined,
   FavoriteOutlined,
+  ImageOutlined,
   MoreVert,
   ShareOutlined,
 } from "@mui/icons-material"
@@ -93,6 +94,12 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [likersOpen, setLikersOpen] = useState(false)
   const [commentLikersId, setCommentLikersId] = useState<string | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editDescription, setEditDescription] = useState("")
+  const [editPicture, setEditPicture] = useState<File | null>(null)
+  const [editRemoveImage, setEditRemoveImage] = useState(false)
+  const [editError, setEditError] = useState<string | undefined>()
+  const [isSavingEditPost, setIsSavingEditPost] = useState(false)
 
   const authorName =
     [post.user?.firstName, post.user?.lastName].filter(Boolean).join(" ").trim() || "Unknown user"
@@ -163,6 +170,61 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       toastError(getErrorMessage(err, "Failed to delete post"))
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const openEditPost = () => {
+    setMenuAnchor(null)
+    setEditDescription(post.description || "")
+    setEditPicture(null)
+    setEditRemoveImage(false)
+    setEditError(undefined)
+    setEditOpen(true)
+  }
+
+  const closeEditPost = () => {
+    if (isSavingEditPost) return
+    setEditOpen(false)
+    setEditPicture(null)
+    setEditRemoveImage(false)
+    setEditError(undefined)
+  }
+
+  const saveEditPost = async () => {
+    const description = editDescription.trim()
+    const keepingImage = Boolean(post.url) && !editRemoveImage
+    const addingImage = Boolean(editPicture)
+    if (!description && !keepingImage && !addingImage) {
+      setEditError("Add text or a photo")
+      return
+    }
+
+    try {
+      setIsSavingEditPost(true)
+      setEditError(undefined)
+      const formData = new FormData()
+      formData.append("description", description)
+      if (editRemoveImage && !editPicture) {
+        formData.append("removeImage", "true")
+      }
+      if (editPicture) {
+        formData.append("picture", editPicture)
+      }
+
+      const { data } = await api.patch<{ message: string; updatedPost: Post }>(
+        `/posts/${post._id}`,
+        formData
+      )
+      dispatch(setPost({ post: data.updatedPost }))
+      setEditOpen(false)
+      setEditPicture(null)
+      setEditRemoveImage(false)
+      success(data.message || "Post updated")
+    } catch (err: unknown) {
+      setEditError(getErrorMessage(err, "Failed to update post"))
+      toastError(getErrorMessage(err, "Failed to update post"))
+    } finally {
+      setIsSavingEditPost(false)
     }
   }
 
@@ -267,6 +329,12 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
+                <MenuItem onClick={openEditPost}>
+                  <ListItemIcon>
+                    <EditOutlined fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Edit post</ListItemText>
+                </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setMenuAnchor(null)
@@ -618,6 +686,121 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           </Box>
         </Box>
       )}
+
+      <Dialog open={editOpen} onClose={closeEditPost} fullWidth maxWidth="sm">
+        <DialogTitle>Edit post</DialogTitle>
+        <DialogContent>
+          <InputBase
+            fullWidth
+            multiline
+            minRows={3}
+            maxRows={8}
+            value={editDescription}
+            onChange={e => {
+              setEditDescription(e.target.value)
+              if (editError) setEditError(undefined)
+            }}
+            disabled={isSavingEditPost}
+            placeholder="What's on your mind?"
+            sx={{
+              mt: 1,
+              backgroundColor: theme.palette.neutral.light,
+              borderRadius: "0.75rem",
+              padding: "0.75rem 1rem",
+              border: editError ? `1px solid ${theme.palette.error.main}` : undefined,
+            }}
+          />
+          {editError && (
+            <Typography sx={{ color: "error.main", mt: "0.35rem", fontSize: "0.75rem" }} role="alert">
+              {editError}
+            </Typography>
+          )}
+
+          {post.url && !editRemoveImage && !editPicture && (
+            <Box sx={{ mt: "1rem" }}>
+              <Box
+                component="img"
+                src={mediaUrl(post.url)}
+                alt="Current post"
+                sx={{ width: "100%", maxHeight: 240, objectFit: "contain", borderRadius: "0.75rem" }}
+              />
+              <Button
+                size="small"
+                color="error"
+                disabled={isSavingEditPost}
+                onClick={() => setEditRemoveImage(true)}
+                sx={{ mt: 0.5, textTransform: "none" }}
+              >
+                Remove image
+              </Button>
+            </Box>
+          )}
+
+          {(editRemoveImage || !post.url) && !editPicture && (
+            <Typography sx={{ color: medium, mt: "0.75rem", fontSize: "0.8125rem" }}>
+              {editRemoveImage ? "Image will be removed on save." : "No image on this post."}
+            </Typography>
+          )}
+
+          {editPicture && (
+            <Typography sx={{ color: neutral, mt: "0.75rem", fontSize: "0.875rem" }}>
+              New image: {editPicture.name}
+            </Typography>
+          )}
+
+          <Box sx={{ mt: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <Button
+              component="label"
+              size="small"
+              startIcon={<ImageOutlined />}
+              disabled={isSavingEditPost}
+              sx={{ textTransform: "none" }}
+            >
+              {editPicture || post.url ? "Replace image" : "Add image"}
+              <input
+                hidden
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={e => {
+                  const file = e.target.files?.[0] ?? null
+                  setEditPicture(file)
+                  if (file) setEditRemoveImage(false)
+                  if (editError) setEditError(undefined)
+                  e.target.value = ""
+                }}
+              />
+            </Button>
+            {editPicture && (
+              <Button
+                size="small"
+                disabled={isSavingEditPost}
+                onClick={() => setEditPicture(null)}
+                sx={{ textTransform: "none" }}
+              >
+                Clear new image
+              </Button>
+            )}
+            {editRemoveImage && (
+              <Button
+                size="small"
+                disabled={isSavingEditPost}
+                onClick={() => setEditRemoveImage(false)}
+                sx={{ textTransform: "none" }}
+              >
+                Keep current image
+              </Button>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeEditPost} disabled={isSavingEditPost}>
+            Cancel
+          </Button>
+          <Button onClick={() => void saveEditPost()} disabled={isSavingEditPost} variant="contained">
+            {isSavingEditPost ? "Saving…" : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={confirmDeleteOpen} onClose={() => !isDeleting && setConfirmDeleteOpen(false)}>
         <DialogTitle>Delete post?</DialogTitle>
