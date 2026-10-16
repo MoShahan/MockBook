@@ -13,7 +13,7 @@ import {
   X,
 } from "@mui/icons-material"
 import { Box, Divider, IconButton, Link, Tooltip, Typography, useTheme } from "@mui/material"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
@@ -44,6 +44,7 @@ const SOCIAL_ICONS: Record<SocialNetwork, React.ReactNode> = {
 
 const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetProps) => {
   const router = useRouter()
+  const pathname = usePathname()
   const dispatch = useAppDispatch()
   const loggedInUser = useAppSelector(state => state.user)
   const { success, error: toastError } = useToast()
@@ -95,8 +96,13 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     return fetched
   }, [fetched, userId, isOwnProfile, loggedInUser])
 
+  // Already on this profile (own `/profile` or `/profile/:id`) — don't re-navigate.
+  const alreadyOnThisProfile =
+    Boolean(userId) &&
+    (pathname === `/profile/${userId}` || (isOwnProfile && (pathname === "/profile" || pathname === `/profile/${userId}`)))
+
   const handleGoToProfile = () => {
-    if (!userId) return
+    if (!userId || alreadyOnThisProfile) return
     if (isOwnProfile) {
       router.push("/profile")
     } else {
@@ -137,7 +143,10 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   return (
     <WidgetWrapper>
       <FlexBetween sx={{ gap: "0.5rem", pb: "1.1rem" }}>
-        <FlexBetween onClick={handleGoToProfile} sx={{ gap: "1rem", cursor: "pointer" }}>
+        <FlexBetween
+          onClick={handleGoToProfile}
+          sx={{ gap: "1rem", cursor: alreadyOnThisProfile ? "default" : "pointer" }}
+        >
           <UserImage image={displayUrl} name={`${user.firstName} ${user.lastName}`} />
           <Box>
             <Typography
@@ -145,9 +154,11 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               sx={{
                 color: dark,
                 fontWeight: "500",
-                "&:hover": {
-                  color: palette.primary.light,
-                },
+                ...(!alreadyOnThisProfile && {
+                  "&:hover": {
+                    color: palette.primary.light,
+                  },
+                }),
               }}
             >
               {user.firstName} {user.lastName}
