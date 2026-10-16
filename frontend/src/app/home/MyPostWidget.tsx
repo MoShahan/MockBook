@@ -168,10 +168,9 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
           values,
           errors,
           touched,
-          handleBlur,
-          handleChange,
           handleSubmit,
           setFieldValue,
+          setFieldTouched,
           status,
           submitCount,
           isSubmitting,
@@ -204,9 +203,11 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                     backgroundColor: palette.neutral.light,
                     border: showContentError ? `1px solid ${palette.error.main}` : undefined,
                   }}
-                  value={values.description}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
+                  value={values.description ?? ""}
+                  // Avoid Formik handleChange/handleBlur — they call event.persist and crash
+                  // when MUI/React 19 invokes the handler without a synthetic event.
+                  onBlur={() => void setFieldTouched("description", true)}
+                  onChange={e => void setFieldValue("description", e.target.value)}
                   disabled={isSubmitting}
                 />
               </FlexBetween>
