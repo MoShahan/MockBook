@@ -112,6 +112,11 @@ MockBook/
 ### Planned next (see `PROJECT_PLAN.md`)
 
 - Production deploy (Part 7)
+- Friend requests (pending / accept) instead of instant add
+- Report / block user (moderation basics)
+- Multiple images per post
+- Image compression / resizing
+- Soft-delete posts
 - Messaging / DMs - **out of scope**
 
 ## Requirements
