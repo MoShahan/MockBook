@@ -13,9 +13,16 @@ import {
   unfollowUser,
   unfriend,
 } from "../controllers/relationships.js"
-import { discoverUsers, getUser, getUserFriends, updateProfile } from "../controllers/users.js"
+import {
+  deactivateUser,
+  discoverUsers,
+  getUser,
+  getUserFriends,
+  reactivateUser,
+  updateProfile,
+} from "../controllers/users.js"
 import { requireObjectId } from "../lib/objectId.js"
-import { verifyAccessToken } from "../middleware/auth.js"
+import { requireAdmin, verifyAccessToken } from "../middleware/auth.js"
 import { uploadPicture } from "../middleware/upload.js"
 
 const router = express.Router()
@@ -46,6 +53,21 @@ router.delete(
 )
 router.delete("/me/friends/:friendId", verifyAccessToken, requireObjectId("friendId"), unfriend)
 router.get("/me/following", verifyAccessToken, listFollowing)
+
+router.post(
+  "/:id/deactivate",
+  verifyAccessToken,
+  requireAdmin,
+  requireObjectId("id"),
+  deactivateUser
+)
+router.post(
+  "/:id/reactivate",
+  verifyAccessToken,
+  requireAdmin,
+  requireObjectId("id"),
+  reactivateUser
+)
 
 router.post("/:id/friend-requests", verifyAccessToken, requireObjectId("id"), sendFriendRequest)
 router.post("/:id/follow", verifyAccessToken, requireObjectId("id"), followUser)

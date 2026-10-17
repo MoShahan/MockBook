@@ -10,17 +10,30 @@ import {
   WorkOutlineOutlined,
   X,
 } from "@mui/icons-material"
-import { alpha, Box, Divider, IconButton, Link, Tooltip, Typography, useTheme } from "@mui/material"
+import {
+  alpha,
+  Box,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  Link,
+  Tooltip,
+  Typography,
+  useTheme,
+} from "@mui/material"
 import { usePathname, useRouter } from "next/navigation"
 
 import { useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
+import { getErrorMessage } from "@/lib/errors"
 import {
   DEFAULT_AVATAR_COLOR,
   DEFAULT_COVER_COLOR,
   normalizeProfileColor,
 } from "@/lib/profileColors"
 import { SOCIAL_NETWORKS, type SocialNetwork, socialProfileUrl } from "@/lib/social"
+import { useToast } from "@/providers/ToastProvider"
 import type { User } from "@/types/models"
 import { sameUserId } from "@/types/models"
 
@@ -48,6 +61,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   const router = useRouter()
   const pathname = usePathname()
   const loggedInUser = useAppSelector(state => state.user)
+  const { success, error: toastError } = useToast()
   const theme = useTheme()
   const { palette } = theme
   const dark = palette.neutral.dark
@@ -56,8 +70,10 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
 
   const [fetched, setFetched] = useState<User | null>(null)
   const [editOpen, setEditOpen] = useState(false)
+  const [modBusy, setModBusy] = useState(false)
 
   const isOwnProfile = isOwnProfileProp ?? sameUserId(loggedInUser?._id, userId)
+  const viewerIsAdmin = loggedInUser?.role === "admin"
 
   useEffect(() => {
     if (!userId) return
@@ -88,6 +104,8 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
         linkedin: loggedInUser.linkedin,
         instagram: loggedInUser.instagram,
         friends: loggedInUser.friends ?? fetched.friends,
+        role: loggedInUser.role ?? fetched.role,
+        isActive: loggedInUser.isActive ?? fetched.isActive,
         // Prefer API value so visit counts stay current after others view the profile.
         viewedProfile: fetched.viewedProfile ?? loggedInUser.viewedProfile,
       }
@@ -165,7 +183,58 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               </IconButton>
             </Tooltip>
           ) : (
-            <RelationshipActions userId={userId} onCover />
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.75 }}>
+              <RelationshipActions userId={userId} onCover />
+              {viewerIsAdmin && user.role !== "admin" ? (
+                <Button
+                  size="small"
+                  color={user.isActive === false ? "primary" : "error"}
+                  variant="contained"
+                  disabled={modBusy}
+                  onClick={() => {
+                    void (async () => {
+                      setModBusy(true)
+                      try {
+                        if (user.isActive === false) {
+                          const { data } = await api.post<{ message: string; user: User }>(
+                            `/users/${userId}/reactivate`
+                          )
+                          setFetched(prev => (prev ? { ...prev, ...data.user } : data.user))
+                          success(data.message || "User reactivated")
+                        } else {
+                          if (
+                            !window.confirm(
+                              `Deactivate ${user.firstName} ${user.lastName}? They will not be able to log in.`
+                            )
+                          ) {
+                            return
+                          }
+                          const { data } = await api.post<{ message: string; user: User }>(
+                            `/users/${userId}/deactivate`
+                          )
+                          setFetched(prev => (prev ? { ...prev, ...data.user } : data.user))
+                          success(data.message || "User deactivated")
+                        }
+                      } catch (err: unknown) {
+                        toastError(getErrorMessage(err, "Could not update user status"))
+                      } finally {
+                        setModBusy(false)
+                      }
+                    })()
+                  }}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: "0.75rem",
+                    bgcolor: theme => alpha(theme.palette.common.white, 0.94),
+                    color: user.isActive === false ? "primary.main" : "error.main",
+                    "&:hover": { bgcolor: "common.white" },
+                  }}
+                >
+                  {user.isActive === false ? "Reactivate" : "Deactivate"}
+                </Button>
+              ) : null}
+            </Box>
           )}
         </Box>
       </Box>
@@ -214,25 +283,52 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
             />
           </Box>
           <Box sx={{ minWidth: 0, width: "100%", pt: "0.35rem" }}>
-            <Typography
-              variant="h4"
-              onClick={handleGoToProfile}
-              noWrap
+            <Box
               sx={{
-                color: dark,
-                fontWeight: 700,
-                lineHeight: 1.25,
-                fontSize: "1.2rem",
-                cursor: alreadyOnThisProfile ? "default" : "pointer",
-                ...(!alreadyOnThisProfile && {
-                  "&:hover": {
-                    color: palette.primary.main,
-                  },
-                }),
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 0.75,
+                minWidth: 0,
               }}
             >
-              {user.firstName} {user.lastName}
-            </Typography>
+              <Typography
+                variant="h4"
+                onClick={handleGoToProfile}
+                noWrap
+                sx={{
+                  color: dark,
+                  fontWeight: 700,
+                  lineHeight: 1.25,
+                  fontSize: "1.2rem",
+                  minWidth: 0,
+                  cursor: alreadyOnThisProfile ? "default" : "pointer",
+                  ...(!alreadyOnThisProfile && {
+                    "&:hover": {
+                      color: palette.primary.main,
+                    },
+                  }),
+                }}
+              >
+                {user.firstName} {user.lastName}
+              </Typography>
+              {user.role === "admin" ? (
+                <Chip
+                  label="Admin"
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                  aria-label="Admin role"
+                  sx={{
+                    height: 22,
+                    fontWeight: 700,
+                    fontSize: "0.7rem",
+                    letterSpacing: "0.02em",
+                    borderWidth: 1.5,
+                  }}
+                />
+              ) : null}
+            </Box>
             <Typography variant="body2" sx={{ color: medium, mt: 0.2, fontWeight: 500 }}>
               {friendCount} {friendCount === 1 ? "friend" : "friends"}
             </Typography>

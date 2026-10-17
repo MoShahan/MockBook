@@ -10,7 +10,7 @@ import { pickSocialFields } from "../lib/social.js"
 import User from "../models/User.js"
 
 const PUBLIC_USER_FIELDS =
-  "_id firstName lastName picturePath avatarColor coverColor location occupation facebook x linkedin instagram friends viewedProfile createdAt"
+  "_id firstName lastName picturePath avatarColor coverColor location occupation facebook x linkedin instagram friends viewedProfile createdAt role isActive"
 
 const DISCOVER_FIELDS = "_id firstName lastName picturePath avatarColor location occupation"
 
@@ -42,7 +42,59 @@ function toPublicUser(userDoc) {
   user.instagram = user.instagram || ""
   user.avatarColor = user.avatarColor || DEFAULT_AVATAR_COLOR
   user.coverColor = user.coverColor || DEFAULT_COVER_COLOR
+  user.role = user.role || "user"
+  user.isActive = user.isActive !== false
   return user
+}
+
+/** Admin: soft-deactivate a user (cannot log in). */
+export const deactivateUser = async (req, res, next) => {
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Admin access required" })
+    }
+    const authUserId = req.user.id
+    const { id } = req.params
+    if (String(authUserId) === String(id)) {
+      return res.status(400).json({ error: "Cannot deactivate your own account" })
+    }
+
+    const target = await User.findById(id)
+    if (!target) return res.status(404).json({ msg: "User not found" })
+    if (target.role === "admin") {
+      return res.status(400).json({ error: "Cannot deactivate an admin account" })
+    }
+
+    target.isActive = false
+    target.deactivatedAt = new Date()
+    target.deactivatedBy = authUserId
+    await target.save()
+
+    res.status(200).json({ message: "User deactivated", user: toPublicUser(target) })
+  } catch (e) {
+    next(e)
+  }
+}
+
+/** Admin: reactivate a deactivated user. */
+export const reactivateUser = async (req, res, next) => {
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Admin access required" })
+    }
+    const { id } = req.params
+    const target = await User.findById(id)
+    if (!target) return res.status(404).json({ msg: "User not found" })
+
+    target.isActive = true
+    target.deactivatedAt = null
+    target.deactivatedBy = null
+    await target.save()
+
+    res.status(200).json({ message: "User reactivated", user: toPublicUser(target) })
+  } catch (e) {
+    next(e)
+  }
 }
 
 export const getUser = async (req, res, next) => {
@@ -152,7 +204,7 @@ export const discoverUsers = async (req, res, next) => {
     const limit = Math.min(20, Math.max(1, Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : 10))
     const q = typeof req.query.q === "string" ? req.query.q.trim() : ""
 
-    const filter = { _id: { $ne: authUserId } }
+    const filter = { _id: { $ne: authUserId }, isActive: { $ne: false } }
 
     if (q) {
       const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")

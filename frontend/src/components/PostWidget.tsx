@@ -78,6 +78,8 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const likesCount = Object.keys(likes).length
   const comments = post.comments ?? []
   const isOwnPost = Boolean(user?._id && String(user._id) === String(post.userId))
+  const isAdmin = user?.role === "admin"
+  const canModeratePost = isOwnPost || isAdmin
   const isSaved = Boolean(user?.savedPosts?.some(id => String(id) === String(post._id)))
 
   const theme = useTheme()
@@ -397,7 +399,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
         avatarSize="44px"
         showFriendButton={false}
         endAction={
-          isOwnPost ? (
+          canModeratePost ? (
             <>
               <Tooltip title="Post options">
                 <IconButton
@@ -416,12 +418,14 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
-                <MenuItem onClick={openEditPost}>
-                  <ListItemIcon>
-                    <EditOutlined fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Edit post</ListItemText>
-                </MenuItem>
+                {isOwnPost ? (
+                  <MenuItem onClick={openEditPost}>
+                    <ListItemIcon>
+                      <EditOutlined fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Edit post</ListItemText>
+                  </MenuItem>
+                ) : null}
                 <MenuItem
                   onClick={() => {
                     setMenuAnchor(null)
@@ -431,7 +435,9 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                   <ListItemIcon>
                     <DeleteOutlined fontSize="small" color="error" />
                   </ListItemIcon>
-                  <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>Delete post</ListItemText>
+                  <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>
+                    {isOwnPost ? "Delete post" : "Delete post (admin)"}
+                  </ListItemText>
                 </MenuItem>
               </Menu>
             </>
@@ -719,6 +725,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                 const isCommentLiked = Boolean(user?._id && commentLikes[user._id])
                 const commentLikesCount = Object.keys(commentLikes).length
                 const isOwnComment = Boolean(comment._id && sameUserId(user?._id, comment.userId))
+                const canModerateComment = isOwnComment || isAdmin
                 const isEditing = Boolean(comment._id && editingCommentId === comment._id)
                 return (
                   <Box
@@ -822,7 +829,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                           >
                             {name}
                           </Typography>
-                          {isOwnComment && comment._id && !isEditing && (
+                          {canModerateComment && comment._id && !isEditing && (
                             <IconButton
                               className="comment-menu-btn"
                               size="small"
@@ -1038,29 +1045,40 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            <MenuItem
-              onClick={() => {
-                const target = comments.find(c => c._id === commentMenu?.commentId)
-                if (target?._id) startEditComment(target._id, target.text)
-              }}
-            >
-              <ListItemIcon>
-                <EditOutlined fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Edit</ListItemText>
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                const id = commentMenu?.commentId
-                setCommentMenu(null)
-                if (id) setConfirmDeleteCommentId(id)
-              }}
-            >
-              <ListItemIcon>
-                <DeleteOutlined fontSize="small" color="error" />
-              </ListItemIcon>
-              <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>Delete</ListItemText>
-            </MenuItem>
+            {(() => {
+              const menuTarget = comments.find(c => c._id === commentMenu?.commentId)
+              const menuIsOwn = Boolean(menuTarget && sameUserId(user?._id, menuTarget.userId))
+              return (
+                <>
+                  {menuIsOwn ? (
+                    <MenuItem
+                      onClick={() => {
+                        if (menuTarget?._id) startEditComment(menuTarget._id, menuTarget.text)
+                      }}
+                    >
+                      <ListItemIcon>
+                        <EditOutlined fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>Edit</ListItemText>
+                    </MenuItem>
+                  ) : null}
+                  <MenuItem
+                    onClick={() => {
+                      const id = commentMenu?.commentId
+                      setCommentMenu(null)
+                      if (id) setConfirmDeleteCommentId(id)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <DeleteOutlined fontSize="small" color="error" />
+                    </ListItemIcon>
+                    <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>
+                      {menuIsOwn ? "Delete" : "Delete (admin)"}
+                    </ListItemText>
+                  </MenuItem>
+                </>
+              )
+            })()}
           </Menu>
 
           <Box

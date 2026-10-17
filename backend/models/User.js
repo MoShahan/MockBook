@@ -15,6 +15,12 @@ const UserSchema = new Schema(
     // Hash only - never select by default; plaintext policy enforced in auth controller.
     // OAuth-only accounts still store a random unusable hash.
     password: { type: String, required: true, select: false },
+    /** Site role. Clients cannot self-promote; set via ADMIN_EMAILS / seed / DB. */
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    /** Soft deactivation (admins). Deactivated users cannot authenticate. */
+    isActive: { type: Boolean, default: true },
+    deactivatedAt: { type: Date, default: null },
+    deactivatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
     /** Linked social login providers (Google / GitHub / Discord). */
     oauthProviders: {
       type: [

@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt"
 
+import { roleForEmail } from "../lib/admins.js"
 import { formatFriendsList } from "../lib/friends.js"
 import { isValidPassword, PASSWORD_POLICY_MESSAGE } from "../lib/password.js"
 import { issueAuthTokens, verifyRefreshTokenString } from "../lib/tokens.js"
@@ -10,6 +11,8 @@ const toSafeUser = userDoc => {
   delete user.password
   user.savedPosts = (user.savedPosts || []).map(id => String(id))
   user.following = (user.following || []).map(id => String(id))
+  user.role = user.role || "user"
+  user.isActive = user.isActive !== false
   return user
 }
 
@@ -32,7 +35,8 @@ export const register = async (req, res, next) => {
       return res.status(400).json({ error: PASSWORD_POLICY_MESSAGE })
     }
 
-    const existing = await User.findOne({ email })
+    const normalizedEmail = String(email).trim().toLowerCase()
+    const existing = await User.findOne({ email: normalizedEmail })
     if (existing) {
       return res.status(409).json({ error: "Email already registered" })
     }
@@ -43,9 +47,11 @@ export const register = async (req, res, next) => {
     const newUser = new User({
       firstName,
       lastName,
-      email,
+      email: normalizedEmail,
       password: hashedPass,
       picturePath: "",
+      role: roleForEmail(normalizedEmail),
+      isActive: true,
       friends: [],
       following: [],
       savedPosts: [],
@@ -71,7 +77,8 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ error: "Invalid credentials" })
     }
 
-    const user = await User.findOne({ email }).select("+password")
+    const normalizedEmail = String(email).trim().toLowerCase()
+    const user = await User.findOne({ email: normalizedEmail }).select("+password")
     if (!user || !user.password) {
       return res.status(400).json({ error: "Invalid credentials" })
     }
@@ -79,6 +86,17 @@ export const login = async (req, res, next) => {
     const passMatch = await bcrypt.compare(password, user.password)
     if (!passMatch) {
       return res.status(400).json({ error: "Invalid credentials" })
+    }
+
+    if (user.isActive === false) {
+      return res.status(403).json({ error: "Account deactivated" })
+    }
+
+    // Keep allowlisted emails promoted to admin (never demote here).
+    const nextRole = roleForEmail(user.email, user.role)
+    if (nextRole !== user.role) {
+      user.role = nextRole
+      await user.save()
     }
 
     const tokens = issueAuthTokens(user._id)
@@ -97,6 +115,12 @@ export const me = async (req, res, next) => {
     if (!userId) return res.status(401).json({ error: "Unauthenticated" })
     const user = await User.findById(userId)
     if (!user) return res.status(401).json({ error: "Unauthenticated" })
+    if (user.isActive === false) return res.status(403).json({ error: "Account deactivated" })
+    const nextRole = roleForEmail(user.email, user.role)
+    if (nextRole !== user.role) {
+      user.role = nextRole
+      await user.save()
+    }
     const safeUser = await withFormattedFriends(user)
     res.status(200).json({ user: safeUser })
   } catch (e) {
@@ -127,6 +151,9 @@ export const refresh = async (req, res, next) => {
     const user = await User.findById(payload.id)
     if (!user) {
       return res.status(401).json({ error: "Invalid or expired refresh token" })
+    }
+    if (user.isActive === false) {
+      return res.status(403).json({ error: "Account deactivated" })
     }
 
     const tokens = issueAuthTokens(user._id)

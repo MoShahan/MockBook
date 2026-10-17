@@ -2,6 +2,7 @@ import crypto from "crypto"
 
 import bcrypt from "bcrypt"
 
+import { roleForEmail } from "../lib/admins.js"
 import {
   buildAuthorizeUrl,
   fetchOauthProfile,
@@ -85,12 +86,15 @@ export const oauthCallback = async (req, res, next) => {
         return redirectError(res, "Your provider account has no email; cannot create an account")
       }
       const placeholderHash = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10)
+      const email = profile.email.toLowerCase()
       user = await User.create({
         firstName: profile.firstName.slice(0, 50),
         lastName: profile.lastName.slice(0, 50),
-        email: profile.email.toLowerCase(),
+        email,
         password: placeholderHash,
         picturePath: profile.picturePath || "",
+        role: roleForEmail(email),
+        isActive: true,
         friends: [],
         following: [],
         savedPosts: [],

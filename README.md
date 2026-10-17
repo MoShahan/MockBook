@@ -69,6 +69,7 @@ MockBook/
 - Navbar friend-request inbox (badge) + `/friend-requests` (Incoming / Outgoing); also notified via the bell
 - Separate **Follow** and **Friend** actions on profiles and Add people (not on post cards)
 - Profile sidebar: **Friends** list (any profile) + **Following** list (own profile only; private)
+- **Admins** (`role: admin`): full normal user (post, comment, friends, follow) **plus** delete any post/comment and deactivate users; profile shows an **Admin** badge (see Demo admin accounts below)
 - **Add people** discovery widget on `/home` (sticky right rail on wide screens; collapsible “Find people” on mobile) with recent users + name search
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
 - Edit own profile (name, location, occupation, avatar, social handles, **avatar color**, **cover color**) via manage-account control
@@ -112,10 +113,27 @@ MockBook/
 - JWT identity for create post / like / comment / delete / friends (not body `userId` trust)
 - Auth secrets and token lifetimes configurable via env
 
+### Demo admin accounts
+
+These three emails are treated as **`role: admin`** (via `ADMIN_EMAILS` / defaults). They can delete **any** post or comment and deactivate non-admin users.
+
+| Email | Password |
+| ----- | -------- |
+| `admin@yopmail.com` | `Admin@123` |
+| `admin@xivi.com` | `Admin@123` |
+| `admin@mockbook.com` | `Admin@123` |
+
+Create/update them in MongoDB (requires `backend/.env` with `MONGODB_URI`):
+
+```bash
+npm run seed:admins -w backend
+```
+
+Or register/login with those emails while they appear in `ADMIN_EMAILS` (see `backend/.env.example`). **Demo only** — change passwords (and the allowlist) before any public production deploy.
+
 ### Planned next (see `PROJECT_PLAN.md`)
 
 - Production deploy (Part 7): **Vercel** (frontend) + **Render** (backend); Atlas + ImageKit already wired — full step-by-step in `PROJECT_PLAN.md` Part 7
-- **Admin roles** (Part 8 / Step 8.5): ~2–3 admins who can delete any post/comment and deactivate users
 - Report / block user (user-facing report) — deferred
 - Multiple images per post
 - Image compression / resizing
@@ -262,6 +280,8 @@ npm run start -w backend
 | `POST`   | `/users/:id/friend-requests` | Send friend request                                              |
 | `POST`   | `/users/:id/follow`          | Follow                                                           |
 | `DELETE` | `/users/:id/follow`          | Unfollow                                                         |
+| `POST`   | `/users/:id/deactivate`      | Admin: soft-deactivate user                                      |
+| `POST`   | `/users/:id/reactivate`      | Admin: reactivate user                                           |
 | `GET`    | `/users/:id/relationship`    | Viewer relationship flags vs `:id`                               |
 | `GET`    | `/users/:id`                 | Get a user (no password)                                         |
 | `GET`    | `/users/:id/friends`         | Get that user’s friends (formatted)                              |

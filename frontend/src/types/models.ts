@@ -13,12 +13,18 @@ export type Friend = {
   url?: string
 }
 
+export type UserRole = "user" | "admin"
+
 export type User = {
   _id: string
   firstName: string
   lastName: string
   email?: string
   picturePath: string
+  /** Site role (`admin` can moderate). */
+  role?: UserRole
+  /** Soft-active flag; deactivated users cannot log in. */
+  isActive?: boolean
   /** Initials avatar background when no photo (allowlisted hex). */
   avatarColor?: string
   /** Solid profile header/cover color (allowlisted hex). */
