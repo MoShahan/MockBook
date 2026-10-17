@@ -10,9 +10,9 @@ import {
 import { Box, CircularProgress, Tab, Tabs, useMediaQuery } from "@mui/material"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
-import FriendsListWidget from "@/components/FriendsListWidget"
 import Navbar from "@/components/Navbar"
 import PageShell from "@/components/PageShell"
+import PeopleListWidget from "@/components/PeopleListWidget"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
 import UserWidget from "@/components/UserWidget"
@@ -113,8 +113,16 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
               userId={profileId}
               isOwnProfile={isOwnProfile}
             />
-            <Box sx={{ mt: { xs: "1rem", md: "1.15rem" } }}>
-              <FriendsListWidget userId={profileId} />
+            <Box
+              sx={{
+                mt: { xs: "1rem", md: "1.15rem" },
+                display: "flex",
+                flexDirection: "column",
+                gap: { xs: "1rem", md: "1.15rem" },
+              }}
+            >
+              <PeopleListWidget userId={profileId} kind="friends" />
+              {isOwnProfile ? <PeopleListWidget userId={profileId} kind="following" /> : null}
             </Box>
           </Box>
           <Box

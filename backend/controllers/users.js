@@ -1,11 +1,11 @@
-import { formatFriendsList, toFriendId } from "../lib/friends.js"
+import { formatFriendsList } from "../lib/friends.js"
 import { uploadImageBuffer } from "../lib/imagekit.js"
-import { createNotification } from "../lib/notifications.js"
 import {
   DEFAULT_AVATAR_COLOR,
   DEFAULT_COVER_COLOR,
   sanitizeProfileColor,
 } from "../lib/profileColors.js"
+import { getRelationshipsMap } from "../lib/relationships.js"
 import { pickSocialFields } from "../lib/social.js"
 import User from "../models/User.js"
 
@@ -33,6 +33,8 @@ function toPublicUser(userDoc) {
   delete user.__v
   user._id = String(user._id)
   user.friends = (user.friends || []).map(id => String(id))
+  // following is private to the owner — strip from public profile payloads
+  delete user.following
   user.savedPosts = (user.savedPosts || []).map(id => String(id))
   user.facebook = user.facebook || ""
   user.x = user.x || ""
@@ -164,16 +166,29 @@ export const discoverUsers = async (req, res, next) => {
       .limit(limit)
       .lean()
 
+    const ids = users.map(u => String(u._id))
+    const relMap = await getRelationshipsMap(authUserId, ids)
+
     res.status(200).json({
-      users: users.map(u => ({
-        _id: String(u._id),
-        firstName: u.firstName,
-        lastName: u.lastName,
-        picturePath: u.picturePath || "",
-        avatarColor: u.avatarColor || DEFAULT_AVATAR_COLOR,
-        location: u.location || "",
-        occupation: u.occupation || "",
-      })),
+      users: users.map(u => {
+        const id = String(u._id)
+        const rel = relMap[id] || {
+          isFriend: false,
+          isFollowing: false,
+          outgoingRequestId: null,
+          incomingRequestId: null,
+        }
+        return {
+          _id: id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          picturePath: u.picturePath || "",
+          avatarColor: u.avatarColor || DEFAULT_AVATAR_COLOR,
+          location: u.location || "",
+          occupation: u.occupation || "",
+          relationship: rel,
+        }
+      }),
     })
   } catch (e) {
     next(e)
@@ -194,53 +209,3 @@ export const getUserFriends = async (req, res, next) => {
   }
 }
 
-/** Toggle friendship for the authenticated user (JWT) and `:friendId`. */
-export const addRemoveFriend = async (req, res, next) => {
-  try {
-    const authUserId = req.user?.id
-    if (!authUserId) {
-      return res.status(401).json({ error: "Unauthenticated" })
-    }
-
-    const { friendId } = req.params
-    if (!friendId) {
-      return res.status(400).json({ error: "Friend id is required" })
-    }
-
-    if (String(authUserId) === String(friendId)) {
-      return res.status(400).json({ error: "Cannot add yourself as a friend" })
-    }
-
-    const user = await User.findById(authUserId)
-    const friend = await User.findById(friendId)
-    if (!user || !friend) {
-      return res.status(404).json({ msg: "User not found" })
-    }
-
-    let message = ""
-    const alreadyFriend = user.friends.some(fid => toFriendId(fid) === String(friendId))
-
-    if (alreadyFriend) {
-      user.friends = user.friends.filter(fid => toFriendId(fid) !== String(friendId))
-      friend.friends = friend.friends.filter(fid => toFriendId(fid) !== String(authUserId))
-      message = "Friend removed"
-    } else {
-      user.friends.push(friend._id)
-      friend.friends.push(user._id)
-      message = "Friend added"
-      void createNotification({
-        recipientId: String(friendId),
-        actorId: String(authUserId),
-        type: "friend",
-      })
-    }
-
-    await user.save()
-    await friend.save()
-
-    const formattedFriends = await formatFriendsList(user.friends)
-    res.status(200).json({ message, friends: formattedFriends })
-  } catch (e) {
-    next(e)
-  }
-}

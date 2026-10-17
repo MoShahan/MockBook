@@ -9,12 +9,14 @@ const toSafeUser = userDoc => {
   const user = userDoc.toObject ? userDoc.toObject() : { ...userDoc }
   delete user.password
   user.savedPosts = (user.savedPosts || []).map(id => String(id))
+  user.following = (user.following || []).map(id => String(id))
   return user
 }
 
 const withFormattedFriends = async userDoc => {
   const safeUser = toSafeUser(userDoc)
   safeUser.friends = await formatFriendsList(userDoc.friends)
+  safeUser.following = (userDoc.following || []).map(id => String(id))
   return safeUser
 }
 
@@ -45,6 +47,7 @@ export const register = async (req, res, next) => {
       password: hashedPass,
       picturePath: "",
       friends: [],
+      following: [],
       savedPosts: [],
       location: "",
       occupation: "",

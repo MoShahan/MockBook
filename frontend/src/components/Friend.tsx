@@ -4,15 +4,12 @@ import React from "react"
 import { alpha, Box, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { api } from "@/lib/api"
-import { useToast } from "@/providers/ToastProvider"
-import { setFriends } from "@/state"
-import type { Friend as FriendData } from "@/types/models"
-import { friendIdOf, sameUserId } from "@/types/models"
+import { useAppSelector } from "@/app/hooks"
+import { sameUserId } from "@/types/models"
+import type { UserRelationship } from "@/types/relationships"
 
 import FlexBetween from "./FlexBetween"
-import FriendToggleButton from "./FriendToggleButton"
+import RelationshipActions from "./RelationshipActions"
 import UserImage from "./UserImage"
 
 type FriendProps = {
@@ -24,8 +21,10 @@ type FriendProps = {
   avatarColor?: string
   /** Avatar size - lists use 48px; post headers keep 55px. */
   avatarSize?: string
-  /** When false, hide add/remove-friend (e.g. post cards). Default true. */
+  /** When false, hide follow/friend actions (e.g. post cards). Default true. */
   showFriendButton?: boolean
+  /** Prefill relationship (e.g. from discover). */
+  relationship?: Partial<UserRelationship> | null
   /** Optional trailing control (e.g. post ⋮ menu). */
   endAction?: React.ReactNode
   /** Soft row hover for list contexts (friends / discover). */
@@ -40,13 +39,12 @@ const Friend = ({
   avatarColor,
   avatarSize = "42px",
   showFriendButton = true,
+  relationship = null,
   endAction,
   listHover = false,
 }: FriendProps) => {
-  const dispatch = useAppDispatch()
   const router = useRouter()
   const user = useAppSelector(state => state.user)
-  const { success, error: toastError } = useToast()
 
   const theme = useTheme()
   const main = theme.palette.neutral.main
@@ -54,7 +52,6 @@ const Friend = ({
   const nameHover = theme.palette.primary.main
 
   const isSelf = sameUserId(user?._id, id)
-  const isFriend = Boolean(user?.friends?.some(friend => sameUserId(friendIdOf(friend), id)))
 
   const handleGoToProfile = () => {
     if (!id) return
@@ -62,20 +59,6 @@ const Friend = ({
       router.push("/profile")
     } else {
       router.push(`/profile/${id}`)
-    }
-  }
-
-  const patchFriend = async () => {
-    if (!user?._id || !id || isSelf) return
-    try {
-      const { data } = await api.patch<{ message?: string; friends: FriendData[] }>(
-        `/users/friends/${id}`,
-        {}
-      )
-      dispatch(setFriends({ friends: data.friends }))
-      success(data.message || (isFriend ? "Friend removed" : "Friend added"))
-    } catch {
-      toastError("Could not update friend")
     }
   }
 
@@ -159,7 +142,6 @@ const Friend = ({
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              // Padding keeps glyph tops (e.g. “B”) inside the overflow clip box.
               py: "0.1em",
               transition: "color 0.15s ease",
               "&:hover": {
@@ -192,7 +174,7 @@ const Friend = ({
       {(showFriendButton && id && !isSelf) || endAction ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
           {showFriendButton && id && !isSelf ? (
-            <FriendToggleButton isFriend={isFriend} onClick={() => void patchFriend()} />
+            <RelationshipActions userId={id} initial={relationship} dense />
           ) : null}
           {endAction}
         </Box>

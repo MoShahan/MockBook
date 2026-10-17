@@ -34,6 +34,11 @@ const UserSchema = new Schema(
       type: [{ type: Schema.Types.ObjectId, ref: "User" }],
       default: [],
     },
+    /** One-way follows (I follow these users). Independent of friends. */
+    following: {
+      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+      default: [],
+    },
     /** Bookmarked posts (own + others’). Private to this user. */
     savedPosts: {
       type: [{ type: Schema.Types.ObjectId, ref: "Post" }],

@@ -9,6 +9,7 @@ import {
   LightMode,
   LogoutOutlined,
   Menu,
+  PersonAddAlt1,
   PersonOutlined,
 } from "@mui/icons-material"
 import {
@@ -38,6 +39,7 @@ import { setLogout, toggleMode } from "../state"
 
 import BrandLogo from "./BrandLogo"
 import FlexBetween from "./FlexBetween"
+import FriendRequestsMenu from "./FriendRequestsMenu"
 import NotificationsMenu from "./NotificationsMenu"
 import { PAGE_MAX_WIDTH } from "./PageShell"
 import UserImage from "./UserImage"
@@ -142,6 +144,7 @@ const Navbar = () => {
         {isNonMobileScreens ? (
           <FlexBetween sx={{ gap: "0.5rem" }}>
             {themeToggle}
+            <FriendRequestsMenu />
             <NotificationsMenu />
             <Tooltip title="Help & FAQ">
               <IconButton onClick={handleGoToHelp} aria-label="Help">
@@ -232,6 +235,7 @@ const Navbar = () => {
           </FlexBetween>
         ) : (
           <FlexBetween sx={{ gap: 0.5 }}>
+            <FriendRequestsMenu />
             <NotificationsMenu />
             <IconButton
               onClick={() => setMobileOpen(true)}
@@ -304,6 +308,18 @@ const Navbar = () => {
                 <PersonOutlined />
               </ListItemIcon>
               <ListItemText primary="Profile" />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => {
+                closeMobile()
+                router.push("/friend-requests")
+              }}
+              sx={{ borderRadius: 2 }}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <PersonAddAlt1 />
+              </ListItemIcon>
+              <ListItemText primary="Friend requests" />
             </ListItemButton>
             <ListItemButton onClick={handleGoToHelp} sx={{ borderRadius: 2 }}>
               <ListItemIcon sx={{ minWidth: 40 }}>

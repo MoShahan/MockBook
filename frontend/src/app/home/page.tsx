@@ -69,7 +69,7 @@ const HomePage = () => {
                 sx={segmentedTabsSx}
               >
                 <Tab value="everyone" label="Everyone" disableRipple />
-                <Tab value="friends" label="Friends" disableRipple />
+                <Tab value="friends" label="Following" disableRipple />
               </Tabs>
             </Box>
             <PostsWidget key={listKind} list={listKind} userId={user?._id ?? ""} />

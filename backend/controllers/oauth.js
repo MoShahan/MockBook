@@ -92,6 +92,7 @@ export const oauthCallback = async (req, res, next) => {
         password: placeholderHash,
         picturePath: profile.picturePath || "",
         friends: [],
+        following: [],
         savedPosts: [],
         location: "",
         occupation: "",

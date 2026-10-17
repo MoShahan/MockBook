@@ -49,7 +49,7 @@ MockBook/
 - Create text and/or image posts (emoji picker on the compose bar; image dropzone with preview)
 - Home feed with author name, avatar, and relative time
 - Infinite scroll on home feed and profile Posts tab (`?limit=&cursor=`)
-- Home feed tabs: **Friends** (you + friends) and **Everyone** (`GET /posts?scope=friends|all`)
+- Home feed tabs: **Everyone** and **Following** (you + friends + people you follow; `GET /posts?scope=friends|all`)
 - Like / unlike posts (optimistic UI; rolls back on failure)
 - View who liked a post (click like count → list with profiles)
 - Save / unsave posts (bookmark on post cards; list via `GET /posts/saved`)
@@ -64,18 +64,20 @@ MockBook/
 
 ### Friends & profiles
 
-- Add / remove friends (both users’ lists update)
-- Friends list on profile pages (empty state when none)
+- **Friend requests** (send → accept / decline / cancel) — mutual friends only after accept; unfriend removes both sides
+- **Follow / unfollow** (one-way) — see someone’s posts in your **Following** feed without being friends; no auto-follow-back
+- Navbar friend-request inbox (badge) + `/friend-requests` (Incoming / Outgoing); also notified via the bell
+- Separate **Follow** and **Friend** actions on profiles and Add people (not on post cards)
+- Profile sidebar: **Friends** list (any profile) + **Following** list (own profile only; private)
 - **Add people** discovery widget on `/home` (sticky right rail on wide screens; collapsible “Find people” on mobile) with recent users + name search
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
 - Edit own profile (name, location, occupation, avatar, social handles, **avatar color**, **cover color**) via manage-account control
 - Solid color profile header (`coverColor`) and initials avatar color (`avatarColor`) when no photo - allowlisted swatches only
 - Optional public social links (Facebook, X, LinkedIn, Instagram) - shown only when set
 - Profile visit counter (`viewedProfile`) increments when another user loads your profile
-- In-app notifications (likes, comments, friend adds) via navbar bell + `/notifications` page
+- In-app notifications (likes, comments, friend requests / accepts) via navbar bell + `/notifications` page
 - Optional OAuth sign-in: Google, GitHub, Discord (when configured in backend env)
 - Click name/avatar to open the correct profile
-- Add/remove friend on another user’s profile header and in friends lists (not on post cards)
 - User details widget on profile only (not on home)
 
 ### Media & uploads
@@ -112,9 +114,9 @@ MockBook/
 
 ### Planned next (see `PROJECT_PLAN.md`)
 
-- Production deploy (Part 7)
-- Friend requests (pending / accept) instead of instant add
-- Report / block user (moderation basics)
+- Production deploy (Part 7): **Vercel** (frontend) + **Render** (backend); Atlas + ImageKit already wired — full step-by-step in `PROJECT_PLAN.md` Part 7
+- **Admin roles** (Part 8 / Step 8.5): ~2–3 admins who can delete any post/comment and deactivate users
+- Report / block user (user-facing report) — deferred
 - Multiple images per post
 - Image compression / resizing
 - Soft-delete posts
@@ -248,13 +250,23 @@ npm run start -w backend
 | `GET`    | `/notifications/unread-count`| Unread notification count                                        |
 | `PATCH`  | `/notifications/read-all`    | Mark all notifications read                                      |
 | `PATCH`  | `/notifications/:id/read`    | Mark one notification read                                       |
-| `GET`    | `/users/discover`            | Recent users or search (`?q=&limit=`; excludes self)             |
+| `GET`    | `/users/discover`            | Recent users or search (`?q=&limit=`; excludes self; includes `relationship`) |
 | `PATCH`  | `/users/me`                  | Update own profile (multipart optional `picture` → ImageKit; `avatarColor` / `coverColor` allowlisted hex) |
+| `GET`    | `/users/me/friend-requests`  | Pending requests (`?box=incoming\|outgoing`)                     |
+| `GET`    | `/users/me/friend-requests/count` | Incoming pending count                                      |
+| `POST`   | `/users/me/friend-requests/:requestId/accept` | Accept → mutual friends                        |
+| `POST`   | `/users/me/friend-requests/:requestId/decline` | Decline                                       |
+| `DELETE` | `/users/me/friend-requests/:requestId` | Cancel own outgoing request                            |
+| `DELETE` | `/users/me/friends/:friendId`| Unfriend (mutual remove)                                         |
+| `GET`    | `/users/me/following`        | Users I follow (formatted)                                       |
+| `POST`   | `/users/:id/friend-requests` | Send friend request                                              |
+| `POST`   | `/users/:id/follow`          | Follow                                                           |
+| `DELETE` | `/users/:id/follow`          | Unfollow                                                         |
+| `GET`    | `/users/:id/relationship`    | Viewer relationship flags vs `:id`                               |
 | `GET`    | `/users/:id`                 | Get a user (no password)                                         |
 | `GET`    | `/users/:id/friends`         | Get that user’s friends (formatted)                              |
-| `PATCH`  | `/users/friends/:friendId`   | Add or remove a friend (JWT user only)                           |
 | `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit); `{ post }` |
-| `GET`    | `/posts`                     | Home feed (`?scope=all\|friends&limit=&cursor=` → `{ posts, nextCursor, hasMore, scope }`) |
+| `GET`    | `/posts`                     | Home feed (`?scope=all\|friends&limit=&cursor=`; `friends` = me ∪ friends ∪ following) |
 | `GET`    | `/posts/saved`               | Logged-in user’s saved posts (newest save first)                 |
 | `GET`    | `/posts/liked`               | Logged-in user’s liked posts (`createdAt` desc)                  |
 | `GET`    | `/posts/commented`           | Posts the user commented on (`createdAt` desc; distinct)         |

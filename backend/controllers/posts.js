@@ -44,7 +44,7 @@ export const createPost = async (req, res, next) => {
 /**
  * Home feed. Query `scope`:
  * - `all` (default): every post, newest first
- * - `friends`: posts by the logged-in user and their friends only
+ * - `friends` (alias for personal network): me ∪ accepted friends ∪ users I follow
  */
 export const getFeed = async (req, res, next) => {
   try {
@@ -54,19 +54,25 @@ export const getFeed = async (req, res, next) => {
     }
 
     const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim().toLowerCase() : "all"
-    const scope = scopeRaw === "friends" ? "friends" : "all"
+    const scope =
+      scopeRaw === "friends" || scopeRaw === "following" || scopeRaw === "network"
+        ? "friends"
+        : "all"
 
     const { limit, cursorDate } = parseCursorPagination(req.query)
     const filter = cursorDate ? { createdAt: { $lt: cursorDate } } : {}
 
     if (scope === "friends") {
-      const me = await User.findById(userId).select("friends")
+      const me = await User.findById(userId).select("friends following")
       if (!me) {
         return res.status(401).json({ error: "Unauthenticated" })
       }
       const authorIds = [
-        String(userId),
-        ...(me.friends || []).map(id => String(id)),
+        ...new Set([
+          String(userId),
+          ...(me.friends || []).map(id => String(id)),
+          ...(me.following || []).map(id => String(id)),
+        ]),
       ]
       filter.userId = { $in: authorIds }
     }

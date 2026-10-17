@@ -11,12 +11,17 @@ export function notificationCopy(n: AppNotification): string {
       return `${name} liked your comment`
     case "friend":
       return `${name} added you as a friend`
+    case "friend_request":
+      return `${name} sent you a friend request`
+    case "friend_accept":
+      return `${name} accepted your friend request`
     default:
       return `${name} interacted with you`
   }
 }
 
 export function notificationHref(n: AppNotification): string | null {
+  if (n.type === "friend_request") return "/friend-requests"
   if (n.postId) return `/post/${n.postId}`
   if (n.actor?._id) return `/profile/${n.actor._id}`
   return null

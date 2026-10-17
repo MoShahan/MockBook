@@ -2,7 +2,14 @@ import mongoose from "mongoose"
 
 const Schema = mongoose.Schema
 
-const NOTIFICATION_TYPES = ["post_like", "comment", "comment_like", "friend"]
+const NOTIFICATION_TYPES = [
+  "post_like",
+  "comment",
+  "comment_like",
+  "friend",
+  "friend_request",
+  "friend_accept",
+]
 
 const NotificationSchema = new Schema(
   {

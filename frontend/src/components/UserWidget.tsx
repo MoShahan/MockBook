@@ -13,7 +13,7 @@ import {
 import { alpha, Box, Divider, IconButton, Link, Tooltip, Typography, useTheme } from "@mui/material"
 import { usePathname, useRouter } from "next/navigation"
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
 import {
   DEFAULT_AVATAR_COLOR,
@@ -21,14 +21,12 @@ import {
   normalizeProfileColor,
 } from "@/lib/profileColors"
 import { SOCIAL_NETWORKS, type SocialNetwork, socialProfileUrl } from "@/lib/social"
-import { useToast } from "@/providers/ToastProvider"
-import { setFriends } from "@/state"
-import type { Friend, User } from "@/types/models"
-import { friendIdOf, sameUserId } from "@/types/models"
+import type { User } from "@/types/models"
+import { sameUserId } from "@/types/models"
 
 import EditProfileDialog from "./EditProfileDialog"
 import FlexBetween from "./FlexBetween"
-import FriendToggleButton from "./FriendToggleButton"
+import RelationshipActions from "./RelationshipActions"
 import UserImage from "./UserImage"
 import WidgetWrapper from "./WidgetWrapper"
 
@@ -49,9 +47,7 @@ const SOCIAL_ICONS: Record<SocialNetwork, React.ReactNode> = {
 const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetProps) => {
   const router = useRouter()
   const pathname = usePathname()
-  const dispatch = useAppDispatch()
   const loggedInUser = useAppSelector(state => state.user)
-  const { success, error: toastError } = useToast()
   const theme = useTheme()
   const { palette } = theme
   const dark = palette.neutral.dark
@@ -62,9 +58,6 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   const [editOpen, setEditOpen] = useState(false)
 
   const isOwnProfile = isOwnProfileProp ?? sameUserId(loggedInUser?._id, userId)
-  const isFriend = Boolean(
-    loggedInUser?.friends?.some(friend => sameUserId(friendIdOf(friend), userId))
-  )
 
   useEffect(() => {
     if (!userId) return
@@ -113,20 +106,6 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
       router.push("/profile")
     } else {
       router.push(`/profile/${userId}`)
-    }
-  }
-
-  const patchFriend = async () => {
-    if (!loggedInUser?._id || !userId || isOwnProfile) return
-    try {
-      const { data } = await api.patch<{ message?: string; friends: Friend[] }>(
-        `/users/friends/${userId}`,
-        {}
-      )
-      dispatch(setFriends({ friends: data.friends }))
-      success(data.message || (isFriend ? "Friend removed" : "Friend added"))
-    } catch {
-      toastError("Could not update friend")
     }
   }
 
@@ -186,11 +165,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               </IconButton>
             </Tooltip>
           ) : (
-            <FriendToggleButton
-              isFriend={isFriend}
-              onCover
-              onClick={() => void patchFriend()}
-            />
+            <RelationshipActions userId={userId} onCover />
           )}
         </Box>
       </Box>

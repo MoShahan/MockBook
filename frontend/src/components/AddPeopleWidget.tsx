@@ -92,6 +92,7 @@ const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
               url={u.picturePath || ""}
               avatarColor={u.avatarColor}
               showFriendButton
+              relationship={u.relationship}
               listHover
             />
           ))}

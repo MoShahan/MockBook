@@ -1,4 +1,10 @@
-export type NotificationType = "post_like" | "comment" | "comment_like" | "friend"
+export type NotificationType =
+  | "post_like"
+  | "comment"
+  | "comment_like"
+  | "friend"
+  | "friend_request"
+  | "friend_accept"
 
 export type NotificationActor = {
   _id: string

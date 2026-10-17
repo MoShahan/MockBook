@@ -16,6 +16,7 @@ function sanitizeUser(user: User): User {
   const { ...safe } = user as User & { password?: unknown }
   delete (safe as { password?: unknown }).password
   safe.savedPosts = (safe.savedPosts || []).map(id => String(id))
+  safe.following = (safe.following || []).map(id => String(id))
   return safe
 }
 
@@ -54,6 +55,13 @@ export const authSlice = createSlice({
         console.warn("User does not exist, cannot set Friends")
       }
     },
+    setFollowing: (state, action: PayloadAction<{ following: string[] }>) => {
+      if (state.user) {
+        state.user.following = action.payload.following.map(id => String(id))
+      } else {
+        console.warn("User does not exist, cannot set following")
+      }
+    },
     setSavedPosts: (state, action: PayloadAction<{ savedPosts: string[] }>) => {
       if (state.user) {
         state.user.savedPosts = action.payload.savedPosts.map(id => String(id))
@@ -63,7 +71,7 @@ export const authSlice = createSlice({
     },
     setUser: (state, action: PayloadAction<{ user: User }>) => {
       const next = sanitizeUser(action.payload.user)
-      // Preserve friends/saved when the API returns raw ids or omits private lists.
+      // Preserve friends/saved/following when the API returns raw ids or omits private lists.
       if (state.user) {
         const incoming = action.payload.user.friends as unknown
         const first = Array.isArray(incoming) ? incoming[0] : undefined
@@ -73,6 +81,9 @@ export const authSlice = createSlice({
         }
         if (!next.savedPosts?.length && state.user.savedPosts?.length) {
           next.savedPosts = state.user.savedPosts
+        }
+        if (action.payload.user.following === undefined && state.user.following?.length) {
+          next.following = state.user.following
         }
       }
       state.user = next
@@ -116,6 +127,7 @@ export const {
   toggleMode,
   setMode,
   setFriends,
+  setFollowing,
   setSavedPosts,
   setUser,
   setLogin,

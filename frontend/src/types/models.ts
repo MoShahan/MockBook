@@ -24,6 +24,8 @@ export type User = {
   /** Solid profile header/cover color (allowlisted hex). */
   coverColor?: string
   friends: Friend[]
+  /** User ids I follow (one-way). Private to me. */
+  following?: string[]
   /** Post ids the user has bookmarked (private). */
   savedPosts?: string[]
   location?: string
@@ -44,6 +46,12 @@ export type DiscoverUser = {
   avatarColor?: string
   location?: string
   occupation?: string
+  relationship?: {
+    isFriend: boolean
+    isFollowing: boolean
+    outgoingRequestId: string | null
+    incomingRequestId: string | null
+  }
 }
 
 /** Post likes are a Map on the server, serialized as an object keyed by user id. */
