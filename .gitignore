@@ -1,7 +1,24 @@
-*/node_modules
+node_modules/
 
-frontend/node_modules
+# Local revamp checklist (not shared via git)
+PROJECT_PLAN.md
+
+frontend/node_modules/
 frontend/.next/
 frontend/next-env.d.ts
+frontend/tsconfig.tsbuildinfo
+*.tsbuildinfo
 
-backend/node_modules
+backend/node_modules/
+
+.env
+.env.*
+!.env.example
+!**/.env.example
+backend/.env
+frontend/.env.local
+
+# Local test accounts (never commit real passwords)
+TEST_ACCOUNTS.local.md
+TEST_ACCOUNTS.local.txt
+

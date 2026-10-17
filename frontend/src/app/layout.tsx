@@ -1,30 +1,58 @@
-import "./globals.css"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import { CssBaseline } from "@mui/material"
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter"
+import type { Metadata } from "next"
+import { Fraunces, Source_Sans_3 } from "next/font/google"
+
+import AuthProvider from "@/providers/AuthProvider"
 import ReduxProvider from "@/providers/ReduxProvider"
 import ThemeProviderComp from "@/providers/ThemeProvider"
-import AuthProvider from "@/providers/AuthProvider"
+import ToastProvider from "@/providers/ToastProvider"
 
-const inter = Inter({ subsets: ["latin"] })
+import "./globals.css"
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+})
+
+const sourceSans = Source_Sans_3({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
-  title: "Social Media",
-  description: "by Mohammed Shahan",
+  title: {
+    default: "Xivi",
+    template: "%s · Xivi",
+  },
+  description: "Xivi - connect with friends, share posts, and stay in the loop.",
+  applicationName: "Xivi",
+  appleWebApp: {
+    title: "Xivi",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <ReduxProvider>
-          <AuthProvider>
-            <ThemeProviderComp>
-              <CssBaseline />
-              {children}
-            </ThemeProviderComp>
-          </AuthProvider>
-        </ReduxProvider>
+    <html lang="en" className={`${fraunces.variable} ${sourceSans.variable}`}>
+      <body className={sourceSans.className}>
+        <a href="#main-content" className="skip-to-content">
+          Skip to content
+        </a>
+        <AppRouterCacheProvider>
+          <ReduxProvider>
+            <AuthProvider>
+              <ThemeProviderComp>
+                <ToastProvider>
+                  <CssBaseline />
+                  {children}
+                </ToastProvider>
+              </ThemeProviderComp>
+            </AuthProvider>
+          </ReduxProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   )
