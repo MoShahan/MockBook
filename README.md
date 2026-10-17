@@ -69,7 +69,7 @@ Xivi/
 - Navbar friend-request inbox (badge) + `/friend-requests` (Incoming / Outgoing); also notified via the bell
 - Separate **Follow** and **Friend** actions on profiles and Add people (not on post cards)
 - Profile sidebar: **Friends** list (any profile) + **Following** list (own profile only; private)
-- **Admins** (`role: admin`): full normal user (post, comment, friends, follow) **plus** delete any post/comment and deactivate users; profile shows an **Admin** badge (see Demo admin accounts below)
+- **Admins** (`role: admin`): full normal user (post, comment, friends, follow) **plus** delete any post/comment and deactivate users; profile shows an **Admin** badge (allowlist via `ADMIN_EMAILS` in local env — never commit credentials)
 - **Add people** discovery widget on `/home` (sticky right rail on wide screens; collapsible “Find people” on mobile) with recent users + name search
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
 - Edit own profile (name, location, occupation, avatar, social handles, **avatar color**, **cover color**) via manage-account control
@@ -113,22 +113,16 @@ Xivi/
 - JWT identity for create post / like / comment / delete / friends (not body `userId` trust)
 - Auth secrets and token lifetimes configurable via env
 
-### Demo admin accounts
+### Admin accounts (local only)
 
-These emails are treated as **`role: admin`** (via `ADMIN_EMAILS` / defaults). They can delete **any** post or comment and deactivate non-admin users.
-
-| Email | Password |
-| ----- | -------- |
-| `admin@yopmail.com` | `Admin@123` |
-| `admin@xivi.com` | `Admin@123` |
-
-Create/update them in MongoDB (requires `backend/.env` with `MONGODB_URI`):
+Admins are normal users with `role: admin`. Promotion comes from **`ADMIN_EMAILS`** in `backend/.env` (not committed). Set emails and an optional seed password there — see placeholders in `backend/.env.example`.
 
 ```bash
+# After filling ADMIN_EMAILS + ADMIN_PASSWORD in backend/.env:
 npm run seed:admins -w backend
 ```
 
-Or register/login with those emails while they appear in `ADMIN_EMAILS` (see `backend/.env.example`). **Demo only** — change passwords (and the allowlist) before any public production deploy.
+Or register/login with an email listed in `ADMIN_EMAILS`. Do **not** put real admin emails or passwords in README, the plan, or any tracked file.
 
 ### Planned next (see `PROJECT_PLAN.md`)
 

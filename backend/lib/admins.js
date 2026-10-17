@@ -1,21 +1,20 @@
-/** Default demo admin emails (local/dev). Override with ADMIN_EMAILS env. */
-export const DEFAULT_ADMIN_EMAILS = [
-  "admin@yopmail.com",
-  "admin@xivi.com",
-]
+/**
+ * Admin allowlist from ADMIN_EMAILS (comma-separated).
+ * No hardcoded emails — leave unset for an empty allowlist (no auto-promotion).
+ */
 
 /**
  * @returns {Set<string>} lowercased emails
  */
 export function getAdminEmailSet() {
   const raw = process.env.ADMIN_EMAILS?.trim()
-  const list = raw
-    ? raw
-        .split(",")
-        .map(s => s.trim().toLowerCase())
-        .filter(Boolean)
-    : DEFAULT_ADMIN_EMAILS.map(e => e.toLowerCase())
-  return new Set(list)
+  if (!raw) return new Set()
+  return new Set(
+    raw
+      .split(",")
+      .map(s => s.trim().toLowerCase())
+      .filter(Boolean),
+  )
 }
 
 export function isAdminEmail(email) {
