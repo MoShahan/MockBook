@@ -22,7 +22,7 @@ function LoginFormWithOauth() {
         Welcome back
       </Typography>
       <Typography sx={{ color: "text.secondary", mb: 3, lineHeight: 1.5 }}>
-        Sign in to continue to MockBook.
+        Sign in to continue to Xivi.
       </Typography>
       <Form
         initVals={loginInitVals}

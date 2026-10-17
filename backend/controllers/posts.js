@@ -25,7 +25,7 @@ export const createPost = async (req, res, next) => {
 
     let url = ""
     if (req.file?.buffer) {
-      const uploaded = await uploadImageBuffer(req.file.buffer, req.file.originalname, "/mockbook/posts")
+      const uploaded = await uploadImageBuffer(req.file.buffer, req.file.originalname, "/xivi/posts")
       url = uploaded.url || ""
     }
 
@@ -421,7 +421,7 @@ export const updatePost = async (req, res, next) => {
       url = ""
     }
     if (req.file?.buffer) {
-      const uploaded = await uploadImageBuffer(req.file.buffer, req.file.originalname, "/mockbook/posts")
+      const uploaded = await uploadImageBuffer(req.file.buffer, req.file.originalname, "/xivi/posts")
       url = uploaded.url || ""
     }
 

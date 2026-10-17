@@ -1,9 +1,9 @@
 ---
-name: mockbook-test-release
-description: Validate MockBook changes, create or improve regression tests, run project checks, and prepare a release-readiness report before deployment.
+name: xivi-test-release
+description: Validate Xivi changes, create or improve regression tests, run project checks, and prepare a release-readiness report before deployment.
 ---
 
-# MockBook Testing and Release Readiness
+# Xivi Testing and Release Readiness
 
 ## Goal
 

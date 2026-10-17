@@ -30,7 +30,7 @@ const EmptyState = ({ title, description, actionLabel, onAction }: EmptyStatePro
     >
       <Box
         component="img"
-        src="/mockbook-mark.png"
+        src="/xivi-mark.png"
         alt=""
         aria-hidden
         sx={{

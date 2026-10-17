@@ -1,9 +1,9 @@
 ---
-name: mockbook-modernize
-description: Safely upgrade MockBook dependencies, migrate legacy APIs, or refactor older code without unnecessary rewrites. Use for Next.js, React, Express, Mongoose, Material UI, Node.js, or tooling upgrades.
+name: xivi-modernize
+description: Safely upgrade Xivi dependencies, migrate legacy APIs, or refactor older code without unnecessary rewrites. Use for Next.js, React, Express, Mongoose, Material UI, Node.js, or tooling upgrades.
 ---
 
-# MockBook Safe Modernization
+# Xivi Safe Modernization
 
 ## Goal
 

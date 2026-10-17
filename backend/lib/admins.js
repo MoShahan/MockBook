@@ -2,7 +2,6 @@
 export const DEFAULT_ADMIN_EMAILS = [
   "admin@yopmail.com",
   "admin@xivi.com",
-  "admin@mockbook.com",
 ]
 
 /**

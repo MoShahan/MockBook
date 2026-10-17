@@ -22,7 +22,7 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
       component={onClick ? "button" : "div"}
       type={onClick ? "button" : undefined}
       onClick={onClick}
-      aria-label="MockBook home"
+      aria-label="Xivi home"
       sx={{
         display: "inline-flex",
         alignItems: "center",
@@ -34,10 +34,10 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
         cursor: onClick ? "pointer" : "default",
         textAlign: "left",
         borderRadius: onClick ? "0.5rem" : undefined,
-        "&:hover .mockbook-wordmark": onClick
+        "&:hover .xivi-wordmark": onClick
           ? { color: theme.palette.mode === "dark" ? pLight : theme.palette.primary.dark }
           : undefined,
-        "&:hover .mockbook-mark": onClick ? { transform: "scale(1.04)" } : undefined,
+        "&:hover .xivi-mark": onClick ? { transform: "scale(1.04)" } : undefined,
         "&:focus-visible": onClick
           ? {
               outline: `2px solid ${primary}`,
@@ -47,9 +47,9 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
       }}
     >
       <Box
-        className="mockbook-mark"
+        className="xivi-mark"
         component="img"
-        src="/mockbook-mark.png"
+        src="/xivi-mark.png"
         alt=""
         width={markPx}
         height={markPx}
@@ -67,7 +67,7 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
         }}
       />
       <Typography
-        className="mockbook-wordmark"
+        className="xivi-wordmark"
         component="span"
         sx={{
           fontFamily: "var(--font-display), Georgia, serif",
@@ -80,7 +80,7 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
           userSelect: "none",
         }}
       >
-        MockBook
+        Xivi
       </Typography>
     </Box>
   )

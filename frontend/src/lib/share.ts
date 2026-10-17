@@ -14,7 +14,7 @@ export function getPostPageUrl(postId: string, origin?: string): string {
 /** Short share text from a post description, or a default line. */
 export function buildShareText(description?: string): string {
   const trimmed = (description || "").trim().replace(/\s+/g, " ")
-  if (!trimmed) return "Check out this post on MockBook"
+  if (!trimmed) return "Check out this post on Xivi"
   if (trimmed.length <= 120) return trimmed
   return `${trimmed.slice(0, 117)}…`
 }
@@ -33,7 +33,7 @@ export function buildShareUrls(
   options?: { text?: string; origin?: string }
 ): ShareIntentUrls {
   const pageUrl = getPostPageUrl(postId, options?.origin)
-  const text = options?.text ?? "Check out this post on MockBook"
+  const text = options?.text ?? "Check out this post on Xivi"
   const encodedUrl = encodeURIComponent(pageUrl)
   const encodedText = encodeURIComponent(text)
 

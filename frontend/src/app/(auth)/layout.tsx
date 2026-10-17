@@ -16,7 +16,7 @@ export default function AuthRouteLayout({ children }: { children: ReactNode }) {
 
   return (
     <AuthLayout
-      headline={isRegister ? "Join MockBook" : "Stay close to your people"}
+      headline={isRegister ? "Join Xivi" : "Stay close to your people"}
       supporting={
         isRegister
           ? "Create an account and start sharing with friends in minutes."

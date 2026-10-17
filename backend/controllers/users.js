@@ -171,7 +171,7 @@ export const updateProfile = async (req, res, next) => {
       const uploaded = await uploadImageBuffer(
         req.file.buffer,
         req.file.originalname,
-        "/mockbook/avatars"
+        "/xivi/avatars"
       )
       user.picturePath = uploaded.url || user.picturePath
     }

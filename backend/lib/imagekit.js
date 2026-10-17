@@ -31,7 +31,7 @@ export function uniqueUploadFileName(originalName = "upload.jpg") {
  * @param {string} [folder]
  * @returns {Promise<{ url: string, fileId?: string, name?: string }>}
  */
-export async function uploadImageBuffer(buffer, originalName = "upload.jpg", folder = "/mockbook/posts") {
+export async function uploadImageBuffer(buffer, originalName = "upload.jpg", folder = "/xivi/posts") {
   const client = getImageKitClient()
   const fileName = uniqueUploadFileName(originalName)
   const file = await toFile(buffer, fileName)

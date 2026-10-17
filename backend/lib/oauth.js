@@ -142,7 +142,7 @@ export async function fetchOauthProfile(provider, code) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/vnd.github+json",
-        "User-Agent": "MockBook",
+        "User-Agent": "Xivi",
       },
     })
     const user = await userRes.json()
@@ -154,7 +154,7 @@ export async function fetchOauthProfile(provider, code) {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: "application/vnd.github+json",
-          "User-Agent": "MockBook",
+          "User-Agent": "Xivi",
         },
       })
       if (emailRes.ok) {

@@ -21,11 +21,11 @@ const TermsPage = () => {
   return (
     <InfoPageShell
       title="Terms & Conditions"
-      subtitle={`Last updated: ${updated}. By using MockBook you agree to these terms.`}
+      subtitle={`Last updated: ${updated}. By using Xivi you agree to these terms.`}
     >
       <Section title="1. The service">
         <Typography component="p">
-          MockBook is a social networking demo provided as-is for learning and portfolio purposes. Features may
+          Xivi is a social networking demo provided as-is for learning and portfolio purposes. Features may
           change, break, or be removed without notice. There is no guarantee of uptime, data durability, or
           commercial support.
         </Typography>
@@ -51,7 +51,7 @@ const TermsPage = () => {
 
       <Section title="4. Your content">
         <Typography component="p">
-          You keep ownership of content you post. By posting, you grant MockBook a limited license to host,
+          You keep ownership of content you post. By posting, you grant Xivi a limited license to host,
           display, and distribute that content within the app so the social features can work. You can delete
           your own posts where the product allows; residual copies may remain in backups for a period.
         </Typography>
@@ -60,7 +60,7 @@ const TermsPage = () => {
       <Section title="5. Third-party services">
         <Typography component="p">
           Sign-in with Google, GitHub, or Discord, and image hosting (e.g. ImageKit), are governed by those
-          providers’ terms when you use them. MockBook is not responsible for third-party outages or policy
+          providers’ terms when you use them. Xivi is not responsible for third-party outages or policy
           changes.
         </Typography>
       </Section>
@@ -68,7 +68,7 @@ const TermsPage = () => {
       <Section title="6. Disclaimers">
         <Typography component="p">
           THE SERVICE IS PROVIDED “AS IS” WITHOUT WARRANTIES OF ANY KIND. To the fullest extent allowed by law,
-          MockBook and its contributors are not liable for damages arising from use of the demo, including data
+          Xivi and its contributors are not liable for damages arising from use of the demo, including data
           loss or unauthorized access.
         </Typography>
       </Section>
@@ -76,8 +76,8 @@ const TermsPage = () => {
       <Section title="7. Changes & contact">
         <Typography component="p">
           We may update these terms; the date above will reflect material changes. Questions:{" "}
-          <MuiLink href="mailto:support@mockbook.app" underline="hover">
-            support@mockbook.app
+          <MuiLink href="mailto:support@xivi.app" underline="hover">
+            support@xivi.app
           </MuiLink>{" "}
           or{" "}
           <MuiLink component={NextLink} href="/help#contact">

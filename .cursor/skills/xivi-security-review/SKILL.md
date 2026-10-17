@@ -1,9 +1,9 @@
 ---
-name: mockbook-security-review
-description: Review MockBook for practical security weaknesses in Express routes, JWT authentication, user authorization, Mongoose queries, uploads, configuration, and frontend session handling.
+name: xivi-security-review
+description: Review Xivi for practical security weaknesses in Express routes, JWT authentication, user authorization, Mongoose queries, uploads, configuration, and frontend session handling.
 ---
 
-# MockBook API and Application Security Review
+# Xivi API and Application Security Review
 
 ## Goal
 

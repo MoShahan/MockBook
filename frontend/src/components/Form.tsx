@@ -97,7 +97,7 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
           refreshToken: data.refreshToken,
         })
       )
-      success("Welcome to MockBook!")
+      success("Welcome to Xivi!")
       router.push("/home")
     } catch (e: unknown) {
       const msg = getErrorMessage(e, "Registration failed")
@@ -287,7 +287,7 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
             <Typography sx={{ textAlign: "center", color: "text.secondary", fontSize: "0.95rem" }}>
               {isLogin ? (
                 <>
-                  New to MockBook?{" "}
+                  New to Xivi?{" "}
                   <MuiLink
                     component="button"
                     type="button"

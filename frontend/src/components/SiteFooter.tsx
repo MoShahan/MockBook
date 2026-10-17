@@ -63,7 +63,7 @@ const SiteFooter = ({ compact = false }: SiteFooterProps) => {
         ))}
         {!compact ? (
           <Typography sx={{ ml: { sm: "auto" }, color: "text.secondary", fontSize: "0.8rem" }}>
-            © {new Date().getFullYear()} MockBook
+            © {new Date().getFullYear()} Xivi
           </Typography>
         ) : null}
       </Box>

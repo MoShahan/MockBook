@@ -78,7 +78,7 @@ const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
           description={
             debounced
               ? "Try a different name, or clear the search to browse recent users."
-              : "When others join MockBook, you’ll see them here."
+              : "When others join Xivi, you’ll see them here."
           }
         />
       ) : (

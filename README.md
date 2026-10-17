@@ -1,4 +1,4 @@
-# MockBook
+# Xivi
 
 Social app built with the MERN stack: a Next.js frontend and an Express API backed by MongoDB. Register, post (text + images), like, comment, friend others, and browse profiles - with light/dark mode and a hardened auth API.
 
@@ -17,7 +17,7 @@ By Mohammed Shahan.
 ## Project structure
 
 ```text
-MockBook/
+Xivi/
 ├── frontend/                 Next.js app
 ├── backend/                  Express API
 │   ├── models/               User, Post
@@ -91,7 +91,7 @@ MockBook/
 ### UX & client architecture
 
 - Light / dark mode (persisted via redux-persist; first visit follows system preference)
-- Stone-first theme + Fraunces / Source Sans 3; MockBook logo + mark in the header; tab favicon / apple-touch icon
+- Stone-first theme + Fraunces / Source Sans 3; Xivi logo + mark in the header; tab favicon / apple-touch icon
 
 - Split **login/register** layout (`AuthLayout`): wave backdrop (`auth-wave-*.jpg`) + café/social panel on the left (`auth-panel-*.jpg`)
 - **Help & FAQ** (`/help`) with Contact section; **Privacy** (`/privacy`) and **Terms** (`/terms`) - linked from navbar Help and auth footers
@@ -115,13 +115,12 @@ MockBook/
 
 ### Demo admin accounts
 
-These three emails are treated as **`role: admin`** (via `ADMIN_EMAILS` / defaults). They can delete **any** post or comment and deactivate non-admin users.
+These emails are treated as **`role: admin`** (via `ADMIN_EMAILS` / defaults). They can delete **any** post or comment and deactivate non-admin users.
 
 | Email | Password |
 | ----- | -------- |
 | `admin@yopmail.com` | `Admin@123` |
 | `admin@xivi.com` | `Admin@123` |
-| `admin@mockbook.com` | `Admin@123` |
 
 Create/update them in MongoDB (requires `backend/.env` with `MONGODB_URI`):
 
@@ -133,6 +132,7 @@ Or register/login with those emails while they appear in `ADMIN_EMAILS` (see `ba
 
 ### Planned next (see `PROJECT_PLAN.md`)
 
+- External rename (Step 5.6c): GitHub repo, MongoDB Atlas, ImageKit, Render/Vercel, OAuth app names → **Xivi**
 - Production deploy (Part 7): **Vercel** (frontend) + **Render** (backend); Atlas + ImageKit already wired — full step-by-step in `PROJECT_PLAN.md` Part 7
 - Report / block user (user-facing report) — deferred
 - Multiple images per post
@@ -171,7 +171,7 @@ cp frontend/.env.example frontend/.env.local
 PORT=5000
 MONGODB_USERNAME=your_atlas_db_user
 MONGODB_PASSWORD=your_atlas_db_password
-MONGODB_URI=mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/mockbook?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/xivi?retryWrites=true&w=majority
 ACCESS_TOKEN_SECRET=a-long-random-string
 REFRESH_TOKEN_SECRET=another-long-random-string
 ACCESS_TOKEN_EXPIRES=1d

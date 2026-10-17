@@ -1,8 +1,8 @@
-# MockBook - Agent Instructions
+# Xivi - Agent Instructions
 
 ## Project mission
 
-MockBook is a full-stack social networking application being revived from an older learning project. Improve it incrementally into a secure, maintainable, tested, and deployable application while preserving its existing product identity and core stack.
+Xivi is a full-stack social networking application being revived from an older learning project. Improve it incrementally into a secure, maintainable, tested, and deployable application while preserving its existing product identity and core stack.
 
 ## Source-of-truth rules
 

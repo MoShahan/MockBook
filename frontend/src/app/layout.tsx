@@ -24,13 +24,13 @@ const sourceSans = Source_Sans_3({
 
 export const metadata: Metadata = {
   title: {
-    default: "MockBook",
-    template: "%s · MockBook",
+    default: "Xivi",
+    template: "%s · Xivi",
   },
-  description: "MockBook - connect with friends, share posts, and stay in the loop.",
-  applicationName: "MockBook",
+  description: "Xivi - connect with friends, share posts, and stay in the loop.",
+  applicationName: "Xivi",
   appleWebApp: {
-    title: "MockBook",
+    title: "Xivi",
   },
 }
 

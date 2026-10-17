@@ -1,5 +1,5 @@
 /**
- * Upsert the three demo admin accounts (local/dev).
+ * Upsert the demo admin accounts (local/dev).
  * Usage (from repo root): npm run seed:admins -w backend
  * Requires MONGODB_URI and ACCESS_TOKEN_SECRET in backend/.env (secret unused here but keeps env consistent).
  */
@@ -21,7 +21,6 @@ const DEMO_PASSWORD = "Admin@123"
 const DEMO_ADMINS = [
   { email: "admin@yopmail.com", firstName: "Admin", lastName: "Yopmail" },
   { email: "admin@xivi.com", firstName: "Admin", lastName: "Xivi" },
-  { email: "admin@mockbook.com", firstName: "Admin", lastName: "MockBook" },
 ]
 
 async function main() {

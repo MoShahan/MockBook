@@ -1,13 +1,13 @@
 ---
-name: mockbook-feature
-description: Implement a MockBook product feature end to end across the existing Next.js/React frontend, Express API, MongoDB/Mongoose models, and tests. Use for new features or completing incomplete social-network functionality.
+name: xivi-feature
+description: Implement an Xivi product feature end to end across the existing Next.js/React frontend, Express API, MongoDB/Mongoose models, and tests. Use for new features or completing incomplete social-network functionality.
 ---
 
-# MockBook Feature Development
+# Xivi Feature Development
 
 ## Goal
 
-Deliver the smallest complete, tested vertical slice that fits MockBook's existing architecture.
+Deliver the smallest complete, tested vertical slice that fits Xivi's existing architecture.
 
 ## Workflow
 

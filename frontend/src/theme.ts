@@ -1,7 +1,7 @@
 import { alpha, type ThemeOptions } from "@mui/material/styles"
 
 /**
- * MockBook design tokens - stone-first UI, muted forest green as accent only (Step 5.1).
+ * Xivi design tokens - stone-first UI, muted forest green as accent only (Step 5.1).
  * Typography families come from CSS variables set in `layout.tsx` (next/font).
  */
 export const colorTokens = {

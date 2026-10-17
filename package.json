@@ -1,8 +1,8 @@
 {
-  "name": "mockbook",
+  "name": "xivi",
   "version": "1.0.0",
   "private": true,
-  "description": "MockBook monorepo - Next.js frontend + Express backend",
+  "description": "Xivi monorepo - Next.js frontend + Express backend",
   "workspaces": [
     "frontend",
     "backend"

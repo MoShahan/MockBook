@@ -49,7 +49,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
     q: "Is my data private?",
     a: (
       <>
-        MockBook is a learning/demo social app. See our{" "}
+        Xivi is a learning/demo social app. See our{" "}
         <MuiLink component={NextLink} href="/privacy">
           Privacy Policy
         </MuiLink>{" "}
@@ -76,7 +76,7 @@ const HelpPage = () => {
   return (
     <InfoPageShell
       title="Help & FAQ"
-      subtitle="Quick answers about MockBook accounts, posting, friends, and privacy."
+      subtitle="Quick answers about Xivi accounts, posting, friends, and privacy."
     >
       <Typography
         sx={{
@@ -136,13 +136,13 @@ const HelpPage = () => {
           Contact us
         </Typography>
         <Typography sx={{ color: "text.secondary", lineHeight: 1.65, mb: 2 }}>
-          Questions about MockBook, account issues, or feedback on this demo? Reach out and we will get back
+          Questions about Xivi, account issues, or feedback on this demo? Reach out and we will get back
           when we can.
         </Typography>
         <Typography sx={{ lineHeight: 1.7 }}>
           Email:{" "}
-          <MuiLink href="mailto:support@mockbook.app" underline="hover" sx={{ fontWeight: 600 }}>
-            support@mockbook.app
+          <MuiLink href="mailto:support@xivi.app" underline="hover" sx={{ fontWeight: 600 }}>
+            support@xivi.app
           </MuiLink>
         </Typography>
         <Typography sx={{ color: "text.secondary", mt: 1.5, fontSize: "0.9rem", lineHeight: 1.6 }}>

@@ -21,21 +21,21 @@ const PrivacyPage = () => {
   return (
     <InfoPageShell
       title="Privacy Policy"
-      subtitle={`Last updated: ${updated}. This policy explains how MockBook handles information in this demo application.`}
+      subtitle={`Last updated: ${updated}. This policy explains how Xivi handles information in this demo application.`}
     >
       <Section title="1. Who we are">
         <Typography component="p">
-          MockBook is a social networking demo / learning project. It is not a commercial consumer product.
+          Xivi is a social networking demo / learning project. It is not a commercial consumer product.
           Contact:{" "}
-          <MuiLink href="mailto:support@mockbook.app" underline="hover">
-            support@mockbook.app
+          <MuiLink href="mailto:support@xivi.app" underline="hover">
+            support@xivi.app
           </MuiLink>
           .
         </Typography>
       </Section>
 
       <Section title="2. Information we collect">
-        <Typography component="p">Depending on how you use MockBook, we may store:</Typography>
+        <Typography component="p">Depending on how you use Xivi, we may store:</Typography>
         <Box component="ul" sx={{ pl: 2.5, m: 0, "& li": { mb: 0.75 } }}>
           <li>Account details you provide (name, email, password hash - never your raw password).</li>
           <li>Profile fields you choose (location, occupation, avatar, social handles).</li>
@@ -60,7 +60,7 @@ const PrivacyPage = () => {
 
       <Section title="4. Sharing">
         <Typography component="p">
-          Content you post may be visible to other users of the same MockBook deployment (for example,
+          Content you post may be visible to other users of the same Xivi deployment (for example,
           friends or the Everyone feed). Media may be stored with our configured image provider (e.g.
           ImageKit). OAuth providers process sign-in according to their own policies when you choose those
           options.
@@ -78,8 +78,8 @@ const PrivacyPage = () => {
         <Typography component="p">
           You can edit profile fields, delete your own posts/comments (where the product allows), and sign out.
           For account deletion or privacy questions, contact{" "}
-          <MuiLink href="mailto:support@mockbook.app" underline="hover">
-            support@mockbook.app
+          <MuiLink href="mailto:support@xivi.app" underline="hover">
+            support@xivi.app
           </MuiLink>{" "}
           or see{" "}
           <MuiLink component={NextLink} href="/help#contact">
