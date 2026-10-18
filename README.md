@@ -124,15 +124,14 @@ npm run seed:admins -w backend
 
 Or register/login with an email listed in `ADMIN_EMAILS`. Do **not** put real admin emails or passwords in README, the plan, or any tracked file.
 
-### Planned next (see `PROJECT_PLAN.md`)
+### Planned next (see `PROJECT_PLAN.md`) — locked order
 
-- External rename (Step 5.6c): GitHub repo, MongoDB Atlas, ImageKit, Render/Vercel, OAuth app names → **Xivi**
-- Production deploy (Part 7): **Vercel** (frontend) + **Render** (backend); Atlas + ImageKit already wired — full step-by-step in `PROJECT_PLAN.md` Part 7
-- Report / block user (user-facing report) — deferred
-- Multiple images per post
-- Image compression / resizing
-- Soft-delete posts
-- Messaging / DMs - **out of scope**
+1. Admin **feature settings** (Step 8.6)
+2. In-app **product tutorial** (Step 8.7) — prefer **react-joyride** (Driver.js/Shepherd OK); header **Show tutorial** for post, friend/follow, profile
+3. Audit / bug fixes (Part 9)
+4. Production deploy (Part 7) — **last** (Vercel FE + Render BE)
+
+Also deferred / optional: external rename leftovers (GitHub repo name), report/block user, multiple images per post, image compression, soft-delete posts. Messaging / DMs remain **out of scope**.
 
 ## Requirements
 
