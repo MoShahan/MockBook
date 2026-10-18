@@ -1,5 +1,6 @@
 import multer from "multer"
 
+/** 5MB ceiling: allows typical phone photos; keeps ImageKit free-tier usage bounded vs unlimited uploads. */
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 const ALLOWED_MIME = new Set(["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"])

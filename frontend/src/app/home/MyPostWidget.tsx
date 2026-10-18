@@ -21,14 +21,12 @@ import UserImage from "@/components/UserImage"
 import WidgetWrapper from "@/components/WidgetWrapper"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import { ACCEPT_IMAGE, validateImageFile } from "@/lib/imageUpload"
 import { useToast } from "@/providers/ToastProvider"
 import { prependPost } from "@/state"
 import type { CreatePostFormValues, Post } from "@/types/models"
 
 import { useAppDispatch, useAppSelector } from "../hooks"
-
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024
-const ACCEPT_IMAGE = "image/jpeg,image/png,image/gif,image/webp"
 
 type MyPostWidgetProps = { url: string }
 
@@ -134,16 +132,6 @@ const createPostSchema: ObjectSchema<CreatePostFormValues> = yup.object({
 const createPostInitVals: CreatePostFormValues = {
   description: "",
   picture: null,
-}
-
-function validateImageFile(file: File): string | null {
-  if (!ACCEPT_IMAGE.split(",").includes(file.type)) {
-    return "Use a JPEG, PNG, GIF, or WebP image"
-  }
-  if (file.size > MAX_IMAGE_BYTES) {
-    return "Image must be 5MB or smaller"
-  }
-  return null
 }
 
 const MyPostWidget = ({ url }: MyPostWidgetProps) => {

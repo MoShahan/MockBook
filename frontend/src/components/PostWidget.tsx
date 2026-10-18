@@ -45,6 +45,7 @@ import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api, mediaUrl } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import { ACCEPT_IMAGE, validateImageFile } from "@/lib/imageUpload"
 import { buildShareText, buildShareUrls, openShareWindow } from "@/lib/share"
 import { formatPostTime } from "@/lib/time"
 import { useToast } from "@/providers/ToastProvider"
@@ -1298,13 +1299,19 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               <input
                 hidden
                 type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
+                accept={ACCEPT_IMAGE}
                 onChange={e => {
                   const file = e.target.files?.[0] ?? null
-                  setEditPicture(file)
-                  if (file) setEditRemoveImage(false)
-                  if (editError) setEditError(undefined)
                   e.target.value = ""
+                  if (!file) return
+                  const invalid = validateImageFile(file)
+                  if (invalid) {
+                    toastError(invalid)
+                    return
+                  }
+                  setEditPicture(file)
+                  setEditRemoveImage(false)
+                  if (editError) setEditError(undefined)
                 }}
               />
             </Button>

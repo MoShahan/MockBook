@@ -1,6 +1,6 @@
 "use client"
 
-import { type ReactNode,useEffect, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 import {
   Box,
   Button,
@@ -18,6 +18,7 @@ import * as yup from "yup"
 import { useAppDispatch } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import { ACCEPT_IMAGE, MAX_IMAGE_LABEL, validateImageFile } from "@/lib/imageUpload"
 import {
   DEFAULT_AVATAR_COLOR,
   DEFAULT_COVER_COLOR,
@@ -225,20 +226,37 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
                         bgColor={values.avatarColor}
                       />
                     </Box>
-                    <Button component="label" variant="outlined" size="small">
-                      Change photo
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/gif,image/webp"
-                        hidden
-                        onChange={e => {
-                          const file = e.target.files?.[0] ?? null
-                          setFieldValue("picture", file)
-                          if (previewUrl) URL.revokeObjectURL(previewUrl)
-                          setPreviewUrl(file ? URL.createObjectURL(file) : null)
-                        }}
-                      />
-                    </Button>
+                    <Box>
+                      <Button component="label" variant="outlined" size="small">
+                        Change photo
+                        <input
+                          type="file"
+                          accept={ACCEPT_IMAGE}
+                          hidden
+                          onChange={e => {
+                            const file = e.target.files?.[0] ?? null
+                            e.target.value = ""
+                            if (!file) {
+                              setFieldValue("picture", null)
+                              if (previewUrl) URL.revokeObjectURL(previewUrl)
+                              setPreviewUrl(null)
+                              return
+                            }
+                            const invalid = validateImageFile(file)
+                            if (invalid) {
+                              toastError(invalid)
+                              return
+                            }
+                            setFieldValue("picture", file)
+                            if (previewUrl) URL.revokeObjectURL(previewUrl)
+                            setPreviewUrl(URL.createObjectURL(file))
+                          }}
+                        />
+                      </Button>
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+                        {`JPEG, PNG, GIF, or WebP · max ${MAX_IMAGE_LABEL}`}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
 
