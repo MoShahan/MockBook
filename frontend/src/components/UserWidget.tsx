@@ -34,11 +34,12 @@ import {
 } from "@/lib/profileColors"
 import { SOCIAL_NETWORKS, type SocialNetwork, socialProfileUrl } from "@/lib/social"
 import { useToast } from "@/providers/ToastProvider"
-import type { User } from "@/types/models"
+import type { PeopleListTab, User } from "@/types/models"
 import { sameUserId } from "@/types/models"
 
 import EditProfileDialog from "./EditProfileDialog"
 import FlexBetween from "./FlexBetween"
+import PeopleListModal from "./PeopleListModal"
 import RelationshipActions from "./RelationshipActions"
 import UserImage from "./UserImage"
 import WidgetWrapper from "./WidgetWrapper"
@@ -71,6 +72,19 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   const [fetched, setFetched] = useState<User | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const [modBusy, setModBusy] = useState(false)
+  const [peopleModalTab, setPeopleModalTab] = useState<PeopleListTab | null>(null)
+
+  const refreshProfile = () => {
+    if (!userId) return
+    void (async () => {
+      try {
+        const { data } = await api.get<User>(`/users/${userId}`)
+        setFetched(data)
+      } catch {
+        // keep last known
+      }
+    })()
+  }
 
   const isOwnProfile = isOwnProfileProp ?? sameUserId(loggedInUser?._id, userId)
   const viewerIsAdmin = loggedInUser?.role === "admin"
@@ -104,6 +118,10 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
         linkedin: loggedInUser.linkedin,
         instagram: loggedInUser.instagram,
         friends: loggedInUser.friends ?? fetched.friends,
+        following: loggedInUser.following ?? fetched.following,
+        friendCount: fetched.friendCount ?? loggedInUser.friendCount,
+        followerCount: fetched.followerCount ?? loggedInUser.followerCount,
+        followingCount: fetched.followingCount ?? loggedInUser.followingCount,
         role: loggedInUser.role ?? fetched.role,
         isActive: loggedInUser.isActive ?? fetched.isActive,
         // Prefer API value so visit counts stay current after others view the profile.
@@ -138,9 +156,38 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   }
 
   const displayUrl = url || user.picturePath || ""
-  const friendCount = Array.isArray(user.friends) ? user.friends.length : 0
+  const friendCount =
+    typeof user.friendCount === "number"
+      ? user.friendCount
+      : Array.isArray(user.friends)
+        ? user.friends.length
+        : 0
+  const followerCount = typeof user.followerCount === "number" ? user.followerCount : 0
+  const followingCount =
+    typeof user.followingCount === "number"
+      ? user.followingCount
+      : Array.isArray(user.following)
+        ? user.following.length
+        : 0
   const avatarColor = normalizeProfileColor(user.avatarColor, DEFAULT_AVATAR_COLOR)
   const coverColor = normalizeProfileColor(user.coverColor, DEFAULT_COVER_COLOR)
+
+  const statButtonSx = {
+    cursor: "pointer",
+    border: "none",
+    background: "none",
+    p: 0,
+    m: 0,
+    font: "inherit",
+    color: "inherit",
+    textAlign: "left" as const,
+    borderRadius: 1,
+    "&:hover": { color: palette.primary.main },
+    "&:focus-visible": {
+      outline: `2px solid ${palette.primary.main}`,
+      outlineOffset: 2,
+    },
+  }
 
   const activeSocials = SOCIAL_NETWORKS.filter(({ key }) => Boolean((user[key] || "").trim())).map(
     ({ key, label }) => ({
@@ -184,7 +231,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
             </Tooltip>
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.75 }}>
-              <RelationshipActions userId={userId} onCover />
+              <RelationshipActions userId={userId} onCover onChanged={refreshProfile} />
               {viewerIsAdmin && user.role !== "admin" ? (
                 <Button
                   size="small"
@@ -329,9 +376,55 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
                 />
               ) : null}
             </Box>
-            <Typography variant="body2" sx={{ color: medium, mt: 0.2, fontWeight: 500 }}>
-              {friendCount} {friendCount === 1 ? "friend" : "friends"}
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: { xs: 1.25, sm: 1.75 },
+                mt: 0.35,
+              }}
+              role="group"
+              aria-label="Connection counts"
+            >
+              {(
+                [
+                  {
+                    key: "friends" as const,
+                    count: friendCount,
+                    singular: "friend",
+                    plural: "friends",
+                  },
+                  {
+                    key: "followers" as const,
+                    count: followerCount,
+                    singular: "follower",
+                    plural: "followers",
+                  },
+                  {
+                    key: "following" as const,
+                    count: followingCount,
+                    singular: "following",
+                    plural: "following",
+                  },
+                ] as const
+              ).map(stat => (
+                <Typography
+                  key={stat.key}
+                  component="button"
+                  type="button"
+                  variant="body2"
+                  onClick={() => setPeopleModalTab(stat.key)}
+                  aria-label={`View ${stat.count} ${stat.count === 1 ? stat.singular : stat.plural}`}
+                  sx={{ ...statButtonSx, color: medium, fontWeight: 500 }}
+                >
+                  <Box component="span" sx={{ color: dark, fontWeight: 700, mr: 0.4 }}>
+                    {stat.count}
+                  </Box>
+                  {stat.count === 1 ? stat.singular : stat.plural}
+                </Typography>
+              ))}
+            </Box>
           </Box>
         </Box>
 
@@ -408,6 +501,15 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
           onSaved={saved => setFetched(saved)}
         />
       ) : null}
+
+      <PeopleListModal
+        open={peopleModalTab != null}
+        onClose={() => setPeopleModalTab(null)}
+        userId={userId}
+        initialTab={peopleModalTab ?? "friends"}
+        isOwnProfile={isOwnProfile}
+        onRelationshipChanged={refreshProfile}
+      />
     </WidgetWrapper>
   )
 }

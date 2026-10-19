@@ -42,7 +42,7 @@ There is **no** separate `comments` collection.
 | `avatarColor` | String | | `"#314F3B"` | Allowlisted hex (enforced in API) |
 | `coverColor` | String | | `"#57534E"` | Allowlisted hex (enforced in API) |
 | `friends` | ObjectId[] → User | | `[]` | Mutual friends |
-| `following` | ObjectId[] → User | | `[]` | One-way follows (people I follow) |
+| `following` | ObjectId[] → User | | `[]` | One-way follows (people I follow). Followers of X = users whose `following` contains X (no separate array) |
 | `savedPosts` | ObjectId[] → Post | | `[]` | Bookmarks; private to owner |
 | `location` | String | | `""` | |
 | `occupation` | String | | `""` | |
@@ -66,6 +66,7 @@ There is **no** separate `comments` collection.
 | Index | Spec |
 | ----- | ---- |
 | Unique email | `{ email: 1 }` unique (from `unique: true`) |
+| Following (followers lookup) | `{ following: 1 }` |
 
 ---
 

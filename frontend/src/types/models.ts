@@ -30,8 +30,12 @@ export type User = {
   /** Solid profile header/cover color (allowlisted hex). */
   coverColor?: string
   friends: Friend[]
-  /** User ids I follow (one-way). Private to me. */
+  /** User ids I follow (one-way). Private to me (session/auth payloads). */
   following?: string[]
+  /** Public relationship counts (prefer these over array lengths on profiles). */
+  friendCount?: number
+  followerCount?: number
+  followingCount?: number
   /** Post ids the user has bookmarked (private). */
   savedPosts?: string[]
   location?: string
@@ -42,6 +46,23 @@ export type User = {
   instagram?: string
   viewedProfile?: number
 }
+
+/** Paginated people list (`/users/:id/friends|followers|following`). */
+export type PaginatedPeople = {
+  users: (Friend & {
+    relationship?: {
+      isFriend: boolean
+      isFollowing: boolean
+      outgoingRequestId: string | null
+      incomingRequestId: string | null
+    }
+  })[]
+  nextCursor: string | null
+  hasMore: boolean
+  total: number
+}
+
+export type PeopleListTab = "friends" | "followers" | "following"
 
 /** Public discover / search row (safe fields only). */
 export type DiscoverUser = {

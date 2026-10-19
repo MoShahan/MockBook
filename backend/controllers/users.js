@@ -1,6 +1,13 @@
 import { formatFriendsList } from "../lib/friends.js"
 import { uploadImageBuffer } from "../lib/imagekit.js"
 import {
+  listFollowersPage,
+  pageIdList,
+  parsePeoplePagination,
+  relationshipCounts,
+  resolvePeopleCards,
+} from "../lib/peopleLists.js"
+import {
   DEFAULT_AVATAR_COLOR,
   DEFAULT_COVER_COLOR,
   sanitizeProfileColor,
@@ -10,7 +17,7 @@ import { pickSocialFields } from "../lib/social.js"
 import User from "../models/User.js"
 
 const PUBLIC_USER_FIELDS =
-  "_id firstName lastName picturePath avatarColor coverColor location occupation facebook x linkedin instagram friends viewedProfile createdAt role isActive"
+  "_id firstName lastName picturePath avatarColor coverColor location occupation facebook x linkedin instagram friends following viewedProfile createdAt role isActive"
 
 const DISCOVER_FIELDS = "_id firstName lastName picturePath avatarColor location occupation"
 
@@ -33,7 +40,7 @@ function toPublicUser(userDoc) {
   delete user.__v
   user._id = String(user._id)
   user.friends = (user.friends || []).map(id => String(id))
-  // following is private to the owner — strip from public profile payloads
+  // following id list is owner-only; counts are public (see attachRelationshipCounts)
   delete user.following
   user.savedPosts = (user.savedPosts || []).map(id => String(id))
   user.facebook = user.facebook || ""
@@ -45,6 +52,15 @@ function toPublicUser(userDoc) {
   user.role = user.role || "user"
   user.isActive = user.isActive !== false
   return user
+}
+
+/** Attach friend / follower / following counts (does not expose following ids). */
+async function attachRelationshipCounts(userDoc, publicUser) {
+  const counts = await relationshipCounts(userDoc)
+  publicUser.friendCount = counts.friendCount
+  publicUser.followerCount = counts.followerCount
+  publicUser.followingCount = counts.followingCount
+  return publicUser
 }
 
 /** Admin: soft-deactivate a user (cannot log in). */
@@ -70,7 +86,8 @@ export const deactivateUser = async (req, res, next) => {
     target.deactivatedBy = authUserId
     await target.save()
 
-    res.status(200).json({ message: "User deactivated", user: toPublicUser(target) })
+    const publicUser = await attachRelationshipCounts(target, toPublicUser(target))
+    res.status(200).json({ message: "User deactivated", user: publicUser })
   } catch (e) {
     next(e)
   }
@@ -91,7 +108,8 @@ export const reactivateUser = async (req, res, next) => {
     target.deactivatedBy = null
     await target.save()
 
-    res.status(200).json({ message: "User reactivated", user: toPublicUser(target) })
+    const publicUser = await attachRelationshipCounts(target, toPublicUser(target))
+    res.status(200).json({ message: "User reactivated", user: publicUser })
   } catch (e) {
     next(e)
   }
@@ -112,7 +130,8 @@ export const getUser = async (req, res, next) => {
       user.viewedProfile = (user.viewedProfile || 0) + 1
     }
 
-    res.status(200).json(toPublicUser(user))
+    const publicUser = await attachRelationshipCounts(user, toPublicUser(user))
+    res.status(200).json(publicUser)
   } catch (e) {
     next(e)
   }
@@ -178,8 +197,9 @@ export const updateProfile = async (req, res, next) => {
 
     await user.save()
 
-    const safe = toPublicUser(user)
+    const safe = await attachRelationshipCounts(user, toPublicUser(user))
     safe.friends = await formatFriendsList(user.friends)
+    safe.following = (user.following || []).map(id => String(id))
     res.status(200).json({ user: safe })
   } catch (e) {
     if (e.message?.includes("IMAGEKIT_PRIVATE_KEY")) {
@@ -247,15 +267,75 @@ export const discoverUsers = async (req, res, next) => {
   }
 }
 
+/** GET /users/:id/friends?cursor=&limit= → { users, nextCursor, hasMore, total } */
 export const getUserFriends = async (req, res, next) => {
   try {
+    const authUserId = req.user?.id
+    if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
+
     const { id } = req.params
-    const user = await User.findById(id)
+    const user = await User.findById(id).select("friends")
     if (!user) {
       return res.status(404).json({ msg: "User not found" })
     }
-    const formattedFriends = await formatFriendsList(user.friends)
-    res.status(200).json(formattedFriends)
+
+    const pagination = parsePeoplePagination(req.query)
+    const page = pageIdList(user.friends, pagination)
+    const users = await resolvePeopleCards(page.ids, authUserId)
+
+    res.status(200).json({
+      users,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+      total: page.total,
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+
+/** GET /users/:id/following?cursor=&limit= → people this user follows */
+export const getUserFollowing = async (req, res, next) => {
+  try {
+    const authUserId = req.user?.id
+    if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
+
+    const { id } = req.params
+    const user = await User.findById(id).select("following")
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" })
+    }
+
+    const pagination = parsePeoplePagination(req.query)
+    const page = pageIdList(user.following, pagination)
+    const users = await resolvePeopleCards(page.ids, authUserId)
+
+    res.status(200).json({
+      users,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+      total: page.total,
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+
+/** GET /users/:id/followers?cursor=&limit= → people who follow this user */
+export const getUserFollowers = async (req, res, next) => {
+  try {
+    const authUserId = req.user?.id
+    if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
+
+    const { id } = req.params
+    const exists = await User.exists({ _id: id })
+    if (!exists) {
+      return res.status(404).json({ msg: "User not found" })
+    }
+
+    const pagination = parsePeoplePagination(req.query)
+    const result = await listFollowersPage(id, pagination, authUserId)
+    res.status(200).json(result)
   } catch (e) {
     next(e)
   }

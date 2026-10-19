@@ -1,5 +1,10 @@
 import { formatFriendsList, toFriendId } from "../lib/friends.js"
 import { createNotification } from "../lib/notifications.js"
+import {
+  pageIdList,
+  parsePeoplePagination,
+  resolvePeopleCards,
+} from "../lib/peopleLists.js"
 import { DEFAULT_AVATAR_COLOR } from "../lib/profileColors.js"
 import { getRelationship, getRelationshipsMap } from "../lib/relationships.js"
 import FriendRequest from "../models/FriendRequest.js"
@@ -344,7 +349,7 @@ export const unfollowUser = async (req, res, next) => {
   }
 }
 
-/** GET /users/me/following */
+/** GET /users/me/following?cursor=&limit= — same shape as GET /users/:id/following */
 export const listFollowing = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
@@ -353,8 +358,16 @@ export const listFollowing = async (req, res, next) => {
     const me = await User.findById(authUserId).select("following")
     if (!me) return res.status(404).json({ msg: "User not found" })
 
-    const users = await formatFriendsList(me.following)
-    res.status(200).json({ following: users })
+    const pagination = parsePeoplePagination(req.query)
+    const page = pageIdList(me.following, pagination)
+    const users = await resolvePeopleCards(page.ids, authUserId)
+
+    res.status(200).json({
+      users,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+      total: page.total,
+    })
   } catch (e) {
     next(e)
   }

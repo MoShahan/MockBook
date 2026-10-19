@@ -32,6 +32,8 @@ type RelationshipActionsProps = {
   onCover?: boolean
   /** Compact single-row for list cards. */
   dense?: boolean
+  /** Fired after a successful friend/follow mutation (e.g. refresh profile counts). */
+  onChanged?: () => void
 }
 
 const chipBase = {
@@ -59,6 +61,7 @@ const RelationshipActions = ({
   initial = null,
   onCover = false,
   dense = false,
+  onChanged,
 }: RelationshipActionsProps) => {
   const theme = useTheme()
   const dispatch = useAppDispatch()
@@ -167,6 +170,7 @@ const RelationshipActions = ({
     setBusy(true)
     try {
       await fn()
+      onChanged?.()
     } catch (err: unknown) {
       toastError(getErrorMessage(err, "Could not update"))
     } finally {

@@ -71,6 +71,9 @@ const UserSchema = new Schema(
   { timestamps: true }
 )
 
+/** Speeds up follower lookups: users whose `following` contains a target id. */
+UserSchema.index({ following: 1 })
+
 UserSchema.set("toJSON", { transform: stripPassword })
 UserSchema.set("toObject", { transform: stripPassword })
 

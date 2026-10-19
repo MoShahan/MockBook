@@ -3,6 +3,7 @@ import bcrypt from "bcrypt"
 import { roleForEmail } from "../lib/admins.js"
 import { formatFriendsList } from "../lib/friends.js"
 import { isValidPassword, PASSWORD_POLICY_MESSAGE } from "../lib/password.js"
+import { relationshipCounts } from "../lib/peopleLists.js"
 import { issueAuthTokens, verifyRefreshTokenString } from "../lib/tokens.js"
 import User from "../models/User.js"
 
@@ -20,6 +21,10 @@ const withFormattedFriends = async userDoc => {
   const safeUser = toSafeUser(userDoc)
   safeUser.friends = await formatFriendsList(userDoc.friends)
   safeUser.following = (userDoc.following || []).map(id => String(id))
+  const counts = await relationshipCounts(userDoc)
+  safeUser.friendCount = counts.friendCount
+  safeUser.followerCount = counts.followerCount
+  safeUser.followingCount = counts.followingCount
   return safeUser
 }
 

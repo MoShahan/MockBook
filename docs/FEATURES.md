@@ -51,7 +51,7 @@ Full feature list for the current app, plus planned items for a later release.
 - Navbar friend-request inbox (badge) + `/friend-requests` (Incoming / Outgoing)
 - Friend-request activity also appears in the notifications bell
 - Separate **Follow** and **Friend** actions on profiles and Add people (icon-only in dense lists)
-- Profile sidebar: **Friends** list (any profile) + **Following** list (own profile only; private)
+- Profile header: clickable **friends / followers / following** counts → modal with tabs + infinite scroll (paginated APIs)
 - **Add people** on `/home` (sticky rail on wide screens; collapsible “Find people” on mobile) with recent users + name search
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
 - Edit own profile (name, location, occupation, avatar, social handles, avatar color, cover color)
@@ -117,6 +117,7 @@ Full feature list for the current app, plus planned items for a later release.
 
 These are **not** in the current release. Planned for a later update:
 
+- Option to hide friends / followers / following **lists** from other users on your profile (counts may still show)
 - Report / block user
 - Multiple images per post, image compression, and soft-delete posts
 - Messaging / DMs / chat

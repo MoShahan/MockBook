@@ -45,7 +45,7 @@ describe("friend requests + follow API", () => {
     const friendsA = await request(getApp()).get(`/users/${idA}/friends`).set(authHeader(tokenA))
     assert.equal(friendsA.status, 200)
     assert.equal(
-      friendsA.body.some(f => String(f._id) === String(idB)),
+      (friendsA.body.users || []).some(f => String(f._id) === String(idB)),
       false
     )
 
@@ -69,7 +69,7 @@ describe("friend requests + follow API", () => {
     assert.ok(accepted.body.friends.some(f => String(f._id) === String(idA)))
 
     const friendsA = await request(getApp()).get(`/users/${idA}/friends`).set(authHeader(tokenA))
-    assert.ok(friendsA.body.some(f => String(f._id) === String(idB)))
+    assert.ok((friendsA.body.users || []).some(f => String(f._id) === String(idB)))
 
     const unfriended = await request(getApp())
       .delete(`/users/me/friends/${idB}`)
@@ -91,7 +91,7 @@ describe("friend requests + follow API", () => {
       .get(`/users/${idA}/friends`)
       .set(authHeader(tokenA))
     assert.equal(
-      friendsAfter.body.some(f => String(f._id) === String(idB)),
+      (friendsAfter.body.users || []).some(f => String(f._id) === String(idB)),
       false
     )
   })
@@ -105,13 +105,96 @@ describe("friend requests + follow API", () => {
     const bFollowing = await request(getApp()).get("/users/me/following").set(authHeader(tokenB))
     assert.equal(bFollowing.status, 200)
     assert.equal(
-      bFollowing.body.following.some(u => String(u._id) === String(idA)),
+      (bFollowing.body.users || []).some(u => String(u._id) === String(idA)),
       false
     )
 
     const unfollow = await request(getApp()).delete(`/users/${idB}/follow`).set(authHeader(tokenA))
     assert.equal(unfollow.status, 200)
     assert.equal(unfollow.body.isFollowing, false)
+  })
+
+  it("profile counts + paginated friends/following/followers", async () => {
+    const c = await registerUser({
+      email: "dana-lists@example.com",
+      firstName: "Dana",
+      lastName: "Doe",
+    })
+    assert.equal(c.res.status, 201)
+    const tokenC = c.res.body.accessToken
+    const idC = c.res.body.user._id
+
+    // Alice follows Bob and Dana; Bob follows Alice; mutual friends Alice↔Bob via accept
+    await request(getApp()).post(`/users/${idB}/follow`).set(authHeader(tokenA))
+    await request(getApp()).post(`/users/${idC}/follow`).set(authHeader(tokenA))
+    await request(getApp()).post(`/users/${idA}/follow`).set(authHeader(tokenB))
+
+    const sent = await request(getApp())
+      .post(`/users/${idB}/friend-requests`)
+      .set(authHeader(tokenA))
+    assert.equal(sent.status, 201)
+    const accept = await request(getApp())
+      .post(`/users/me/friend-requests/${sent.body.request._id}/accept`)
+      .set(authHeader(tokenB))
+    assert.equal(accept.status, 200)
+
+    const profileB = await request(getApp()).get(`/users/${idB}`).set(authHeader(tokenA))
+    assert.equal(profileB.status, 200)
+    assert.equal(profileB.body.friendCount, 1)
+    assert.equal(profileB.body.followerCount, 1) // Alice follows Bob
+    assert.equal(profileB.body.followingCount, 1) // Bob follows Alice
+    assert.equal(typeof profileB.body.following, "undefined")
+
+    const friendsPage = await request(getApp())
+      .get(`/users/${idA}/friends`)
+      .query({ limit: 1 })
+      .set(authHeader(tokenA))
+    assert.equal(friendsPage.status, 200)
+    assert.equal(friendsPage.body.users.length, 1)
+    assert.equal(friendsPage.body.total, 1)
+    assert.equal(friendsPage.body.hasMore, false)
+    assert.ok(friendsPage.body.users[0].relationship)
+
+    const followingPage1 = await request(getApp())
+      .get(`/users/${idA}/following`)
+      .query({ limit: 1 })
+      .set(authHeader(tokenC))
+    assert.equal(followingPage1.status, 200)
+    assert.equal(followingPage1.body.users.length, 1)
+    assert.equal(followingPage1.body.total, 2)
+    assert.equal(followingPage1.body.hasMore, true)
+    assert.ok(followingPage1.body.nextCursor)
+
+    const followingPage2 = await request(getApp())
+      .get(`/users/${idA}/following`)
+      .query({ limit: 1, cursor: followingPage1.body.nextCursor })
+      .set(authHeader(tokenC))
+    assert.equal(followingPage2.status, 200)
+    assert.equal(followingPage2.body.users.length, 1)
+    assert.equal(followingPage2.body.hasMore, false)
+    const allFollowingIds = [
+      ...followingPage1.body.users.map(u => String(u._id)),
+      ...followingPage2.body.users.map(u => String(u._id)),
+    ]
+    assert.equal(new Set(allFollowingIds).size, 2)
+
+    const followers = await request(getApp())
+      .get(`/users/${idA}/followers`)
+      .set(authHeader(tokenA))
+    assert.equal(followers.status, 200)
+    assert.ok((followers.body.users || []).some(u => String(u._id) === String(idB)))
+    assert.equal(followers.body.total, 1)
+
+    const unauth = await request(getApp()).get(`/users/${idA}/followers`)
+    assert.equal(unauth.status, 401)
+
+    const missing = await request(getApp())
+      .get("/users/000000000000000000000099/followers")
+      .set(authHeader(tokenA))
+    assert.equal(missing.status, 404)
+
+    // Reset Alice↔Bob friendship so later tests can send requests again.
+    await request(getApp()).delete(`/users/me/friends/${idB}`).set(authHeader(tokenA))
   })
 
   it("rejects self friend/follow and unauthorized accept", async () => {

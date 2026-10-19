@@ -29,6 +29,10 @@ type FriendProps = {
   endAction?: React.ReactNode
   /** Soft row hover for list contexts (friends / discover). */
   listHover?: boolean
+  /** After friend/follow mutation from this row. */
+  onRelationshipChanged?: () => void
+  /** Called before navigating to this user’s profile (e.g. close a modal). */
+  onBeforeNavigate?: () => void
 }
 
 const Friend = ({
@@ -42,6 +46,8 @@ const Friend = ({
   relationship = null,
   endAction,
   listHover = false,
+  onRelationshipChanged,
+  onBeforeNavigate,
 }: FriendProps) => {
   const router = useRouter()
   const user = useAppSelector(state => state.user)
@@ -55,6 +61,7 @@ const Friend = ({
 
   const handleGoToProfile = () => {
     if (!id) return
+    onBeforeNavigate?.()
     if (isSelf) {
       router.push("/profile")
     } else {
@@ -174,7 +181,12 @@ const Friend = ({
       {(showFriendButton && id && !isSelf) || endAction ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
           {showFriendButton && id && !isSelf ? (
-            <RelationshipActions userId={id} initial={relationship} dense />
+            <RelationshipActions
+              userId={id}
+              initial={relationship}
+              dense
+              onChanged={onRelationshipChanged}
+            />
           ) : null}
           {endAction}
         </Box>

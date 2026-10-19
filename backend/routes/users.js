@@ -17,6 +17,8 @@ import {
   deactivateUser,
   discoverUsers,
   getUser,
+  getUserFollowers,
+  getUserFollowing,
   getUserFriends,
   reactivateUser,
   updateProfile,
@@ -75,6 +77,8 @@ router.delete("/:id/follow", verifyAccessToken, requireObjectId("id"), unfollowU
 router.get("/:id/relationship", verifyAccessToken, requireObjectId("id"), getUserRelationship)
 
 router.get("/:id/friends", verifyAccessToken, requireObjectId("id"), getUserFriends)
+router.get("/:id/following", verifyAccessToken, requireObjectId("id"), getUserFollowing)
+router.get("/:id/followers", verifyAccessToken, requireObjectId("id"), getUserFollowers)
 
 router.get("/:id", verifyAccessToken, requireObjectId("id"), getUser)
 

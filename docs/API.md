@@ -33,15 +33,17 @@ Authorization: Bearer <accessToken>
 | `POST`   | `/users/me/friend-requests/:requestId/decline` | Decline                                       |
 | `DELETE` | `/users/me/friend-requests/:requestId` | Cancel own outgoing request                            |
 | `DELETE` | `/users/me/friends/:friendId`| Unfriend (mutual remove)                                         |
-| `GET`    | `/users/me/following`        | Users I follow (formatted)                                       |
+| `GET`    | `/users/me/following`        | People I follow (`?cursor=&limit=` → `{ users, nextCursor, hasMore, total }`) |
 | `POST`   | `/users/:id/friend-requests` | Send friend request                                              |
 | `POST`   | `/users/:id/follow`          | Follow                                                           |
 | `DELETE` | `/users/:id/follow`          | Unfollow                                                         |
 | `POST`   | `/users/:id/deactivate`      | Admin: soft-deactivate user                                      |
 | `POST`   | `/users/:id/reactivate`      | Admin: reactivate user                                           |
 | `GET`    | `/users/:id/relationship`    | Viewer relationship flags vs `:id`                               |
-| `GET`    | `/users/:id`                 | Get a user (no password)                                         |
-| `GET`    | `/users/:id/friends`         | Get that user’s friends (formatted)                              |
+| `GET`    | `/users/:id`                 | Get a user (no password). Includes `friendCount`, `followerCount`, `followingCount` (following ids omitted) |
+| `GET`    | `/users/:id/friends`         | Friends list (`?cursor=&limit=`, default 20, max 30) → `{ users, nextCursor, hasMore, total }` + `relationship` per row |
+| `GET`    | `/users/:id/following`       | People `:id` follows (same pagination shape)                     |
+| `GET`    | `/users/:id/followers`       | People who follow `:id` (same pagination shape)                  |
 | `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit); `{ post }` |
 | `GET`    | `/posts`                     | Home feed (`?scope=all\|friends&limit=&cursor=`; `friends` = me ∪ friends ∪ following) |
 | `GET`    | `/posts/saved`               | Logged-in user’s saved posts (newest save first)                 |

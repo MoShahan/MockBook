@@ -177,6 +177,18 @@ GitHub Actions (Node 22, install from repo root):
 
 The API uses **Bearer JWTs** (`Authorization: Bearer <accessToken>`), not cookie sessions. Access and refresh tokens are issued on login/register; the frontend refreshes silently on `401`. See [API overview](./docs/API.md).
 
+## Profile connections
+
+Profiles expose **`friendCount` / `followerCount` / `followingCount`** on `GET /users/:id` (and auth user payloads). Lists are paginated:
+
+| Endpoint | Meaning |
+| -------- | ------- |
+| `GET /users/:id/friends?cursor=&limit=` | Mutual friends |
+| `GET /users/:id/followers?cursor=&limit=` | People who follow `:id` |
+| `GET /users/:id/following?cursor=&limit=` | People `:id` follows |
+
+Response shape: `{ users, nextCursor, hasMore, total }` (default limit 20, max 30). Each row includes a `relationship` object for the viewer.
+
 ---
 
 ## License / private
