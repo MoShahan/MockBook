@@ -27,8 +27,8 @@ const PrivacyPage = () => {
         <Typography component="p">
           Xivi is a social networking demo / learning project. It is not a commercial consumer product.
           Contact:{" "}
-          <MuiLink href="mailto:support@xivi.app" underline="hover">
-            support@xivi.app
+          <MuiLink href="mailto:support@xivi.com" underline="hover">
+            support@xivi.com
           </MuiLink>
           .
         </Typography>
@@ -78,8 +78,8 @@ const PrivacyPage = () => {
         <Typography component="p">
           You can edit profile fields, delete your own posts/comments (where the product allows), and sign out.
           For account deletion or privacy questions, contact{" "}
-          <MuiLink href="mailto:support@xivi.app" underline="hover">
-            support@xivi.app
+          <MuiLink href="mailto:support@xivi.com" underline="hover">
+            support@xivi.com
           </MuiLink>{" "}
           or see{" "}
           <MuiLink component={NextLink} href="/help#contact">

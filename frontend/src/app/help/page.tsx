@@ -141,8 +141,8 @@ const HelpPage = () => {
         </Typography>
         <Typography sx={{ lineHeight: 1.7 }}>
           Email:{" "}
-          <MuiLink href="mailto:support@xivi.app" underline="hover" sx={{ fontWeight: 600 }}>
-            support@xivi.app
+          <MuiLink href="mailto:support@xivi.com" underline="hover" sx={{ fontWeight: 600 }}>
+            support@xivi.com
           </MuiLink>
         </Typography>
         <Typography sx={{ color: "text.secondary", mt: 1.5, fontSize: "0.9rem", lineHeight: 1.6 }}>

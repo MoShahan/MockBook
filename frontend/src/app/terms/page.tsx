@@ -76,8 +76,8 @@ const TermsPage = () => {
       <Section title="7. Changes & contact">
         <Typography component="p">
           We may update these terms; the date above will reflect material changes. Questions:{" "}
-          <MuiLink href="mailto:support@xivi.app" underline="hover">
-            support@xivi.app
+          <MuiLink href="mailto:support@xivi.com" underline="hover">
+            support@xivi.com
           </MuiLink>{" "}
           or{" "}
           <MuiLink component={NextLink} href="/help#contact">
