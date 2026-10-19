@@ -135,4 +135,4 @@ These are **not** in the current release. Planned for a later update:
 
 ---
 
-See also: [API overview](./API.md) · [Schema](./SCHEMA.md) · [ER diagram](./ERD.md) · [README](../README.md)
+See also: [Design roadmap](./DESIGN_ROADMAP.md) · [API overview](./API.md) · [Schema](./SCHEMA.md) · [ER diagram](./ERD.md) · [README](../README.md)

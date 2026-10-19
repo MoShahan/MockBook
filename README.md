@@ -13,6 +13,7 @@ Post text and images, like and comment, send friend requests, follow people, bro
 | Doc | Contents |
 | --- | -------- |
 | [Features](./docs/FEATURES.md) | What the app does today + coming soon |
+| [Design roadmap](./docs/DESIGN_ROADMAP.md) | UI journey Phases 0–3 with screenshots |
 | [API overview](./docs/API.md) | REST endpoints and auth header |
 | [Database schema](./docs/SCHEMA.md) | Collections, fields, indexes |
 | [ER diagram](./docs/ERD.md) | Visual entity relationships |
