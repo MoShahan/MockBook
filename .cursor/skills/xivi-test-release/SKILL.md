@@ -36,8 +36,6 @@ Provide evidence that a change works and identify what remains unverified.
 7. Never use production credentials or production data in tests. Do not run destructive database operations against an unknown URI. Env names in this project: `MONGODB_URI`, `ACCESS_TOKEN_SECRET`, `PORT`, optional `MONGODB_USERNAME` / `MONGODB_PASSWORD`, frontend `NEXT_PUBLIC_API_URL`.
 8. Inspect the final diff for accidental changes, leaked secrets, generated files (e.g. `*.tsbuildinfo`), skipped tests, and unsafe error output.
 9. If deployment is requested, verify environment configuration, build/start commands, CORS, database connectivity, upload storage, health checks, and rollback plan before deploying. Do not deploy unless explicitly authorized. Do not switch auth from Bearer JWT to cookies unless the user asks.
-10. For multi-step revamp work, note which `PROJECT_PLAN.md` items were validated.
-
 ## Release report
 
 Use this structure:

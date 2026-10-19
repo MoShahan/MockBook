@@ -25,7 +25,7 @@ Modernize in small, reversible steps while preserving existing behavior and the 
 6. Avoid unrelated dependency updates. Explain any added, removed, or replaced dependency and why it is needed.
 7. Keep the existing architecture unless a rewrite is explicitly approved. Do not move the Express API into Next.js, replace MongoDB, or change UI libraries as a side effect.
 8. If a migration fails, isolate the failing package/API and report the error. Do not hide failures with broad casts, disabled lint rules, or downgrades without explaining the trade-off.
-9. Update Node engine documentation, environment examples (`MONGODB_URI`, `NEXT_PUBLIC_API_URL`, etc.), README, and `PROJECT_PLAN.md` when needed. Do not invent env names that disagree with the code.
+9. Update Node engine documentation, environment examples (`MONGODB_URI`, `NEXT_PUBLIC_API_URL`, etc.), and README when needed. Do not invent env names that disagree with the code.
 
 ## Migration safeguards
 

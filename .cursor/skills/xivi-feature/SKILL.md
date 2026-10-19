@@ -12,14 +12,13 @@ Deliver the smallest complete, tested vertical slice that fits Xivi's existing a
 ## Workflow
 
 1. **Discover**
-   - Inspect `git status`, the **root** and app `package.json` files (npm workspaces), the README, `PROJECT_PLAN.md` if the work is part of the revamp, existing routes/controllers/models, frontend pages/components, and tests.
+   - Inspect `git status`, the **root** and app `package.json` files (npm workspaces), the README, existing routes/controllers/models, frontend pages/components, and tests.
    - Trace a similar existing feature end to end before proposing a new pattern.
    - Identify whether the feature requires frontend, backend, database, authorization, upload, or documentation changes.
 2. **Define**
    - State expected user behavior and acceptance criteria.
    - Identify permissions and invalid/error cases.
    - Make a brief file-by-file plan. Ask a focused question if a product decision is essential.
-   - For multi-step revamp items, update `PROJECT_PLAN.md` checkboxes when the slice is done.
 3. **Design the data/API**
    - Reuse existing Mongoose conventions and response patterns.
    - Define validation, authorization, status codes, and response types before wiring the UI.
@@ -55,4 +54,3 @@ Deliver the smallest complete, tested vertical slice that fits Xivi's existing a
 - [ ] Regression and permission tests are added.
 - [ ] Relevant checks were run or explicitly marked as blocked.
 - [ ] No secrets or unrelated changes were introduced.
-- [ ] `PROJECT_PLAN.md` updated if this closed a planned revamp item.

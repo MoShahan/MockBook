@@ -4,8 +4,6 @@ Social app built with the MERN stack: a Next.js frontend and an Express API back
 
 By Mohammed Shahan.
 
-> This project is being modernized. See [`PROJECT_PLAN.md`](./PROJECT_PLAN.md) for the step-by-step completion plan (and what’s still TODO).
-
 ## Stack
 
 | Layer    | Technologies                                                                                                     |
@@ -24,8 +22,7 @@ Xivi/
 │   ├── routes/               auth, users, posts
 │   ├── controllers/
 │   └── middleware/           JWT check
-├── package.json              npm workspaces root
-└── PROJECT_PLAN.md           upgrade / feature plan
+└── package.json              npm workspaces root
 ```
 
 ## Features
@@ -123,16 +120,7 @@ Admins are normal users with `role: admin`. Promotion comes from **`ADMIN_EMAILS
 npm run seed:admins -w backend
 ```
 
-Or register/login with an email listed in `ADMIN_EMAILS`. Do **not** put real admin emails or passwords in README, the plan, or any tracked file.
-
-### Planned next (see `PROJECT_PLAN.md`) — locked order
-
-1. Admin **feature settings** (Step 8.6)
-2. Profile **Friends / Followers / Following** counts + paginated modal lists (Step 8.8)
-3. Audit / bug fixes (Part 9)
-4. Production deploy (Part 7) — **last** (Vercel FE + Render BE)
-
-Also deferred / optional: external rename leftovers (GitHub repo name), report/block user, multiple images per post, image compression, soft-delete posts. Messaging / DMs remain **out of scope**.
+Or register/login with an email listed in `ADMIN_EMAILS`. Do **not** put real admin emails or passwords in README or any tracked file.
 
 ## Requirements
 
@@ -319,7 +307,3 @@ GitHub Actions workflows (Node 22, install from root workspace):
 | Frontend Typecheck   | `npm run typecheck -w frontend` |
 
 Locally: `npm run typecheck` from the repo root.
-
-## Roadmap
-
-Full checklist lives in [`PROJECT_PLAN.md`](./PROJECT_PLAN.md): clean upgrades, fix broken flows, security, MVP features, UI polish, tests, and deploy.

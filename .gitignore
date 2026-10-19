@@ -1,7 +1,8 @@
 node_modules/
 
-# Local revamp checklist (not shared via git)
+# Local revamp checklists (personal reference only — never commit)
 PROJECT_PLAN.md
+COMPLETED_PLAN.md
 
 frontend/node_modules/
 frontend/.next/

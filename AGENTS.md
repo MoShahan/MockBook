@@ -11,7 +11,6 @@ Xivi is a full-stack social networking application being revived from an older l
 - Treat the current code as the source of truth. Do not claim a feature exists until you find its implementation or verify it running.
 - Do not replace working architecture just because another approach is fashionable.
 - Keep a short implementation plan for non-trivial tasks. Identify affected frontend, backend, database, tests, and documentation.
-- For multi-step revamp work, follow and update checkboxes in `PROJECT_PLAN.md` as tasks complete.
 - If a requested change depends on unknown product behavior, ask one focused question or choose the smallest reversible default and state it.
 - Never silently discard user changes, reset branches, rewrite Git history, or run destructive commands.
 
@@ -46,7 +45,7 @@ If a check cannot run, say why. Never claim tests passed unless they were actual
 - Keep API calls out of presentational components when a shared API helper is appropriate. Use the shared **axios** client in `frontend/src/lib/api.ts` (base URL from `NEXT_PUBLIC_API_URL`) for all Express API calls - do not use raw `fetch` for the API once Step 2.0 is done. Prefer an axios **request interceptor** to attach `Authorization: Bearer <token>` from Redux (Step 2.0b) instead of repeating auth headers at every call site. Do not introduce RTK Query mid-feature without explicit approval.
 - Use Redux Toolkit for genuinely shared client state (auth user, token, posts, theme).
 - Keep **Formik + Yup** for forms unless the user explicitly approves a different form/validation library.
-- Auth today uses a **Bearer JWT** stored in Redux (and currently persisted via redux-persist). Do not casually change token storage or break login during unrelated features. Improving persistence/expiry belongs in a dedicated auth-hardening task (see `PROJECT_PLAN.md` Part 3). Never persist password hashes. Prefer not to widen what is persisted.
+- Auth today uses a **Bearer JWT** stored in Redux (and currently persisted via redux-persist). Do not casually change token storage or break login during unrelated features. Improving persistence/expiry belongs in a dedicated auth-hardening task. Never persist password hashes. Prefer not to widen what is persisted.
 - Use `NEXT_PUBLIC_API_URL` for the API base URL once wired; until then, do not invent alternate env names. Align docs with code.
 - Handle loading, empty, success, and error states for asynchronous screens.
 - Use semantic HTML, accessible labels, keyboard interaction, and visible focus states.
@@ -100,7 +99,7 @@ If a check cannot run, say why. Never claim tests passed unless they were actual
 
 - Follow the existing formatting and naming conventions unless they are inconsistent enough to warrant a focused change.
 - Prefer explicit, readable code over clever abstractions.
-- Frontend goal (see `PROJECT_PLAN.md` Step 6.1b): **no `any`** in `frontend/src`. Model API request/response and Redux types properly; do not silence type errors with `@ts-ignore`, broad casts, or eslint disables for `no-explicit-any`.
+- Frontend goal: **no `any`** in `frontend/src`. Model API request/response and Redux types properly; do not silence type errors with `@ts-ignore`, broad casts, or eslint disables for `no-explicit-any`.
 - Avoid duplicate API logic and duplicate validation rules when a shared implementation is reasonable.
 - Remove dead code only when it is clearly in scope. Do not perform broad drive-by refactors.
 - Do not add dependencies for trivial functionality that can be handled by the existing stack.
