@@ -343,6 +343,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
                 variant="h4"
                 onClick={handleGoToProfile}
                 noWrap
+                title={`${user.firstName} ${user.lastName}`}
                 sx={{
                   color: dark,
                   fontWeight: 700,

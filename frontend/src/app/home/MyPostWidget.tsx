@@ -22,6 +22,13 @@ import WidgetWrapper from "@/components/WidgetWrapper"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 import { ACCEPT_IMAGE, validateImageFile } from "@/lib/imageUpload"
+import {
+  graphemeLength,
+  POST_DESCRIPTION_LIMIT_REACHED,
+  POST_DESCRIPTION_MAX,
+  POST_DESCRIPTION_MAX_LABEL,
+  truncateGraphemes,
+} from "@/lib/postLimits"
 import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { useToast } from "@/providers/ToastProvider"
 import { prependPost } from "@/state"
@@ -123,6 +130,11 @@ const createPostSchema: ObjectSchema<CreatePostFormValues> = yup.object({
   description: yup
     .string()
     .default("")
+    .test(
+      "max-graphemes",
+      `Keep posts under ${POST_DESCRIPTION_MAX_LABEL}`,
+      value => graphemeLength(value ?? "") <= POST_DESCRIPTION_MAX
+    )
     .test("has-content", POST_EMPTY_MESSAGE, function (value) {
       const picture = (this.parent as CreatePostFormValues).picture
       return Boolean(value?.trim()) || picture instanceof File
@@ -207,6 +219,8 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
           const canSubmit =
             Boolean(values.description?.trim()) || values.picture instanceof File
           const hasPhoto = values.picture instanceof File
+          const charCount = graphemeLength(values.description ?? "")
+          const atCharLimit = charCount >= POST_DESCRIPTION_MAX
 
           const openFilePicker = () => {
             if (isSubmitting) return
@@ -273,8 +287,10 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                       inputRef={descriptionInputRef}
                       multiline
                       maxRows={5}
-                      aria-invalid={showContentError}
-                      aria-describedby={showContentError ? "create-post-error" : undefined}
+                      aria-invalid={showContentError || atCharLimit}
+                      aria-describedby={
+                        showContentError || atCharLimit ? "create-post-error" : "create-post-char-count"
+                      }
                       sx={{
                         flex: 1,
                         minWidth: 0,
@@ -285,7 +301,12 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                       }}
                       value={values.description ?? ""}
                       onBlur={() => void setFieldTouched("description", true)}
-                      onChange={e => void setFieldValue("description", e.target.value)}
+                      onChange={e =>
+                        void setFieldValue(
+                          "description",
+                          truncateGraphemes(e.target.value, POST_DESCRIPTION_MAX)
+                        )
+                      }
                       disabled={isSubmitting}
                       onKeyDown={e => {
                         if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -344,7 +365,11 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                               descriptionInputRef.current,
                               values.description,
                               emoji,
-                              next => void setFieldValue("description", next)
+                              next =>
+                                void setFieldValue(
+                                  "description",
+                                  truncateGraphemes(next, POST_DESCRIPTION_MAX)
+                                )
                             )
                           }
                         />
@@ -379,21 +404,62 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                     </Box>
                   </Box>
 
-                  {showContentError && (
-                    <Typography
-                      id="create-post-error"
-                      role="alert"
-                      sx={{
-                        color: "error.main",
-                        mt: "0.55rem",
-                        fontSize: "0.8125rem",
-                        fontWeight: 500,
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {contentErrorMessage}
-                    </Typography>
-                  )}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      justifyContent: "space-between",
+                      gap: 1,
+                      mt: showContentError || atCharLimit || charCount > 0 ? "0.55rem" : 0,
+                    }}
+                  >
+                    {showContentError ? (
+                      <Typography
+                        id="create-post-error"
+                        role="alert"
+                        sx={{
+                          color: "error.main",
+                          fontSize: "0.8125rem",
+                          fontWeight: 500,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {contentErrorMessage}
+                      </Typography>
+                    ) : atCharLimit ? (
+                      <Typography
+                        id="create-post-error"
+                        role="status"
+                        sx={{
+                          color: "error.main",
+                          fontSize: "0.8125rem",
+                          fontWeight: 500,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {POST_DESCRIPTION_LIMIT_REACHED}
+                      </Typography>
+                    ) : (
+                      <span />
+                    )}
+                    {charCount > 0 ? (
+                      <Typography
+                        id="create-post-char-count"
+                        component="span"
+                        aria-live="polite"
+                        sx={{
+                          flexShrink: 0,
+                          ml: "auto",
+                          fontSize: "0.75rem",
+                          fontWeight: atCharLimit ? 600 : 400,
+                          color: atCharLimit ? "error.main" : medMain,
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        {charCount.toLocaleString()} / {POST_DESCRIPTION_MAX.toLocaleString()}
+                      </Typography>
+                    ) : null}
+                  </Box>
                 </Box>
               </FlexBetween>
 

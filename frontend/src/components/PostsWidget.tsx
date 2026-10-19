@@ -23,6 +23,8 @@ type PostsWidgetProps = {
   userId?: string
   /** @deprecated Prefer `list="authored"`. */
   isProfile?: boolean
+  /** Switch home feed to Everyone (Following empty-state CTA). */
+  onBrowseEveryone?: () => void
 }
 
 const EMPTY_COPY: Record<PostsListKind, { title: string; description: string }> = {
@@ -31,8 +33,9 @@ const EMPTY_COPY: Record<PostsListKind, { title: string; description: string }> 
     description: "When people post, their updates will show up in Everyone.",
   },
   friends: {
-    title: "No friend posts yet",
-    description: "Find people from the menu or Home, or switch to Everyone to browse the wider feed.",
+    title: "Nothing from people you follow yet",
+    description:
+      "Find people from the menu or People page, send friend requests or follow them, then check back here — or browse Everyone for the wider feed.",
   },
   authored: {
     title: "No posts yet",
@@ -85,7 +88,12 @@ function pathForList(kind: PostsListKind, userId: string, cursor?: string | null
   }
 }
 
-const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps) => {
+const PostsWidget = ({
+  list,
+  userId = "",
+  isProfile = false,
+  onBrowseEveryone,
+}: PostsWidgetProps) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const posts = useAppSelector(state => state.posts)
@@ -190,7 +198,13 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
     const copy = EMPTY_COPY[kind]
     const cta =
       kind === "friends"
-        ? { actionLabel: "Browse Everyone", onAction: () => router.push("/home") }
+        ? {
+            actionLabel: "Browse Everyone",
+            onAction: () => {
+              if (onBrowseEveryone) onBrowseEveryone()
+              else router.push("/home?feed=everyone")
+            },
+          }
         : kind === "authored"
           ? { actionLabel: "Go to Home", onAction: () => router.push("/home") }
           : kind === "feed"

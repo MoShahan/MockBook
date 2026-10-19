@@ -1,27 +1,43 @@
 "use client"
 
 import React, { useState } from "react"
-import { Box, Button, type SxProps, type Theme,Typography } from "@mui/material"
+import { Box, Button, type SxProps, type Theme, Typography } from "@mui/material"
 
 type ExpandableTextProps = {
   text: string
   /** Max words shown before “See more”. Default 40. */
   maxWords?: number
+  /** Max characters for unbroken / very long strings. Default 280. */
+  maxChars?: number
   typographySx?: SxProps<Theme>
   buttonSx?: SxProps<Theme>
 }
 
-function truncateByWords(text: string, maxWords: number): { preview: string; needsExpand: boolean } {
+function truncateText(
+  text: string,
+  maxWords: number,
+  maxChars: number
+): { preview: string; needsExpand: boolean } {
   const trimmed = text.trim()
   if (!trimmed) return { preview: "", needsExpand: false }
 
   const words = trimmed.split(/\s+/).filter(Boolean)
-  if (words.length <= maxWords) {
+  const needsWordExpand = words.length > maxWords
+  const needsCharExpand = trimmed.length > maxChars
+
+  if (!needsWordExpand && !needsCharExpand) {
     return { preview: trimmed, needsExpand: false }
   }
 
+  if (needsWordExpand) {
+    return {
+      preview: `${words.slice(0, maxWords).join(" ")}…`,
+      needsExpand: true,
+    }
+  }
+
   return {
-    preview: `${words.slice(0, maxWords).join(" ")}…`,
+    preview: `${trimmed.slice(0, maxChars)}…`,
     needsExpand: true,
   }
 }
@@ -29,18 +45,27 @@ function truncateByWords(text: string, maxWords: number): { preview: string; nee
 const ExpandableText = ({
   text,
   maxWords = 40,
+  maxChars = 280,
   typographySx,
   buttonSx,
 }: ExpandableTextProps) => {
   const [expanded, setExpanded] = useState(false)
-  const { preview, needsExpand } = truncateByWords(text, maxWords)
+  const { preview, needsExpand } = truncateText(text, maxWords, maxChars)
   const display = expanded || !needsExpand ? text.trim() : preview
 
   if (!display) return null
 
   return (
     <Box>
-      <Typography sx={typographySx}>{display}</Typography>
+      <Typography
+        sx={{
+          overflowWrap: "anywhere",
+          wordBreak: "break-word",
+          ...((typographySx || {}) as object),
+        }}
+      >
+        {display}
+      </Typography>
       {needsExpand && (
         <Button
           size="small"

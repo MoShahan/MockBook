@@ -46,6 +46,13 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api, mediaUrl } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 import { ACCEPT_IMAGE, validateImageFile } from "@/lib/imageUpload"
+import {
+  graphemeLength,
+  POST_DESCRIPTION_LIMIT_REACHED,
+  POST_DESCRIPTION_MAX,
+  POST_DESCRIPTION_MAX_LABEL,
+  truncateGraphemes,
+} from "@/lib/postLimits"
 import { buildShareText, buildShareUrls, openShareWindow } from "@/lib/share"
 import { formatPostTime } from "@/lib/time"
 import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
@@ -135,6 +142,8 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
 
   const authorName =
     [post.user?.firstName, post.user?.lastName].filter(Boolean).join(" ").trim() || "Unknown user"
+  const editCharCount = graphemeLength(editDescription)
+  const editAtLimit = editCharCount >= POST_DESCRIPTION_MAX
 
   const patchLike = async () => {
     if (!user?._id || likeInFlight.current) return
@@ -293,6 +302,10 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
     const addingImage = Boolean(editPicture)
     if (!description && !keepingImage && !addingImage) {
       setEditError("Add text or a photo")
+      return
+    }
+    if (graphemeLength(description) > POST_DESCRIPTION_MAX) {
+      setEditError(`Keep posts under ${POST_DESCRIPTION_MAX_LABEL}`)
       return
     }
 
@@ -474,7 +487,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           buttonSx={{ color: primary, ml: 0 }}
         />
       ) : null}
-      {post?.url && !imageFailed ? (
+      {post?.url ? (
         <Box
           sx={{
             mt: "0.75rem",
@@ -484,21 +497,36 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            minHeight: imageFailed ? 120 : undefined,
             maxHeight: { xs: "min(300px, 45vh)", sm: "min(360px, 50vh)" },
           }}
         >
-          <Box
-            component="img"
-            alt="Post image"
-            src={mediaUrl(post.url)}
-            onError={() => setImageFailed(true)}
-            sx={{
-              display: "block",
-              width: "100%",
-              maxHeight: { xs: "min(300px, 45vh)", sm: "min(360px, 50vh)" },
-              objectFit: "contain",
-            }}
-          />
+          {imageFailed ? (
+            <Typography
+              sx={{
+                px: 2,
+                py: 3,
+                color: theme.palette.neutral.medium,
+                fontSize: "0.875rem",
+                textAlign: "center",
+              }}
+            >
+              Image unavailable
+            </Typography>
+          ) : (
+            <Box
+              component="img"
+              alt="Post image"
+              src={mediaUrl(post.url)}
+              onError={() => setImageFailed(true)}
+              sx={{
+                display: "block",
+                width: "100%",
+                maxHeight: { xs: "min(300px, 45vh)", sm: "min(360px, 50vh)" },
+                objectFit: "contain",
+              }}
+            />
+          )}
         </Box>
       ) : null}
       <Divider sx={{ mt: "0.75rem", mb: "0.15rem", opacity: 0.7 }} />
@@ -823,10 +851,11 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                           },
                         }}
                       >
-                        <FlexBetween sx={{ alignItems: "flex-start", gap: 0.5 }}>
+                        <FlexBetween sx={{ alignItems: "flex-start", gap: 0.5, minWidth: 0 }}>
                           <Typography
                             component="button"
                             type="button"
+                            title={name}
                             onClick={() => goToProfile(comment.userId)}
                             sx={{
                               border: 0,
@@ -841,6 +870,11 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                               lineHeight: 1.3,
                               textAlign: "left",
                               borderRadius: 0.5,
+                              minWidth: 0,
+                              flex: "1 1 auto",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
                               transition: "color 0.15s ease",
                               "&:hover": {
                                 color: comment.userId ? primary : theme.palette.neutral.dark,
@@ -868,6 +902,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                                 ml: "auto",
                                 mt: -0.35,
                                 mr: -0.5,
+                                flexShrink: 0,
                                 opacity: { xs: 1, sm: 0 },
                                 transition: "opacity 0.15s ease",
                               }}
@@ -1249,11 +1284,12 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               inputRef={editDescriptionInputRef}
               value={editDescription}
               onChange={e => {
-                setEditDescription(e.target.value)
+                setEditDescription(truncateGraphemes(e.target.value, POST_DESCRIPTION_MAX))
                 if (editError) setEditError(undefined)
               }}
               disabled={isSavingEditPost}
               placeholder="What's on your mind?"
+              aria-describedby="edit-post-char-count"
               sx={{
                 px: 1.25,
                 pt: 1,
@@ -1264,12 +1300,27 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "flex-end",
+                justifyContent: "space-between",
                 alignItems: "center",
                 px: 0.65,
                 pb: 0.55,
+                gap: 1,
               }}
             >
+              <Typography
+                id="edit-post-char-count"
+                component="span"
+                aria-live="polite"
+                sx={{
+                  fontSize: "0.75rem",
+                  fontWeight: editAtLimit ? 600 : 400,
+                  color: editAtLimit ? "error.main" : theme.palette.neutral.mediumMain,
+                  pl: 0.5,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {editCharCount.toLocaleString()} / {POST_DESCRIPTION_MAX.toLocaleString()}
+              </Typography>
               {canEmoji ? (
                 <EmojiPickerButton
                   dense
@@ -1279,16 +1330,16 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                       editDescriptionInputRef.current,
                       editDescription,
                       emoji,
-                      setEditDescription
+                      next => setEditDescription(truncateGraphemes(next, POST_DESCRIPTION_MAX))
                     )
                   }
                 />
               ) : null}
             </Box>
           </Box>
-          {editError && (
+          {(editError || editAtLimit) && (
             <Typography sx={{ color: "error.main", mt: "0.35rem", fontSize: "0.75rem" }} role="alert">
-              {editError}
+              {editError || POST_DESCRIPTION_LIMIT_REACHED}
             </Typography>
           )}
 

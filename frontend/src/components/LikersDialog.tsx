@@ -265,6 +265,7 @@ const LikersList = ({ fetchPath, pageSize, onSelectUser }: LikersListProps) => {
               <Box sx={{ minWidth: 0, flex: 1 }}>
                 <Typography
                   noWrap
+                  title={name}
                   sx={{
                     color: dark,
                     fontWeight: 600,

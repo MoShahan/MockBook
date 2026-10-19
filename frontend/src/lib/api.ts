@@ -35,16 +35,19 @@ export function apiUrl(path: string = ""): string {
 /**
  * Resolve a media `src` for `<img>`.
  * Absolute ImageKit (or other CDN) URLs are returned as-is.
+ * Legacy ImageKit folder `/mockbook/` is rewritten to `/xivi/` (D4).
  * Empty values stay empty.
  */
 export function mediaUrl(src: string | undefined | null): string {
   if (!src) return ""
   const trimmed = src.trim()
   if (!trimmed) return ""
-  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("data:")) {
-    return trimmed
+  // Dashboard folder rename: old post/avatar URLs may still say /mockbook/
+  const normalized = trimmed.replace(/\/mockbook\//gi, "/xivi/")
+  if (/^https?:\/\//i.test(normalized) || normalized.startsWith("data:")) {
+    return normalized
   }
-  return trimmed
+  return normalized
 }
 
 /** @deprecated Prefer `mediaUrl` - uploads are absolute ImageKit URLs now. */

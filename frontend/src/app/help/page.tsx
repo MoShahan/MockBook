@@ -38,8 +38,8 @@ const FAQS: { q: string; a: ReactNode }[] = [
     a: "Use the heart to like, the comment field under a post to reply, and the bookmark to save posts for later. On your profile, open the Saved, Liked, or Commented tabs to find them again.",
   },
   {
-    q: "How do friends and Find people work?",
-    a: "Open Find people from the left sidebar (or /people) to search or browse recent users. Send a friend request for mutual friends, or follow someone to see their posts in Following. Everyone shows the wider feed.",
+    q: "How do friends, follow, and Find people work?",
+    a: "Open Find people from the sidebar (or /people) to search or browse recent users. Send a friend request — they must accept before you are mutual friends. Follow someone anytime to see their posts in the Following feed. The Everyone tab shows the wider public feed.",
   },
   {
     q: "How do I edit my profile?",
