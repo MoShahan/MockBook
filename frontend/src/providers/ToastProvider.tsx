@@ -63,7 +63,13 @@ const ToastProvider = ({ children }: { children: React.ReactNode }) => {
           severity={severity}
           variant="filled"
           onClose={() => setOpen(false)}
-          sx={{ width: "100%" }}
+          sx={{
+            // Hug content so the centered snackbar doesn’t stretch with a hollow middle.
+            width: "auto",
+            maxWidth: "min(420px, calc(100vw - 2rem))",
+            alignItems: "center",
+            boxShadow: 3,
+          }}
           role={severity === "error" ? "alert" : "status"}
         >
           {message}

@@ -171,7 +171,10 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   }
 
   return (
-    <WidgetWrapper sx={{ p: { xs: "1.15rem", sm: "1.35rem 1.25rem 1.15rem" } }}>
+    <WidgetWrapper
+      data-tour="compose"
+      sx={{ p: { xs: "1.15rem", sm: "1.35rem 1.25rem 1.15rem" } }}
+    >
       <Formik<CreatePostFormValues>
         initialValues={createPostInitVals}
         validationSchema={createPostSchema}

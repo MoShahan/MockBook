@@ -95,6 +95,7 @@ Xivi/
 
 - Split **login/register** layout (`AuthLayout`): wave backdrop (`auth-wave-*.jpg`) + café/social panel on the left (`auth-panel-*.jpg`)
 - **Help & FAQ** (`/help`) with Contact section; **Privacy** (`/privacy`) and **Terms** (`/terms`) - linked from navbar Help and auth footers
+- In-app **product tutorial** (`react-joyride`): navbar **Show tutorial** walks through compose, friends/follow, and profile (replayable; optional one-time auto-run)
 - Mobile nav uses a finished side drawer (account, profile, help, theme, log out)
 - Toast / snackbar feedback for key actions
 - Formik + Yup validation with visible field errors
@@ -127,7 +128,7 @@ Or register/login with an email listed in `ADMIN_EMAILS`. Do **not** put real ad
 ### Planned next (see `PROJECT_PLAN.md`) — locked order
 
 1. Admin **feature settings** (Step 8.6)
-2. In-app **product tutorial** (Step 8.7) — prefer **react-joyride** (Driver.js/Shepherd OK); header **Show tutorial** for post, friend/follow, profile
+2. Profile **follower count** (Step 8.8)
 3. Audit / bug fixes (Part 9)
 4. Production deploy (Part 7) — **last** (Vercel FE + Render BE)
 

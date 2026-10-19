@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { Fraunces, Source_Sans_3 } from "next/font/google"
 
 import AuthProvider from "@/providers/AuthProvider"
+import ProductTourProvider from "@/providers/ProductTourProvider"
 import ReduxProvider from "@/providers/ReduxProvider"
 import ThemeProviderComp from "@/providers/ThemeProvider"
 import ToastProvider from "@/providers/ToastProvider"
@@ -46,8 +47,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AuthProvider>
               <ThemeProviderComp>
                 <ToastProvider>
-                  <CssBaseline />
-                  {children}
+                  <ProductTourProvider>
+                    <CssBaseline />
+                    {children}
+                  </ProductTourProvider>
                 </ToastProvider>
               </ThemeProviderComp>
             </AuthProvider>

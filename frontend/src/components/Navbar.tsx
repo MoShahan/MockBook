@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Close,
   DarkMode,
@@ -11,6 +11,7 @@ import {
   Menu,
   PersonAddAlt1,
   PersonOutlined,
+  TourOutlined,
 } from "@mui/icons-material"
 import {
   alpha,
@@ -33,6 +34,8 @@ import {
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { TOUR_OPEN_MENU_EVENT } from "@/lib/productTour"
+import { useProductTour } from "@/providers/ProductTourProvider"
 import { useToast } from "@/providers/ToastProvider"
 
 import { setLogout, toggleMode } from "../state"
@@ -52,6 +55,7 @@ const Navbar = () => {
   const user = useAppSelector(state => state.user)
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
   const { success } = useToast()
+  const { startTour } = useProductTour()
 
   const theme = useTheme()
   const dark = theme.palette.neutral.dark
@@ -64,6 +68,20 @@ const Navbar = () => {
 
   const closeMobile = () => setMobileOpen(false)
   const closeAccount = () => setAccountAnchor(null)
+
+  useEffect(() => {
+    const openMenu = () => {
+      if (!isNonMobileScreens) setMobileOpen(true)
+    }
+    window.addEventListener(TOUR_OPEN_MENU_EVENT, openMenu)
+    return () => window.removeEventListener(TOUR_OPEN_MENU_EVENT, openMenu)
+  }, [isNonMobileScreens])
+
+  const handleShowTutorial = () => {
+    closeAccount()
+    closeMobile()
+    startTour()
+  }
 
   const handleGoToHome = () => {
     router.push("/home")
@@ -146,12 +164,18 @@ const Navbar = () => {
             {themeToggle}
             <FriendRequestsMenu />
             <NotificationsMenu />
+            <Tooltip title="Show tutorial">
+              <IconButton onClick={handleShowTutorial} aria-label="Show tutorial">
+                <TourOutlined sx={{ fontSize: "25px" }} />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Help & FAQ">
               <IconButton onClick={handleGoToHelp} aria-label="Help">
                 <Help sx={{ fontSize: "25px" }} />
               </IconButton>
             </Tooltip>
             <Button
+              data-tour="nav-profile"
               onClick={e => setAccountAnchor(e.currentTarget)}
               aria-haspopup="true"
               aria-expanded={accountOpen}
@@ -215,12 +239,6 @@ const Navbar = () => {
                   <PersonOutlined fontSize="small" />
                 </ListItemIcon>
                 <ListItemText>Profile</ListItemText>
-              </MenuItem>
-              <MenuItem onClick={handleGoToHelp}>
-                <ListItemIcon>
-                  <Help fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Help & FAQ</ListItemText>
               </MenuItem>
               <Divider sx={{ my: 0.5 }} />
               <MenuItem onClick={handleLogout}>
@@ -303,7 +321,11 @@ const Navbar = () => {
           <Divider />
 
           <List sx={{ px: 1, py: 1, flex: 1 }}>
-            <ListItemButton onClick={handleGoToProfile} sx={{ borderRadius: 2 }}>
+            <ListItemButton
+              data-tour="nav-profile"
+              onClick={handleGoToProfile}
+              sx={{ borderRadius: 2 }}
+            >
               <ListItemIcon sx={{ minWidth: 40 }}>
                 <PersonOutlined />
               </ListItemIcon>
@@ -320,6 +342,12 @@ const Navbar = () => {
                 <PersonAddAlt1 />
               </ListItemIcon>
               <ListItemText primary="Friend requests" />
+            </ListItemButton>
+            <ListItemButton onClick={handleShowTutorial} sx={{ borderRadius: 2 }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <TourOutlined />
+              </ListItemIcon>
+              <ListItemText primary="Show tutorial" />
             </ListItemButton>
             <ListItemButton onClick={handleGoToHelp} sx={{ borderRadius: 2 }}>
               <ListItemIcon sx={{ minWidth: 40 }}>

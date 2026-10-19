@@ -100,7 +100,12 @@ const NotificationsMenu = () => {
 
   return (
     <>
-      <IconButton onClick={handleOpen} aria-label="Notifications" aria-haspopup="true">
+      <IconButton
+        data-tour="notifications"
+        onClick={handleOpen}
+        aria-label="Notifications"
+        aria-haspopup="true"
+      >
         <Badge badgeContent={unread} color="primary" max={99}>
           <Notifications sx={{ fontSize: "25px" }} />
         </Badge>

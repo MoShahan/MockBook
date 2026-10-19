@@ -1,6 +1,6 @@
 "use client"
 
-import { type ReactNode, useEffect, useState } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import {
   Box,
   Button,
@@ -104,6 +104,7 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
   const dispatch = useAppDispatch()
   const { success, error: toastError } = useToast()
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     return () => {
@@ -202,7 +203,10 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
                     mb: 2,
                   }}
                 >
-                  <Box sx={{ height: 64, bgcolor: values.coverColor }} aria-hidden />
+                  <Box
+                    sx={{ height: 36, bgcolor: values.coverColor }}
+                    aria-label="Cover color preview"
+                  />
                   <Box
                     sx={{
                       display: "flex",
@@ -210,50 +214,68 @@ const EditProfileDialog = ({ open, onClose, user, onSaved }: EditProfileDialogPr
                       gap: 1.5,
                       px: 1.5,
                       py: 1.25,
-                      mt: -3.25,
                     }}
                   >
                     <Box
                       sx={{
                         borderRadius: "50%",
-                        border: theme => `3px solid ${theme.palette.background.paper}`,
+                        border: theme => `2px solid ${theme.palette.divider}`,
+                        flexShrink: 0,
+                        lineHeight: 0,
                       }}
                     >
                       <UserImage
                         image={previewUrl || user.picturePath || ""}
                         name={`${values.firstName} ${values.lastName}`}
-                        size="56px"
+                        size="52px"
                         bgColor={values.avatarColor}
                       />
                     </Box>
-                    <Box>
-                      <Button component="label" variant="outlined" size="small">
-                        Change photo
-                        <input
-                          type="file"
-                          accept={ACCEPT_IMAGE}
-                          hidden
-                          onChange={e => {
-                            const file = e.target.files?.[0] ?? null
-                            e.target.value = ""
-                            if (!file) {
-                              setFieldValue("picture", null)
-                              if (previewUrl) URL.revokeObjectURL(previewUrl)
-                              setPreviewUrl(null)
-                              return
-                            }
-                            const invalid = validateImageFile(file)
-                            if (invalid) {
-                              toastError(invalid)
-                              return
-                            }
-                            setFieldValue("picture", file)
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <input
+                        ref={photoInputRef}
+                        type="file"
+                        accept={ACCEPT_IMAGE}
+                        hidden
+                        onChange={e => {
+                          const file = e.target.files?.[0] ?? null
+                          e.target.value = ""
+                          if (!file) {
+                            setFieldValue("picture", null)
                             if (previewUrl) URL.revokeObjectURL(previewUrl)
-                            setPreviewUrl(URL.createObjectURL(file))
-                          }}
-                        />
+                            setPreviewUrl(null)
+                            return
+                          }
+                          const invalid = validateImageFile(file)
+                          if (invalid) {
+                            toastError(invalid)
+                            return
+                          }
+                          setFieldValue("picture", file)
+                          if (previewUrl) URL.revokeObjectURL(previewUrl)
+                          setPreviewUrl(URL.createObjectURL(file))
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        size="small"
+                        onClick={() => photoInputRef.current?.click()}
+                        sx={{
+                          lineHeight: 1.4,
+                          py: 0.55,
+                          px: 1.25,
+                          display: "inline-flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        Change photo
                       </Button>
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ mt: 0.4, display: "block", lineHeight: 1.35 }}
+                      >
                         {`JPEG, PNG, GIF, or WebP · max ${MAX_IMAGE_LABEL}`}
                       </Typography>
                     </Box>

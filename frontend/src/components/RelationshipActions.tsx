@@ -7,7 +7,15 @@ import {
   PersonRemoveOutlined,
   RssFeed,
 } from "@mui/icons-material"
-import { alpha, Box, Button, CircularProgress, Tooltip, useTheme } from "@mui/material"
+import {
+  alpha,
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  useTheme,
+} from "@mui/material"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
@@ -35,6 +43,14 @@ const chipBase = {
   minHeight: 28,
   px: 1.1,
   py: 0.35,
+  borderRadius: 2,
+}
+
+/** Icon-only hit target for dense list rows (Add people rail, etc.). */
+const iconChipBase = {
+  flexShrink: 0,
+  width: 32,
+  height: 32,
   borderRadius: 2,
 }
 
@@ -222,6 +238,117 @@ const RelationshipActions = ({
       await refresh()
     })
 
+  const followLabel = rel.isFollowing ? "Unfollow" : "Follow"
+  const followTip = rel.isFollowing ? "Unfollow" : "Follow to see their posts in your feed"
+  const followIcon = rel.isFollowing ? (
+    <Check sx={{ fontSize: "1.1rem" }} />
+  ) : (
+    <RssFeed sx={{ fontSize: "1.1rem" }} />
+  )
+  const followSurface = rel.isFollowing ? activeSurface : coverSurface
+
+  if (dense) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 0.35,
+          flexShrink: 0,
+        }}
+      >
+        <Tooltip title={followTip}>
+          <span>
+            <IconButton
+              size="small"
+              disabled={busy}
+              onClick={() => void toggleFollow()}
+              aria-label={followLabel}
+              aria-pressed={rel.isFollowing}
+              sx={{ ...iconChipBase, ...followSurface }}
+            >
+              {followIcon}
+            </IconButton>
+          </span>
+        </Tooltip>
+
+        {rel.isFriend ? (
+          <Tooltip title="Remove friend">
+            <span>
+              <IconButton
+                size="small"
+                disabled={busy}
+                onClick={() => void removeFriend()}
+                aria-label="Remove friend"
+                sx={{ ...iconChipBase, ...activeSurface }}
+              >
+                <PersonRemoveOutlined sx={{ fontSize: "1.1rem" }} />
+              </IconButton>
+            </span>
+          </Tooltip>
+        ) : rel.incomingRequestId ? (
+          <>
+            <Tooltip title="Accept friend request">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={busy}
+                  onClick={() => void acceptRequest()}
+                  aria-label="Accept friend request"
+                  sx={{ ...iconChipBase, ...activeSurface }}
+                >
+                  <Check sx={{ fontSize: "1.1rem" }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Decline friend request">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={busy}
+                  onClick={() => void declineRequest()}
+                  aria-label="Decline friend request"
+                  sx={{ ...iconChipBase, ...coverSurface }}
+                >
+                  <PersonRemoveOutlined sx={{ fontSize: "1.1rem" }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </>
+        ) : rel.outgoingRequestId ? (
+          <Tooltip title="Cancel friend request">
+            <span>
+              <IconButton
+                size="small"
+                disabled={busy}
+                onClick={() => void cancelRequest()}
+                aria-label="Cancel friend request"
+                sx={{ ...iconChipBase, ...coverSurface }}
+              >
+                <PersonAddOutlined sx={{ fontSize: "1.1rem" }} />
+              </IconButton>
+            </span>
+          </Tooltip>
+        ) : (
+          <Tooltip title="Send friend request">
+            <span>
+              <IconButton
+                size="small"
+                disabled={busy}
+                onClick={() => void sendRequest()}
+                aria-label="Send friend request"
+                sx={{ ...iconChipBase, ...coverSurface }}
+              >
+                <PersonAddOutlined sx={{ fontSize: "1.1rem" }} />
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
+      </Box>
+    )
+  }
+
   return (
     <Box
       sx={{
@@ -229,16 +356,16 @@ const RelationshipActions = ({
         flexWrap: "wrap",
         alignItems: "center",
         justifyContent: "flex-end",
-        gap: dense ? 0.5 : 0.75,
+        gap: 0.75,
       }}
     >
-      <Tooltip title={rel.isFollowing ? "Unfollow" : "Follow to see their posts in your feed"}>
+      <Tooltip title={followTip}>
         <span>
           <Button
             size="small"
             disabled={busy}
             onClick={() => void toggleFollow()}
-            aria-label={rel.isFollowing ? "Unfollow" : "Follow"}
+            aria-label={followLabel}
             aria-pressed={rel.isFollowing}
             startIcon={
               rel.isFollowing ? (
@@ -247,7 +374,7 @@ const RelationshipActions = ({
                 <RssFeed sx={{ fontSize: "1rem !important" }} />
               )
             }
-            sx={{ ...chipBase, ...(rel.isFollowing ? activeSurface : coverSurface) }}
+            sx={{ ...chipBase, ...followSurface }}
           >
             {rel.isFollowing ? "Following" : "Follow"}
           </Button>

@@ -102,10 +102,18 @@ const AddPeopleWidget = ({ embedded = false }: AddPeopleWidgetProps) => {
   )
 
   if (embedded) {
-    return <Box sx={{ px: 2, pb: 2 }}>{body}</Box>
+    return (
+      <Box data-tour="add-people" sx={{ px: 2, pb: 2 }}>
+        {body}
+      </Box>
+    )
   }
 
-  return <WidgetWrapper sx={{ overflow: "hidden" }}>{body}</WidgetWrapper>
+  return (
+    <WidgetWrapper data-tour="add-people" sx={{ overflow: "hidden" }}>
+      {body}
+    </WidgetWrapper>
+  )
 }
 
 export default AddPeopleWidget

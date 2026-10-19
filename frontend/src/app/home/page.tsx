@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
 import {
   Accordion,
@@ -19,6 +19,7 @@ import Navbar from "@/components/Navbar"
 import PageShell from "@/components/PageShell"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
+import { TOUR_EXPAND_PEOPLE_EVENT } from "@/lib/productTour"
 
 import { useAppSelector } from "../hooks"
 
@@ -31,8 +32,15 @@ const HomePage = () => {
   const theme = useTheme()
   const isWide = useMediaQuery("(min-width:1000px)")
   const [tab, setTab] = useState<HomeTab>("everyone")
+  const [peopleExpanded, setPeopleExpanded] = useState(false)
 
   const listKind: PostsListKind = tab === "friends" ? "friends" : "feed"
+
+  useEffect(() => {
+    const expand = () => setPeopleExpanded(true)
+    window.addEventListener(TOUR_EXPAND_PEOPLE_EVENT, expand)
+    return () => window.removeEventListener(TOUR_EXPAND_PEOPLE_EVENT, expand)
+  }, [])
 
   return (
     <Box>
@@ -90,6 +98,8 @@ const HomePage = () => {
             <Accordion
               disableGutters
               elevation={0}
+              expanded={peopleExpanded}
+              onChange={(_, expanded) => setPeopleExpanded(expanded)}
               sx={{
                 mt: "1.25rem",
                 width: "100%",
