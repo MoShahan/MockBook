@@ -16,6 +16,12 @@ import userRoutes from "./routes/users.js"
  */
 export function createApp() {
   const app = express()
+
+  // D10: correct client IP behind Render / reverse proxies (rate limits, logs)
+  if (process.env.TRUST_PROXY === "1" || process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1)
+  }
+
   app.use(express.json({ limit: "1mb" }))
 
   const frontendOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
@@ -23,6 +29,7 @@ export function createApp() {
     .map(s => s.trim())
     .filter(Boolean)
 
+  // A9: no Origin (curl/mobile) allowed; browser origins must be allowlisted
   app.use(
     cors({
       origin(origin, callback) {
@@ -35,7 +42,17 @@ export function createApp() {
     })
   )
   app.use(express.urlencoded({ extended: true, limit: "1mb" }))
-  app.use(helmet())
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          defaultSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+        },
+      },
+    })
+  )
   app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }))
   if (process.env.NODE_ENV !== "test") {
     app.use(morgan("common"))

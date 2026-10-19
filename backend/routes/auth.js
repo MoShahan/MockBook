@@ -1,7 +1,7 @@
 import express from "express"
 import rateLimit from "express-rate-limit"
 
-import { login, me, refresh, register } from "../controllers/auth.js"
+import { login, logout, me, refresh, register } from "../controllers/auth.js"
 import { listOauthProviders, oauthCallback, startOauth } from "../controllers/oauth.js"
 import { verifyAccessToken } from "../middleware/auth.js"
 
@@ -28,6 +28,7 @@ function requireOauthProvider(req, res, next) {
 router.post("/register", authLimiter, register)
 router.post("/login", authLimiter, login)
 router.post("/refresh", authLimiter, refresh)
+router.post("/logout", verifyAccessToken, logout)
 router.get("/me", verifyAccessToken, me)
 
 router.get("/providers", listOauthProviders)

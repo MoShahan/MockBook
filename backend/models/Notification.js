@@ -24,6 +24,8 @@ const NotificationSchema = new Schema(
 )
 
 NotificationSchema.index({ recipient: 1, createdAt: -1 })
+/** TTL: auto-delete notifications ~90 days after creation (D3). */
+NotificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 })
 
 const Notification = mongoose.model("Notification", NotificationSchema)
 

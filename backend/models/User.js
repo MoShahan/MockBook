@@ -67,6 +67,18 @@ const UserSchema = new Schema(
     linkedin: { type: String, default: "" },
     instagram: { type: String, default: "" },
     viewedProfile: { type: Number, default: 0 },
+    /** Hashed refresh token sessions (jti + sha256). Not returned to clients. */
+    refreshSessions: {
+      type: [
+        {
+          jti: { type: String, required: true },
+          tokenHash: { type: String, required: true },
+          expiresAt: { type: Date, required: true },
+        },
+      ],
+      default: [],
+      select: false,
+    },
   },
   { timestamps: true }
 )

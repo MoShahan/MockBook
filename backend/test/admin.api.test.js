@@ -16,15 +16,21 @@ describe("admin moderation API", () => {
     process.env.ADMIN_EMAILS = "admin-test@example.com"
     await startTestApp()
 
-    const admin = await registerUser({
+    const adminReg = await registerUser({
       email: "admin-test@example.com",
       firstName: "Ada",
       lastName: "Admin",
       password: VALID_PASSWORD,
     })
-    assert.equal(admin.res.status, 201, JSON.stringify(admin.res.body))
-    assert.equal(admin.res.body.user.role, "admin")
-    adminToken = admin.res.body.accessToken
+    assert.equal(adminReg.res.status, 201, JSON.stringify(adminReg.res.body))
+    assert.equal(adminReg.res.body.user.role || "user", "user")
+    // A11: allowlist promotes on password login, not register
+    const adminLogin = await request(getApp())
+      .post("/auth/login")
+      .send({ email: "admin-test@example.com", password: VALID_PASSWORD })
+    assert.equal(adminLogin.status, 200)
+    assert.equal(adminLogin.body.user.role, "admin")
+    adminToken = adminLogin.body.accessToken
 
     const user = await registerUser({
       email: "member-test@example.com",

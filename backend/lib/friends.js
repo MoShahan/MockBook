@@ -24,15 +24,16 @@ export const formatFriend = friend => {
   }
 }
 
-/** Resolve friend ids to formatted Friend objects (skips missing users). */
+/** Resolve friend ids to formatted Friend objects in one query (skips missing / inactive). */
 export const formatFriendsList = async friendIds => {
   const ids = (friendIds || []).map(toFriendId).filter(Boolean)
   if (!ids.length) return []
 
-  const friends = await Promise.all(
-    ids.map(id =>
-      User.findById(id).select("firstName lastName occupation location picturePath avatarColor")
-    )
-  )
-  return friends.map(formatFriend).filter(Boolean)
+  const friends = await User.find({
+    _id: { $in: ids },
+    isActive: { $ne: false },
+  }).select("firstName lastName occupation location picturePath avatarColor")
+
+  const byId = new Map(friends.map(f => [String(f._id), f]))
+  return ids.map(id => formatFriend(byId.get(id))).filter(Boolean)
 }

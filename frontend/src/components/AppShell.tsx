@@ -40,6 +40,7 @@ import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { useProductTour } from "@/providers/ProductTourProvider"
 import { useToast } from "@/providers/ToastProvider"
 import { setLogout, toggleMode } from "@/state"
+import { store } from "@/state/store"
 import { sameUserId } from "@/types/models"
 
 import BrandLogo from "./BrandLogo"
@@ -126,9 +127,22 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
 
   const handleLogout = () => {
     closeMobile()
-    dispatch(setLogout())
-    success("Signed out")
-    router.push("/login")
+    const refreshToken = store.getState().refreshToken
+    void (async () => {
+      try {
+        if (refreshToken) {
+          await api.post("/auth/logout", { refreshToken })
+        } else {
+          await api.post("/auth/logout", {})
+        }
+      } catch {
+        // Client logout still proceeds if revoke fails (expired session, offline).
+      } finally {
+        dispatch(setLogout())
+        success("Signed out")
+        router.push("/login")
+      }
+    })()
   }
 
   const handleShowTutorial = () => {

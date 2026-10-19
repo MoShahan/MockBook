@@ -1,6 +1,9 @@
 /** Max post description length (grapheme clusters). Keep in sync with frontend `postLimits.ts`. */
 export const POST_DESCRIPTION_MAX = 5000
 
+/** Max comments embedded on a single post document (D1). */
+export const COMMENTS_PER_POST_MAX = 200
+
 /** Count user-visible characters (Unicode grapheme clusters). */
 export function graphemeLength(text) {
   if (!text) return 0

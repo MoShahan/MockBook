@@ -8,7 +8,7 @@ import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 import { useToast } from "@/providers/ToastProvider"
 import { appendPosts, setPosts } from "@/state"
-import type { PaginatedPosts, Post } from "@/types/models"
+import type { PaginatedPosts } from "@/types/models"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 
@@ -64,8 +64,8 @@ function resolveList(list: PostsListKind | undefined, isProfile: boolean): Posts
   return isProfile ? "authored" : "feed"
 }
 
-function usesCursorPagination(kind: PostsListKind): boolean {
-  return kind === "feed" || kind === "friends" || kind === "authored"
+function usesCursorPagination(_kind: PostsListKind): boolean {
+  return true
 }
 
 function pathForList(kind: PostsListKind, userId: string, cursor?: string | null): string {
@@ -82,11 +82,11 @@ function pathForList(kind: PostsListKind, userId: string, cursor?: string | null
     case "authored":
       return `/posts/${userId}/posts?${params}`
     case "saved":
-      return "/posts/saved"
+      return `/posts/saved?${params}`
     case "liked":
-      return "/posts/liked"
+      return `/posts/liked?${params}`
     case "commented":
-      return "/posts/commented"
+      return `/posts/commented?${params}`
   }
 }
 
@@ -128,19 +128,11 @@ const PostsWidget = ({
         setNextCursor(null)
         setHasMore(false)
         const path = pathForList(kind, userId)
-        if (paginated) {
-          const { data } = await api.get<PaginatedPosts>(path)
-          if (cancelled) return
-          dispatch(setPosts({ posts: data.posts || [] }))
-          setNextCursor(data.nextCursor)
-          setHasMore(Boolean(data.hasMore))
-        } else {
-          const { data } = await api.get<Post[]>(path)
-          if (cancelled) return
-          dispatch(setPosts({ posts: data }))
-          setHasMore(false)
-          setNextCursor(null)
-        }
+        const { data } = await api.get<PaginatedPosts>(path)
+        if (cancelled) return
+        dispatch(setPosts({ posts: data.posts || [] }))
+        setNextCursor(data.nextCursor)
+        setHasMore(Boolean(data.hasMore))
         setLoadedFor(loadKey)
       } catch {
         if (!cancelled) {

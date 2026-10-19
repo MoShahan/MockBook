@@ -2,7 +2,6 @@ import crypto from "crypto"
 
 import bcrypt from "bcrypt"
 
-import { roleForEmail } from "../lib/admins.js"
 import {
   buildAuthorizeUrl,
   fetchOauthProfile,
@@ -65,20 +64,12 @@ export const oauthCallback = async (req, res, next) => {
       oauthProviders: { $elemMatch: { provider, providerId: profile.providerId } },
     })
 
+    // A7: never silent-link by email alone (account takeover). Existing password
+    // accounts must sign in first; future explicit-link flow can be added later.
     if (!user && profile.email) {
-      user = await User.findOne({ email: profile.email.toLowerCase() })
-      if (user) {
-        const already = (user.oauthProviders || []).some(
-          p => p.provider === provider && p.providerId === profile.providerId
-        )
-        if (!already) {
-          user.oauthProviders = user.oauthProviders || []
-          user.oauthProviders.push({ provider, providerId: profile.providerId })
-          if (!user.picturePath && profile.picturePath) {
-            user.picturePath = profile.picturePath
-          }
-          await user.save()
-        }
+      const emailOwner = await User.findOne({ email: profile.email.toLowerCase() }).select("_id")
+      if (emailOwner) {
+        return redirectError(res, "account_exists")
       }
     }
 
@@ -94,7 +85,8 @@ export const oauthCallback = async (req, res, next) => {
         email,
         password: placeholderHash,
         picturePath: profile.picturePath || "",
-        role: roleForEmail(email),
+        // A11: never auto-promote on OAuth register — seed/DB or password login allowlist
+        role: "user",
         isActive: true,
         friends: [],
         following: [],
@@ -106,10 +98,12 @@ export const oauthCallback = async (req, res, next) => {
       })
     }
 
-    const tokens = issueAuthTokens(user._id)
+    if (user.isActive === false) {
+      return redirectError(res, "failed")
+    }
 
-    // Handoff tokens in the URL fragment (not query) so Referer logs stay cleaner.
-    // Frontend `/auth/callback` stores tokens then loads the user via GET /auth/me.
+    const tokens = await issueAuthTokens(user._id)
+
     const handoff = new URL("/auth/callback", frontendOrigin())
     const fragment = new URLSearchParams({
       accessToken: tokens.accessToken,

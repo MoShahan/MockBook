@@ -2,7 +2,7 @@ import { assertFeatureEnabled } from "../lib/features.js"
 import { uploadImageBuffer } from "../lib/imagekit.js"
 import { createNotification } from "../lib/notifications.js"
 import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
-import { graphemeLength, POST_DESCRIPTION_MAX } from "../lib/postLimits.js"
+import { COMMENTS_PER_POST_MAX, graphemeLength, POST_DESCRIPTION_MAX } from "../lib/postLimits.js"
 import {
   likesMapKeys,
   parseLikersPagination,
@@ -103,12 +103,12 @@ export const getPost = async (req, res, next) => {
     const { postId } = req.params
     const post = await Post.findById(postId)
     if (!post) {
-      return res.status(404).json({ msg: "Post not found" })
+      return res.status(404).json({ error: "Post not found" })
     }
     const [formatted] = await withAuthors([post])
     res.status(200).json(formatted)
   } catch (e) {
-    res.status(404).json({ msg: e.message })
+    next(e)
   }
 }
 
@@ -141,16 +141,18 @@ export const likePost = async (req, res, next) => {
 
     const post = await Post.findById(postId)
     if (!post) {
-      return res.status(404).json({ msg: "Post not found" })
+      return res.status(404).json({ error: "Post not found" })
     }
 
+    const likeKey = `likes.${userId}`
+    const isLiked = Boolean(post.likes?.get?.(userId))
     let message = ""
-    const isLiked = post.likes.get(userId)
+    let updatedPost
     if (isLiked) {
-      post.likes.delete(userId)
+      updatedPost = await Post.findByIdAndUpdate(postId, { $unset: { [likeKey]: "" } }, { new: true })
       message = "your like has been removed"
     } else {
-      post.likes.set(userId, true)
+      updatedPost = await Post.findByIdAndUpdate(postId, { $set: { [likeKey]: true } }, { new: true })
       message = "you liked this post"
       void createNotification({
         recipientId: String(post.userId),
@@ -160,7 +162,6 @@ export const likePost = async (req, res, next) => {
       })
     }
 
-    const updatedPost = await Post.findByIdAndUpdate(postId, { likes: post.likes }, { new: true })
     const [formatted] = await withAuthors([updatedPost])
 
     res.status(200).json({ message, updatedPost: formatted })
@@ -209,7 +210,12 @@ export const addComment = async (req, res, next) => {
 
     const post = await Post.findById(postId)
     if (!post) {
-      return res.status(404).json({ msg: "Post not found" })
+      return res.status(404).json({ error: "Post not found" })
+    }
+    if ((post.comments?.length || 0) >= COMMENTS_PER_POST_MAX) {
+      return res.status(400).json({
+        error: `This post has reached the maximum of ${COMMENTS_PER_POST_MAX} comments`,
+      })
     }
 
     post.comments.push({ userId, text, likes: {} })
@@ -258,12 +264,23 @@ export const likeComment = async (req, res, next) => {
       comment.likes = new Map()
     }
 
+    const likePath = `comments.$.likes.${userId}`
+    const isLiked = Boolean(comment.likes?.get?.(userId))
     let message = ""
-    if (comment.likes.get(userId)) {
-      comment.likes.delete(userId)
+    let updatedPost
+    if (isLiked) {
+      updatedPost = await Post.findOneAndUpdate(
+        { _id: postId, "comments._id": commentId },
+        { $unset: { [likePath]: "" } },
+        { new: true }
+      )
       message = "Comment like removed"
     } else {
-      comment.likes.set(userId, true)
+      updatedPost = await Post.findOneAndUpdate(
+        { _id: postId, "comments._id": commentId },
+        { $set: { [likePath]: true } },
+        { new: true }
+      )
       message = "Comment liked"
       void createNotification({
         recipientId: String(comment.userId),
@@ -274,10 +291,11 @@ export const likeComment = async (req, res, next) => {
       })
     }
 
-    post.markModified("comments")
-    await post.save()
+    if (!updatedPost) {
+      return res.status(404).json({ error: "Comment not found" })
+    }
 
-    const [formatted] = await withAuthors([post])
+    const [formatted] = await withAuthors([updatedPost])
     res.status(200).json({ message, updatedPost: formatted })
   } catch (e) {
     next(e)
@@ -414,7 +432,7 @@ export const deletePost = async (req, res, next) => {
     await User.updateMany({ savedPosts: postId }, { $pull: { savedPosts: postId } })
     res.status(200).json({ message: "Post deleted", postId })
   } catch (e) {
-    res.status(500).json({ error: e.message })
+    next(e)
   }
 }
 
@@ -551,7 +569,7 @@ export const unsavePost = async (req, res, next) => {
   }
 }
 
-/** List posts the JWT user has saved (newest save first). Private to owner. */
+/** List posts the JWT user has saved (newest save first). Private to owner. Cursor = last post id. */
 export const getSavedPosts = async (req, res, next) => {
   try {
     const userId = req.user?.id
@@ -564,16 +582,34 @@ export const getSavedPosts = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthenticated" })
     }
 
+    const { limit } = parseCursorPagination(req.query)
+    const cursorId = typeof req.query.cursor === "string" ? req.query.cursor.trim() : ""
     const idsNewestFirst = [...(user.savedPosts || [])].reverse().map(id => String(id))
-    if (idsNewestFirst.length === 0) {
-      return res.status(200).json([])
+
+    let start = 0
+    if (cursorId) {
+      const idx = idsNewestFirst.indexOf(cursorId)
+      start = idx >= 0 ? idx + 1 : idsNewestFirst.length
     }
 
-    const posts = await Post.find({ _id: { $in: idsNewestFirst } })
-    const byId = Object.fromEntries(posts.map(p => [String(p._id), p]))
-    const ordered = idsNewestFirst.map(id => byId[id]).filter(Boolean)
+    const pageIds = idsNewestFirst.slice(start, start + limit + 1)
+    const hasMore = pageIds.length > limit
+    const sliceIds = hasMore ? pageIds.slice(0, limit) : pageIds
 
-    res.status(200).json(await withAuthors(ordered))
+    if (sliceIds.length === 0) {
+      return res.status(200).json({ posts: [], nextCursor: null, hasMore: false })
+    }
+
+    const posts = await Post.find({ _id: { $in: sliceIds } })
+    const byId = Object.fromEntries(posts.map(p => [String(p._id), p]))
+    const ordered = sliceIds.map(id => byId[id]).filter(Boolean)
+    const nextCursor = hasMore ? sliceIds[sliceIds.length - 1] : null
+
+    res.status(200).json({
+      posts: await withAuthors(ordered),
+      nextCursor,
+      hasMore,
+    })
   } catch (e) {
     next(e)
   }
@@ -590,8 +626,18 @@ export const getLikedPosts = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthenticated" })
     }
 
-    const posts = await Post.find({ [`likes.${userId}`]: true }).sort({ createdAt: -1 })
-    res.status(200).json(await withAuthors(posts))
+    const { limit, cursorDate } = parseCursorPagination(req.query)
+    const filter = {
+      [`likes.${userId}`]: true,
+      ...(cursorDate ? { createdAt: { $lt: cursorDate } } : {}),
+    }
+    const docs = await Post.find(filter).sort({ createdAt: -1 }).limit(limit + 1)
+    const { pageDocs, nextCursor, hasMore } = pageFromDocs(docs, limit)
+    res.status(200).json({
+      posts: await withAuthors(pageDocs),
+      nextCursor,
+      hasMore,
+    })
   } catch (e) {
     next(e)
   }
@@ -608,8 +654,18 @@ export const getCommentedPosts = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthenticated" })
     }
 
-    const posts = await Post.find({ "comments.userId": String(userId) }).sort({ createdAt: -1 })
-    res.status(200).json(await withAuthors(posts))
+    const { limit, cursorDate } = parseCursorPagination(req.query)
+    const filter = {
+      "comments.userId": String(userId),
+      ...(cursorDate ? { createdAt: { $lt: cursorDate } } : {}),
+    }
+    const docs = await Post.find(filter).sort({ createdAt: -1 }).limit(limit + 1)
+    const { pageDocs, nextCursor, hasMore } = pageFromDocs(docs, limit)
+    res.status(200).json({
+      posts: await withAuthors(pageDocs),
+      nextCursor,
+      hasMore,
+    })
   } catch (e) {
     next(e)
   }

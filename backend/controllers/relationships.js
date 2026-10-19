@@ -66,7 +66,9 @@ export const sendFriendRequest = async (req, res, next) => {
     }
 
     const [me, them] = await Promise.all([User.findById(authUserId), User.findById(toId)])
-    if (!me || !them) return res.status(404).json({ msg: "User not found" })
+    if (!me || !them || them.isActive === false) {
+      return res.status(404).json({ error: "User not found" })
+    }
 
     if ((me.friends || []).some(fid => toFriendId(fid) === String(toId))) {
       return res.status(409).json({ error: "Already friends" })
@@ -185,22 +187,25 @@ export const acceptFriendRequest = async (req, res, next) => {
       User.findById(authUserId),
       User.findById(request.from),
     ])
-    if (!me || !them) return res.status(404).json({ msg: "User not found" })
+    if (!me || !them || them.isActive === false) {
+      return res.status(404).json({ error: "User not found" })
+    }
 
     const fromId = String(request.from)
     const toId = String(authUserId)
 
-    if (!(me.friends || []).some(fid => toFriendId(fid) === fromId)) {
-      me.friends.push(them._id)
-    }
-    if (!(them.friends || []).some(fid => toFriendId(fid) === toId)) {
-      them.friends.push(me._id)
+    // D6: ordered $addToSet updates with compensating rollback (no multi-doc transaction required)
+    await User.updateOne({ _id: me._id }, { $addToSet: { friends: them._id } })
+    try {
+      await User.updateOne({ _id: them._id }, { $addToSet: { friends: me._id } })
+    } catch (err) {
+      await User.updateOne({ _id: me._id }, { $pull: { friends: them._id } })
+      throw err
     }
 
     request.status = "accepted"
-    await Promise.all([me.save(), them.save(), request.save()])
+    await request.save()
 
-    // Cancel any reverse pending request if present.
     await FriendRequest.updateMany(
       {
         status: "pending",
@@ -219,7 +224,8 @@ export const acceptFriendRequest = async (req, res, next) => {
       type: "friend_accept",
     })
 
-    const friends = await formatFriendsList(me.friends)
+    const updatedMe = await User.findById(authUserId).select("friends")
+    const friends = await formatFriendsList(updatedMe?.friends)
     res.status(200).json({ message: "Friend request accepted", friends })
   } catch (e) {
     next(e)
@@ -317,7 +323,9 @@ export const followUser = async (req, res, next) => {
     }
 
     const [me, them] = await Promise.all([User.findById(authUserId), User.findById(targetId)])
-    if (!me || !them) return res.status(404).json({ msg: "User not found" })
+    if (!me || !them || them.isActive === false) {
+      return res.status(404).json({ error: "User not found" })
+    }
 
     const already = (me.following || []).some(fid => toFriendId(fid) === String(targetId))
     if (!already) {

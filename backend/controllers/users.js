@@ -16,6 +16,7 @@ import {
 } from "../lib/profileColors.js"
 import { getRelationshipsMap } from "../lib/relationships.js"
 import { pickSocialFields } from "../lib/social.js"
+import ProfileView, { utcDayKey } from "../models/ProfileView.js"
 import User from "../models/User.js"
 
 const PUBLIC_USER_FIELDS =
@@ -122,14 +123,30 @@ export const getUser = async (req, res, next) => {
     const { id } = req.params
     const user = await User.findById(id).select(PUBLIC_USER_FIELDS)
     if (!user) {
-      return res.status(404).json({ msg: "User not found" })
+      return res.status(404).json({ error: "User not found" })
     }
 
-    // Count a profile visit when someone other than the owner loads the profile.
     const viewerId = req.user?.id
-    if (viewerId && String(viewerId) !== String(id)) {
-      await User.updateOne({ _id: id }, { $inc: { viewedProfile: 1 } })
-      user.viewedProfile = (user.viewedProfile || 0) + 1
+    const viewerIsAdmin = req.user?.role === "admin"
+    // A14: hide deactivated profiles from non-admins
+    if (user.isActive === false && !viewerIsAdmin && String(viewerId) !== String(id)) {
+      return res.status(404).json({ error: "User not found" })
+    }
+
+    // A8: count at most one view per viewer per UTC day
+    if (viewerId && String(viewerId) !== String(id) && user.isActive !== false) {
+      try {
+        await ProfileView.create({
+          viewer: viewerId,
+          profile: id,
+          day: utcDayKey(),
+        })
+        await User.updateOne({ _id: id }, { $inc: { viewedProfile: 1 } })
+        user.viewedProfile = (user.viewedProfile || 0) + 1
+      } catch (err) {
+        // Duplicate key = already counted today — ignore
+        if (err?.code !== 11000) throw err
+      }
     }
 
     const publicUser = await attachRelationshipCounts(user, toPublicUser(user))
@@ -231,8 +248,9 @@ export const updateProfile = async (req, res, next) => {
 }
 
 /**
- * Discover users: recent registrants by default, or name/email search when `q` is set.
+ * Discover users: recent registrants by default, or name search when `q` is set.
  * Excludes the authenticated user. Cursor pagination: `?limit=&cursor=` (default 10, max 30).
+ * A6: search names only (never email).
  */
 export const discoverUsers = async (req, res, next) => {
   try {
@@ -249,7 +267,7 @@ export const discoverUsers = async (req, res, next) => {
     if (q) {
       const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
       const re = new RegExp(escaped, "i")
-      filter.$or = [{ firstName: re }, { lastName: re }, { email: re }]
+      filter.$or = [{ firstName: re }, { lastName: re }]
     }
 
     if (cursorDate) {

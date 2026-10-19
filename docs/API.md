@@ -16,7 +16,8 @@ Authorization: Bearer <accessToken>
 | -------- | ---------------------------- | ---------------------------------------------------------------- |
 | `POST`   | `/auth/register`             | Create account; returns user + access + refresh tokens           |
 | `POST`   | `/auth/login`                | Log in; returns user + access + refresh tokens                   |
-| `POST`   | `/auth/refresh`              | Exchange refresh token for a new access + refresh pair           |
+| `POST`   | `/auth/refresh`              | Rotate refresh: exchange valid refresh for a new access + refresh pair |
+| `POST`   | `/auth/logout`               | Revoke refresh session (Bearer access; body may include `refreshToken`) |
 | `GET`    | `/auth/me`                   | Current user (Bearer)                                            |
 | `GET`    | `/auth/providers`            | Configured OAuth providers                                       |
 | `GET`    | `/auth/:provider`            | Start OAuth (`google` \| `github` \| `discord`)                  |
@@ -46,9 +47,9 @@ Authorization: Bearer <accessToken>
 | `GET`    | `/users/:id/followers`       | People who follow `:id` (same pagination shape)                  |
 | `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit); `{ post }` |
 | `GET`    | `/posts`                     | Home feed (`?scope=all\|friends&limit=&cursor=`; `friends` = me ∪ friends ∪ following) |
-| `GET`    | `/posts/saved`               | Logged-in user’s saved posts (newest save first)                 |
-| `GET`    | `/posts/liked`               | Logged-in user’s liked posts (`createdAt` desc)                  |
-| `GET`    | `/posts/commented`           | Posts the user commented on (`createdAt` desc; distinct)         |
+| `GET`    | `/posts/saved`               | Saved posts (paginated `{ posts, nextCursor, hasMore }`)         |
+| `GET`    | `/posts/liked`               | Liked posts (paginated `{ posts, nextCursor, hasMore }`)         |
+| `GET`    | `/posts/commented`           | Commented posts (paginated envelope)                             |
 | `GET`    | `/posts/:userId/posts`       | One user’s posts (same cursor pagination as feed)                |
 | `GET`    | `/posts/:postId`             | Single post                                                      |
 | `PUT`    | `/posts/:postId/save`        | Save/bookmark a post (idempotent)                                |

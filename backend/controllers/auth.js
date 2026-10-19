@@ -4,12 +4,17 @@ import { roleForEmail } from "../lib/admins.js"
 import { formatFriendsList } from "../lib/friends.js"
 import { isValidPassword, PASSWORD_POLICY_MESSAGE } from "../lib/password.js"
 import { relationshipCounts } from "../lib/peopleLists.js"
-import { issueAuthTokens, verifyRefreshTokenString } from "../lib/tokens.js"
+import {
+  consumeRefreshSession,
+  issueAuthTokens,
+  revokeRefreshSessions,
+} from "../lib/tokens.js"
 import User from "../models/User.js"
 
 const toSafeUser = userDoc => {
   const user = userDoc.toObject ? userDoc.toObject() : { ...userDoc }
   delete user.password
+  delete user.refreshSessions
   user.savedPosts = (user.savedPosts || []).map(id => String(id))
   user.following = (user.following || []).map(id => String(id))
   user.role = user.role || "user"
@@ -28,17 +33,19 @@ const withFormattedFriends = async userDoc => {
   return safeUser
 }
 
+function sanitizeRegisterName(raw) {
+  if (typeof raw !== "string") return ""
+  return raw.trim().slice(0, 50)
+}
+
 export const register = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password } = req.body
-    const trimmedFirst = typeof firstName === "string" ? firstName.trim() : ""
-    const trimmedLast = typeof lastName === "string" ? lastName.trim() : ""
+    const trimmedFirst = sanitizeRegisterName(firstName)
+    const trimmedLast = sanitizeRegisterName(lastName)
 
     if (!trimmedFirst || !trimmedLast || !email || !password) {
       return res.status(400).json({ error: "Missing required fields" })
-    }
-    if (trimmedFirst.length > 50 || trimmedLast.length > 50) {
-      return res.status(400).json({ error: "Names must be at most 50 characters" })
     }
 
     if (!isValidPassword(password)) {
@@ -46,9 +53,10 @@ export const register = async (req, res, next) => {
     }
 
     const normalizedEmail = String(email).trim().toLowerCase()
-    const existing = await User.findOne({ email: normalizedEmail })
+    const existing = await User.findOne({ email: normalizedEmail }).select("_id")
     if (existing) {
-      return res.status(409).json({ error: "Email already registered" })
+      // A13: avoid confirming which emails are registered
+      return res.status(400).json({ error: "Unable to create account" })
     }
 
     const salt = await bcrypt.genSalt()
@@ -60,7 +68,8 @@ export const register = async (req, res, next) => {
       email: normalizedEmail,
       password: hashedPass,
       picturePath: "",
-      role: roleForEmail(normalizedEmail),
+      // A11: never auto-promote on register — use seed/DB or password login allowlist
+      role: "user",
       isActive: true,
       friends: [],
       following: [],
@@ -71,7 +80,7 @@ export const register = async (req, res, next) => {
     })
 
     const savedUser = await newUser.save()
-    const tokens = issueAuthTokens(savedUser._id)
+    const tokens = await issueAuthTokens(savedUser._id)
     const user = await withFormattedFriends(savedUser)
 
     res.status(201).json({ user, ...tokens })
@@ -102,14 +111,14 @@ export const login = async (req, res, next) => {
       return res.status(403).json({ error: "Account deactivated" })
     }
 
-    // Keep allowlisted emails promoted to admin (never demote here).
+    // A11: allowlist promote only after password auth (proves account control)
     const nextRole = roleForEmail(user.email, user.role)
     if (nextRole !== user.role) {
       user.role = nextRole
       await user.save()
     }
 
-    const tokens = issueAuthTokens(user._id)
+    const tokens = await issueAuthTokens(user._id)
     const safeUser = await withFormattedFriends(user)
 
     res.status(200).json({ user: safeUser, ...tokens })
@@ -126,11 +135,7 @@ export const me = async (req, res, next) => {
     const user = await User.findById(userId)
     if (!user) return res.status(401).json({ error: "Unauthenticated" })
     if (user.isActive === false) return res.status(403).json({ error: "Account deactivated" })
-    const nextRole = roleForEmail(user.email, user.role)
-    if (nextRole !== user.role) {
-      user.role = nextRole
-      await user.save()
-    }
+    // Do not promote via /me alone (A11) — only login / seed.
     const safeUser = await withFormattedFriends(user)
     res.status(200).json({ user: safeUser })
   } catch (e) {
@@ -138,7 +143,7 @@ export const me = async (req, res, next) => {
   }
 }
 
-/** Exchange a valid refresh token for a new access + refresh pair. */
+/** Exchange a valid refresh token for a new access + refresh pair (rotating). */
 export const refresh = async (req, res, next) => {
   try {
     const refreshToken =
@@ -151,23 +156,29 @@ export const refresh = async (req, res, next) => {
       return res.status(401).json({ error: "Refresh token required" })
     }
 
-    let payload
-    try {
-      payload = verifyRefreshTokenString(refreshToken)
-    } catch {
+    const consumed = await consumeRefreshSession(refreshToken)
+    if (!consumed) {
       return res.status(401).json({ error: "Invalid or expired refresh token" })
     }
 
-    const user = await User.findById(payload.id)
-    if (!user) {
-      return res.status(401).json({ error: "Invalid or expired refresh token" })
-    }
-    if (user.isActive === false) {
-      return res.status(403).json({ error: "Account deactivated" })
-    }
-
-    const tokens = issueAuthTokens(user._id)
+    const tokens = await issueAuthTokens(consumed.user._id)
     res.status(200).json(tokens)
+  } catch (e) {
+    next(e)
+  }
+}
+
+/** Revoke the presented refresh session (or all sessions for the user). */
+export const logout = async (req, res, next) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" })
+
+    const refreshToken =
+      (typeof req.body?.refreshToken === "string" && req.body.refreshToken.trim()) || ""
+
+    await revokeRefreshSessions(userId, refreshToken || null)
+    res.status(200).json({ message: "Signed out" })
   } catch (e) {
     next(e)
   }

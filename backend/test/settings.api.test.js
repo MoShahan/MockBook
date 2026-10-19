@@ -22,14 +22,19 @@ describe("site feature settings API", () => {
     await startTestApp()
     invalidateFeaturesCache()
 
-    const admin = await registerUser({
+    const adminReg = await registerUser({
       email: "feat-admin@example.com",
       firstName: "Feat",
       lastName: "Admin",
       password: VALID_PASSWORD,
     })
-    assert.equal(admin.res.status, 201, JSON.stringify(admin.res.body))
-    adminToken = admin.res.body.accessToken
+    assert.equal(adminReg.res.status, 201, JSON.stringify(adminReg.res.body))
+    const adminLogin = await request(getApp())
+      .post("/auth/login")
+      .send({ email: "feat-admin@example.com", password: VALID_PASSWORD })
+    assert.equal(adminLogin.status, 200)
+    assert.equal(adminLogin.body.user.role, "admin")
+    adminToken = adminLogin.body.accessToken
 
     const user = await registerUser({
       email: "feat-user@example.com",

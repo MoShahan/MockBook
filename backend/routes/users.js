@@ -25,35 +25,45 @@ import {
 } from "../controllers/users.js"
 import { requireObjectId } from "../lib/objectId.js"
 import { requireAdmin, verifyAccessToken } from "../middleware/auth.js"
+import { authCreateLimiter, authWriteLimiter } from "../middleware/rateLimit.js"
 import { uploadPicture } from "../middleware/upload.js"
 
 const router = express.Router()
 
 router.get("/discover", verifyAccessToken, discoverUsers)
 
-router.patch("/me", verifyAccessToken, uploadPicture, updateProfile)
+router.patch("/me", verifyAccessToken, authWriteLimiter, uploadPicture, updateProfile)
 
 router.get("/me/friend-requests/count", verifyAccessToken, countIncomingFriendRequests)
 router.get("/me/friend-requests", verifyAccessToken, listFriendRequests)
 router.post(
   "/me/friend-requests/:requestId/accept",
   verifyAccessToken,
+  authWriteLimiter,
   requireObjectId("requestId"),
   acceptFriendRequest
 )
 router.post(
   "/me/friend-requests/:requestId/decline",
   verifyAccessToken,
+  authWriteLimiter,
   requireObjectId("requestId"),
   declineFriendRequest
 )
 router.delete(
   "/me/friend-requests/:requestId",
   verifyAccessToken,
+  authWriteLimiter,
   requireObjectId("requestId"),
   cancelFriendRequest
 )
-router.delete("/me/friends/:friendId", verifyAccessToken, requireObjectId("friendId"), unfriend)
+router.delete(
+  "/me/friends/:friendId",
+  verifyAccessToken,
+  authWriteLimiter,
+  requireObjectId("friendId"),
+  unfriend
+)
 router.get("/me/following", verifyAccessToken, listFollowing)
 
 router.post(
@@ -71,9 +81,15 @@ router.post(
   reactivateUser
 )
 
-router.post("/:id/friend-requests", verifyAccessToken, requireObjectId("id"), sendFriendRequest)
-router.post("/:id/follow", verifyAccessToken, requireObjectId("id"), followUser)
-router.delete("/:id/follow", verifyAccessToken, requireObjectId("id"), unfollowUser)
+router.post(
+  "/:id/friend-requests",
+  verifyAccessToken,
+  authCreateLimiter,
+  requireObjectId("id"),
+  sendFriendRequest
+)
+router.post("/:id/follow", verifyAccessToken, authWriteLimiter, requireObjectId("id"), followUser)
+router.delete("/:id/follow", verifyAccessToken, authWriteLimiter, requireObjectId("id"), unfollowUser)
 router.get("/:id/relationship", verifyAccessToken, requireObjectId("id"), getUserRelationship)
 
 router.get("/:id/friends", verifyAccessToken, requireObjectId("id"), getUserFriends)
