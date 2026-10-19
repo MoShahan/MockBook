@@ -7,7 +7,6 @@ import {
   alpha,
   Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogContent,
   IconButton,
@@ -21,6 +20,7 @@ import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 import { sameUserId } from "@/types/models"
 
+import { PeopleListSkeleton } from "./skeletons"
 import UserImage from "./UserImage"
 
 export type Liker = {
@@ -122,16 +122,7 @@ const LikersList = ({ fetchPath, pageSize, onSelectUser }: LikersListProps) => {
   }
 
   if (loading) {
-    return (
-      <Box
-        sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.25, py: 5 }}
-        role="status"
-        aria-live="polite"
-      >
-        <CircularProgress size={28} />
-        <Typography sx={{ color: medium, fontSize: "0.8125rem" }}>Loading likes…</Typography>
-      </Box>
-    )
+    return <PeopleListSkeleton count={5} />
   }
 
   if (error && likers.length === 0) {

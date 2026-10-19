@@ -1,15 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Tab,
-  Tabs,
-  Typography,
-  useTheme,
-} from "@mui/material"
+import { Box, Button, Tab, Tabs, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch } from "@/app/hooks"
@@ -17,6 +9,7 @@ import EmptyState from "@/components/EmptyState"
 import Navbar from "@/components/Navbar"
 import PageShell from "@/components/PageShell"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
+import { PeopleListSkeleton } from "@/components/skeletons"
 import UserImage from "@/components/UserImage"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
@@ -124,9 +117,7 @@ const FriendRequestsPage = () => {
         </Tabs>
 
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }} role="status">
-            <CircularProgress />
-          </Box>
+          <PeopleListSkeleton count={5} />
         ) : items.length === 0 ? (
           <EmptyState
             title={box === "incoming" ? "No incoming requests" : "No outgoing requests"}

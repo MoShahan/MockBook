@@ -41,6 +41,7 @@ import EditProfileDialog from "./EditProfileDialog"
 import FlexBetween from "./FlexBetween"
 import PeopleListModal from "./PeopleListModal"
 import RelationshipActions from "./RelationshipActions"
+import { ProfileWidgetSkeleton } from "./skeletons"
 import UserImage from "./UserImage"
 import WidgetWrapper from "./WidgetWrapper"
 
@@ -146,13 +147,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   }
 
   if (!user) {
-    return (
-      <WidgetWrapper>
-        <Box sx={{ display: "flex", justifyContent: "center", py: 3 }} role="status">
-          <Typography sx={{ color: medium }}>Loading profile…</Typography>
-        </Box>
-      </WidgetWrapper>
-    )
+    return <ProfileWidgetSkeleton />
   }
 
   const displayUrl = url || user.picturePath || ""

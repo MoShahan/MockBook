@@ -7,7 +7,6 @@ import {
   Badge,
   Box,
   Button,
-  CircularProgress,
   Divider,
   IconButton,
   List,
@@ -21,6 +20,7 @@ import {
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch } from "@/app/hooks"
+import { PeopleListSkeleton } from "@/components/skeletons"
 import UserImage from "@/components/UserImage"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
@@ -168,8 +168,8 @@ const FriendRequestsMenu = () => {
         </Box>
         <Divider />
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
-            <CircularProgress size={28} />
+          <Box sx={{ px: 1, py: 0.5 }}>
+            <PeopleListSkeleton count={3} />
           </Box>
         ) : items.length === 0 ? (
           <Typography sx={{ px: 2, py: 2.5, color: "text.secondary", fontSize: "0.9rem" }}>

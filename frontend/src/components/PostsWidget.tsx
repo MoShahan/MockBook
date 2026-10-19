@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Box, CircularProgress, Typography, useTheme } from "@mui/material"
+import { Box, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { api } from "@/lib/api"
@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from "../app/hooks"
 
 import EmptyState from "./EmptyState"
 import PostWidget from "./PostWidget"
+import { PostCardSkeleton, PostsFeedSkeleton } from "./skeletons"
 
 /** Which post list to load. */
 export type PostsListKind = "feed" | "friends" | "authored" | "saved" | "liked" | "commented"
@@ -178,24 +179,7 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
   }, [paginated, hasMore, loadMore, loadedFor, posts.length])
 
   if (loading || loadedFor !== loadKey) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1.5,
-          py: 4,
-        }}
-        role="status"
-        aria-live="polite"
-      >
-        <CircularProgress size={32} />
-        <Typography sx={{ color: theme.palette.neutral.medium }} variant="body2">
-          Loading posts…
-        </Typography>
-      </Box>
-    )
+    return <PostsFeedSkeleton count={3} />
   }
 
   if (loadError) {
@@ -240,13 +224,8 @@ const PostsWidget = ({ list, userId = "", isProfile = false }: PostsWidgetProps)
         </Box>
       ))}
       {paginated && hasMore ? (
-        <Box
-          ref={sentinelRef}
-          sx={{ display: "flex", justifyContent: "center", py: 2 }}
-          role="status"
-          aria-live="polite"
-        >
-          {loadingMore ? <CircularProgress size={28} /> : null}
+        <Box ref={sentinelRef} role="status" aria-live="polite">
+          {loadingMore ? <PostCardSkeleton /> : <Box sx={{ height: 1 }} aria-hidden />}
         </Box>
       ) : null}
       {paginated && !hasMore && posts.length > 0 ? (

@@ -5,7 +5,6 @@ import CloseIcon from "@mui/icons-material/Close"
 import {
   alpha,
   Box,
-  CircularProgress,
   Dialog,
   DialogContent,
   IconButton,
@@ -24,6 +23,7 @@ import { friendIdOf } from "@/types/models"
 
 import EmptyState from "./EmptyState"
 import Friend from "./Friend"
+import { PeopleListSkeleton, PeopleRowSkeleton } from "./skeletons"
 
 const PAGE_LIMIT = 20
 
@@ -77,7 +77,6 @@ const PeopleListModal = ({
   const router = useRouter()
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"))
   const dark = theme.palette.neutral.dark
-  const medium = theme.palette.neutral.medium
   const isDark = theme.palette.mode === "dark"
 
   const [tab, setTab] = useState<PeopleListTab>(initialTab)
@@ -261,13 +260,7 @@ const PeopleListModal = ({
         }}
       >
         {loading ? (
-          <Box
-            sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, py: 5 }}
-            role="status"
-          >
-            <CircularProgress size={28} />
-            <Typography sx={{ color: medium, fontSize: "0.8125rem" }}>Loading…</Typography>
-          </Box>
+          <PeopleListSkeleton count={6} />
         ) : error && people.length === 0 ? (
           <Typography sx={{ color: "error.main", textAlign: "center", py: 4 }} role="alert">
             {error}
@@ -305,8 +298,9 @@ const PeopleListModal = ({
             })}
             <Box ref={sentinelRef} sx={{ height: 1 }} aria-hidden />
             {loadingMore ? (
-              <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }} role="status">
-                <CircularProgress size={22} />
+              <Box role="status" aria-label="Loading more people">
+                <PeopleRowSkeleton />
+                <PeopleRowSkeleton />
               </Box>
             ) : null}
             {error ? (

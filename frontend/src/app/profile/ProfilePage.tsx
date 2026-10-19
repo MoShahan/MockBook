@@ -7,13 +7,14 @@ import {
   FavoriteBorderOutlined,
   GridViewOutlined,
 } from "@mui/icons-material"
-import { Box, CircularProgress, Tab, Tabs, useMediaQuery } from "@mui/material"
+import { Box, Tab, Tabs, useMediaQuery } from "@mui/material"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import Navbar from "@/components/Navbar"
 import PageShell from "@/components/PageShell"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
+import { ProfilePageSkeleton } from "@/components/skeletons"
 import UserWidget from "@/components/UserWidget"
 import { sameUserId } from "@/types/models"
 
@@ -79,9 +80,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
       <Box>
         <Navbar />
         <PageShell>
-          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }} role="status">
-            <CircularProgress size={32} />
-          </Box>
+          <ProfilePageSkeleton wide={isNonMobileScreens} />
         </PageShell>
       </Box>
     )

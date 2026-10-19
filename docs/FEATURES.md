@@ -94,6 +94,7 @@ Full feature list for the current app, plus planned items for a later release.
 - **Help & FAQ** (`/help`), **Privacy** (`/privacy`), **Terms** (`/terms`)
 - In-app **product tutorial** (`react-joyride`): navbar **Show tutorial** (compose, friends/follow, notifications, profile); replayable; optional one-time auto-run
 - Mobile nav side drawer (account, profile, tutorial, help, theme, log out)
+- Skeleton loaders for posts feed, profile header, likers / friends / followers / following lists, and friend-request inbox
 - Toast / snackbar feedback for key actions (compact, centered)
 - Formik + Yup validation with visible field errors
 - Accessibility: skip-to-content, labeled controls, focus-visible rings, contrast
