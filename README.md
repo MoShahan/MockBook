@@ -10,23 +10,23 @@ Post text and images, like and comment, send friend requests, follow people, bro
 
 ## Documentation
 
-| Doc | Contents |
-| --- | -------- |
-| [Features](./docs/FEATURES.md) | What the app does today + coming soon |
+| Doc                                        | Contents                               |
+| ------------------------------------------ | -------------------------------------- |
+| [Features](./docs/FEATURES.md)             | What the app does today + coming soon  |
 | [Design roadmap](./docs/DESIGN_ROADMAP.md) | UI journey Phases 0–3 with screenshots |
-| [API overview](./docs/API.md) | REST endpoints and auth header |
-| [Database schema](./docs/SCHEMA.md) | Collections, fields, indexes |
-| [ER diagram](./docs/ERD.md) | Visual entity relationships |
+| [API overview](./docs/API.md)              | REST endpoints and auth header         |
+| [Database schema](./docs/SCHEMA.md)        | Collections, fields, indexes           |
+| [ER diagram](./docs/ERD.md)                | Visual entity relationships            |
 
 ---
 
 ## Stack
 
-| Layer | Technologies |
-| ----- | ------------ |
-| Frontend | Next.js 16 (App Router), React 19, TypeScript, Material UI 9, Redux Toolkit, Formik, Yup, axios |
-| Backend | Node.js, Express 4.22, JWT (access + refresh), bcrypt, Multer 2, Helmet, CORS, rate limiting, ImageKit |
-| Database | MongoDB + Mongoose 8 |
+| Layer    | Technologies                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------ |
+| Frontend | Next.js 16 (App Router), React 19, TypeScript, Material UI 9, Redux Toolkit, Formik, Yup, axios        |
+| Backend  | Node.js, Express 4.22, JWT (access + refresh), bcrypt, Multer 2, Helmet, CORS, rate limiting, ImageKit |
+| Database | MongoDB + Mongoose 8                                                                                   |
 
 ---
 
@@ -76,26 +76,26 @@ cp frontend/.env.example frontend/.env.local
 
 Fill in at least these **backend** values in `backend/.env`:
 
-| Variable | Required | Purpose |
-| -------- | -------- | ------- |
-| `MONGODB_URI` | Yes | Mongo connection string |
-| `ACCESS_TOKEN_SECRET` | Yes | Access JWT signing secret |
-| `IMAGEKIT_PUBLIC_KEY` | Yes* | Image uploads |
-| `IMAGEKIT_PRIVATE_KEY` | Yes* | Image uploads (server only) |
-| `IMAGEKIT_URL_ENDPOINT` | Yes* | ImageKit CDN endpoint |
-| `PORT` | No | API port (default `5000`) |
-| `REFRESH_TOKEN_SECRET` | No | Prefer separate secret in production |
-| `FRONTEND_URL` | No | CORS origins (default `http://localhost:3000`) |
-| `API_PUBLIC_URL` | No | OAuth callback base (default `http://localhost:5000`) |
-| `ADMIN_EMAILS` | No | Comma-separated admin emails (local only — never commit) |
+| Variable                | Required | Purpose                                                  |
+| ----------------------- | -------- | -------------------------------------------------------- |
+| `MONGODB_URI`           | Yes      | Mongo connection string                                  |
+| `ACCESS_TOKEN_SECRET`   | Yes      | Access JWT signing secret                                |
+| `IMAGEKIT_PUBLIC_KEY`   | Yes*     | Image uploads                                            |
+| `IMAGEKIT_PRIVATE_KEY`  | Yes*     | Image uploads (server only)                              |
+| `IMAGEKIT_URL_ENDPOINT` | Yes*     | ImageKit CDN endpoint                                    |
+| `PORT`                  | No       | API port (default `5000`)                                |
+| `REFRESH_TOKEN_SECRET`  | No       | Prefer separate secret in production                     |
+| `FRONTEND_URL`          | No       | CORS origins (default `http://localhost:3000`)           |
+| `API_PUBLIC_URL`        | No       | OAuth callback base (default `http://localhost:5000`)    |
+| `ADMIN_EMAILS`          | No       | Comma-separated admin emails (local only — never commit) |
 
 \*Needed to create posts/avatars with images. Text-only flows can run without ImageKit, but image upload will fail.
 
 **Frontend** (`frontend/.env.local`):
 
-| Variable | Required | Purpose |
-| -------- | -------- | ------- |
-| `NEXT_PUBLIC_API_URL` | No* | API base URL, no trailing slash |
+| Variable              | Required | Purpose                         |
+| --------------------- | -------- | ------------------------------- |
+| `NEXT_PUBLIC_API_URL` | No*      | API base URL, no trailing slash |
 
 \*Defaults to `http://localhost:5000` if unset.
 
@@ -115,10 +115,10 @@ Details: [Features → Admin](./docs/FEATURES.md#admin).
 npm run dev
 ```
 
-| App | URL |
-| --- | --- |
+| App      | URL                                            |
+| -------- | ---------------------------------------------- |
 | Frontend | [http://localhost:3000](http://localhost:3000) |
-| Backend | [http://localhost:5000](http://localhost:5000) |
+| Backend  | [http://localhost:5000](http://localhost:5000) |
 
 Run separately if you prefer:
 
@@ -133,17 +133,17 @@ npm run dev:frontend
 
 ### Root
 
-| Command | Description |
-| ------- | ----------- |
-| `npm install` | Install all workspace deps |
-| `npm run dev` | Backend + frontend together |
-| `npm run build` | Production build (frontend) |
-| `npm run lint` | Lint both packages |
-| `npm run lint:fix` | Auto-fix ESLint issues |
-| `npm run format` | Format with Prettier |
-| `npm run format:check` | Check Prettier formatting |
-| `npm run test` | Frontend + backend tests |
-| `npm run typecheck` | Frontend `tsc --noEmit` |
+| Command                | Description                 |
+| ---------------------- | --------------------------- |
+| `npm install`          | Install all workspace deps  |
+| `npm run dev`          | Backend + frontend together |
+| `npm run build`        | Production build (frontend) |
+| `npm run lint`         | Lint both packages          |
+| `npm run lint:fix`     | Auto-fix ESLint issues      |
+| `npm run format`       | Format with Prettier        |
+| `npm run format:check` | Check Prettier formatting   |
+| `npm run test`         | Frontend + backend tests    |
+| `npm run typecheck`    | Frontend `tsc --noEmit`     |
 
 ### Workspace examples
 
@@ -164,12 +164,12 @@ Backend tests use **in-memory MongoDB** (`mongodb-memory-server`) — no Atlas U
 
 GitHub Actions (Node 22, install from repo root):
 
-| Workflow | Command |
-| -------- | ------- |
-| Backend Lint | `npm run lint -w backend` |
-| Backend Test | `npm run test -w backend` |
-| Frontend Lint | `npm run lint -w frontend` |
-| Frontend Test | `npm run test -w frontend` |
+| Workflow           | Command                         |
+| ------------------ | ------------------------------- |
+| Backend Lint       | `npm run lint -w backend`       |
+| Backend Test       | `npm run test -w backend`       |
+| Frontend Lint      | `npm run lint -w frontend`      |
+| Frontend Test      | `npm run test -w frontend`      |
 | Frontend Typecheck | `npm run typecheck -w frontend` |
 
 ---
@@ -184,11 +184,11 @@ The API uses **Bearer JWTs** (`Authorization: Bearer <accessToken>`), not cookie
 
 Profiles expose **`friendCount` / `followerCount` / `followingCount`** on `GET /users/:id` (and auth user payloads). Lists are paginated:
 
-| Endpoint | Meaning |
-| -------- | ------- |
-| `GET /users/:id/friends?cursor=&limit=` | Mutual friends |
+| Endpoint                                  | Meaning                 |
+| ----------------------------------------- | ----------------------- |
+| `GET /users/:id/friends?cursor=&limit=`   | Mutual friends          |
 | `GET /users/:id/followers?cursor=&limit=` | People who follow `:id` |
-| `GET /users/:id/following?cursor=&limit=` | People `:id` follows |
+| `GET /users/:id/following?cursor=&limit=` | People `:id` follows    |
 
 Response shape: `{ users, nextCursor, hasMore, total }` (default limit 20, max 30). Each row includes a `relationship` object for the viewer.
 

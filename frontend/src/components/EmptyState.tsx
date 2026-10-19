@@ -30,13 +30,18 @@ const EmptyState = ({ title, description, actionLabel, onAction }: EmptyStatePro
     >
       <Box
         component="img"
-        src="/xivi-mark.png"
+        src="/assets/xivi-mark.png"
         alt=""
         aria-hidden
+        width={40}
+        height={40}
+        draggable={false}
         sx={{
           width: 40,
           height: 40,
+          aspectRatio: "1 / 1",
           objectFit: "contain",
+          objectPosition: "center",
           opacity: theme.palette.mode === "dark" ? 0.45 : 0.55,
           mb: 1.25,
           filter: theme.palette.mode === "dark" ? "grayscale(0.2)" : "none",

@@ -62,9 +62,36 @@ const SiteFooter = ({ compact = false }: SiteFooterProps) => {
           </MuiLink>
         ))}
         {!compact ? (
-          <Typography sx={{ ml: { sm: "auto" }, color: "text.secondary", fontSize: "0.8rem" }}>
-            © {new Date().getFullYear()} Xivi
-          </Typography>
+          <Box
+            sx={{
+              ml: { sm: "auto" },
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.75,
+              color: "text.secondary",
+            }}
+          >
+            <Box
+              component="img"
+              src="/assets/xivi-mark.png"
+              alt=""
+              aria-hidden
+              width={18}
+              height={18}
+              draggable={false}
+              sx={{
+                width: 18,
+                height: 18,
+                aspectRatio: "1 / 1",
+                objectFit: "contain",
+                borderRadius: "0.3rem",
+                opacity: 0.85,
+              }}
+            />
+            <Typography sx={{ color: "inherit", fontSize: "0.8rem" }}>
+              © {new Date().getFullYear()} Xivi
+            </Typography>
+          </Box>
         ) : null}
       </Box>
     </Box>

@@ -49,16 +49,20 @@ const BrandLogo = ({ onClick, size = "nav" }: BrandLogoProps) => {
       <Box
         className="xivi-mark"
         component="img"
-        src="/xivi-mark.png"
+        src="/assets/xivi-mark.png"
         alt=""
         width={markPx}
         height={markPx}
+        draggable={false}
         sx={{
           width: markPx,
           height: markPx,
+          objectFit: "contain",
+          objectPosition: "center",
           borderRadius: "0.65rem",
           display: "block",
           flexShrink: 0,
+          aspectRatio: "1 / 1",
           transition: "transform 0.15s ease",
           boxShadow:
             theme.palette.mode === "dark"
