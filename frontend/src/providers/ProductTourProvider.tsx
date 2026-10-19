@@ -29,7 +29,7 @@ export function useProductTour(): ProductTourContextValue {
   return ctx
 }
 
-/** Slim AppShell top bar — keep page targets below it so the spotlight doesn’t include the header. */
+/** Slim AppShell top bar - keep page targets below it so the spotlight doesn’t include the header. */
 const STICKY_HEADER_OFFSET_PX = 64
 
 async function scrollTourTargetIntoView(selector: string, block: ScrollLogicalPosition = "center") {
@@ -74,14 +74,14 @@ function buildTourSteps(): Step[] {
         "Open the bell to see likes, comments, and other updates. Unread items show a badge here.",
       placement: "bottom",
       targetWaitTimeout: 4000,
-      // Already in the slim top bar — don’t scroll the page.
+      // Already in the slim top bar - don’t scroll the page.
       skipScroll: true,
     },
     {
       id: "nav-profile",
       target: TOUR_SELECTORS.navProfile,
       title: "Your profile",
-      content: "Click your name at the bottom of the sidebar to open your profile — edit details, change your photo, and see your posts, friends, and saved items.",
+      content: "Click your name at the bottom of the sidebar to open your profile - edit details, change your photo, and see your posts, friends, and saved items.",
       placement: "right",
       targetWaitTimeout: 4000,
       skipScroll: true,

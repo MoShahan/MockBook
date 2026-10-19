@@ -22,7 +22,7 @@ const multerPicture = multer({
 
 /**
  * In-memory uploads for ImageKit (no local disk). Field name: `picture`.
- * Validates magic bytes after multer (A5) — client MIME alone is not trusted.
+ * Validates magic bytes after multer (A5) - client MIME alone is not trusted.
  */
 export function uploadPicture(req, res, next) {
   multerPicture(req, res, err => {

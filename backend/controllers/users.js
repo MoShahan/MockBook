@@ -144,7 +144,7 @@ export const getUser = async (req, res, next) => {
         await User.updateOne({ _id: id }, { $inc: { viewedProfile: 1 } })
         user.viewedProfile = (user.viewedProfile || 0) + 1
       } catch (err) {
-        // Duplicate key = already counted today — ignore
+        // Duplicate key = already counted today - ignore
         if (err?.code !== 11000) throw err
       }
     }

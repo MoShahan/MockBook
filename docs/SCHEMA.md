@@ -1,4 +1,4 @@
-# Xivi — Database schema
+# Xivi - Database schema
 
 MongoDB collections and fields as defined by Mongoose models in `backend/models/`.
 

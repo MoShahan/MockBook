@@ -37,7 +37,7 @@ export const colorTokens = {
 const fontBody = 'var(--font-body), "Segoe UI", system-ui, sans-serif'
 const fontDisplay = 'var(--font-display), Georgia, "Times New Roman", serif'
 
-/** Soft card elevation — use on WidgetWrapper / feed surfaces. */
+/** Soft card elevation - use on WidgetWrapper / feed surfaces. */
 export function cardShadow(mode: "light" | "dark"): string {
   return mode === "dark"
     ? `0 1px 0 ${alpha(colorTokens.stone[0], 0.05)}, 0 4px 16px ${alpha("#000", 0.28)}`
@@ -202,7 +202,7 @@ export const themeSettings = (mode: "light" | "dark"): ThemeOptions => {
             outline: `2px solid ${primary.main}`,
             outlineOffset: 2,
           },
-          // Thin overlay scrollbars (dialogs, menus, page) — match stone UI.
+          // Thin overlay scrollbars (dialogs, menus, page) - match stone UI.
           "*::-webkit-scrollbar": {
             width: 8,
             height: 8,

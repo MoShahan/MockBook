@@ -3,7 +3,7 @@ import mongoose from "mongoose"
 const Schema = mongoose.Schema
 
 /**
- * One document per viewer+profile+UTC day — used to debounce viewedProfile $inc (A8).
+ * One document per viewer+profile+UTC day - used to debounce viewedProfile $inc (A8).
  */
 const ProfileViewSchema = new Schema(
   {

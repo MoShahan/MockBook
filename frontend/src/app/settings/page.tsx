@@ -68,7 +68,7 @@ const SettingsPage = () => {
       ) : (
         <>
           <Typography sx={{ color: "text.secondary", mb: 2, lineHeight: 1.5 }}>
-            Site settings / Features — toggles apply to users with role <strong>user</strong> only.
+            Site settings / Features - toggles apply to users with role <strong>user</strong> only.
             Admins always keep full capability. Changes save immediately.
           </Typography>
           <Alert severity="info" sx={{ mb: 2.5 }}>

@@ -1,4 +1,4 @@
-# Xivi — Features
+# Xivi - Features
 
 Full feature list for the current app, plus planned items for a later release.
 
@@ -45,9 +45,9 @@ Full feature list for the current app, plus planned items for a later release.
 
 ## Friends, follow & profiles
 
-- **Friend requests** (send → accept / decline / cancel) — mutual friends only after accept
+- **Friend requests** (send → accept / decline / cancel) - mutual friends only after accept
 - Unfriend removes both sides
-- **Follow / unfollow** (one-way) — see someone’s posts in **Following** without being friends; no auto-follow-back
+- **Follow / unfollow** (one-way) - see someone’s posts in **Following** without being friends; no auto-follow-back
 - Friend-request inbox in the left rail (badge) + `/friend-requests` (Incoming / Outgoing)
 - Friend-request activity also appears in the notifications bell
 - Separate **Follow** and **Friend** actions on profiles and Add people (icon-only in dense lists)
@@ -56,7 +56,7 @@ Full feature list for the current app, plus planned items for a later release.
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
 - Edit own profile (name, location, occupation, avatar, social handles, avatar color, cover color)
 - Solid color profile header (`coverColor`) and initials avatar color (`avatarColor`) when no photo
-- Optional public social links (Facebook, X, LinkedIn, Instagram) — shown only when set
+- Optional public social links (Facebook, X, LinkedIn, Instagram) - shown only when set
 - Profile visit counter (`viewedProfile`) when another user loads your profile
 - Join date on profiles and Find people / Add people rows (`Joined Mon YYYY`)
 - Click name/avatar to open the correct profile

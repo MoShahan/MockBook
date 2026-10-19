@@ -7,7 +7,7 @@ export const TOUR_SELECTORS = {
   navProfile: '[data-tour="nav-profile"]',
 } as const
 
-/** localStorage key — first auto-run only once per browser. */
+/** localStorage key - first auto-run only once per browser. */
 export const TOUR_SEEN_KEY = "xivi.tour.v1.seen"
 
 /** Ask AppShell to open the mobile drawer (profile step on small screens). */

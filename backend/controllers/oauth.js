@@ -85,7 +85,7 @@ export const oauthCallback = async (req, res, next) => {
         email,
         password: placeholderHash,
         picturePath: profile.picturePath || "",
-        // A11: never auto-promote on OAuth register — seed/DB or password login allowlist
+        // A11: never auto-promote on OAuth register - seed/DB or password login allowlist
         role: "user",
         isActive: true,
         friends: [],

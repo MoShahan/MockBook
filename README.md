@@ -2,7 +2,7 @@
 
 A social networking app built as an **npm workspaces** monorepo: Next.js frontend + Express API + MongoDB.
 
-Post text and images, like and comment, send friend requests, follow people, browse profiles, and use light/dark mode — with Bearer JWT auth and ImageKit uploads.
+Post text and images, like and comment, send friend requests, follow people, browse profiles, and use light/dark mode - with Bearer JWT auth and ImageKit uploads.
 
 **Author:** Mohammed Shahan
 
@@ -87,7 +87,7 @@ Fill in at least these **backend** values in `backend/.env`:
 | `REFRESH_TOKEN_SECRET`  | No       | Prefer separate secret in production                     |
 | `FRONTEND_URL`          | No       | CORS origins (default `http://localhost:3000`)           |
 | `API_PUBLIC_URL`        | No       | OAuth callback base (default `http://localhost:5000`)    |
-| `ADMIN_EMAILS`          | No       | Comma-separated admin emails (local only — never commit) |
+| `ADMIN_EMAILS`          | No       | Comma-separated admin emails (local only - never commit) |
 
 \*Needed to create posts/avatars with images. Text-only flows can run without ImageKit, but image upload will fail.
 
@@ -156,7 +156,7 @@ npm run typecheck -w frontend
 npm run start -w backend
 ```
 
-Backend tests use **in-memory MongoDB** (`mongodb-memory-server`) — no Atlas URI required for `npm run test -w backend`.
+Backend tests use **in-memory MongoDB** (`mongodb-memory-server`) - no Atlas URI required for `npm run test -w backend`.
 
 ---
 

@@ -17,7 +17,7 @@ type InfoPageShellProps = {
 }
 
 /**
- * Shell for Help / Privacy / Terms — AppShell when signed in, minimal header when public.
+ * Shell for Help / Privacy / Terms - AppShell when signed in, minimal header when public.
  */
 const InfoPageShell = ({ title, subtitle, children }: InfoPageShellProps) => {
   const theme = useTheme()

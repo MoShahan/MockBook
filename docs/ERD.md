@@ -1,4 +1,4 @@
-# Xivi — Entity relationship diagram
+# Xivi - Entity relationship diagram
 
 Data model derived from the Mongoose schemas in `backend/models/`.
 
@@ -104,7 +104,7 @@ erDiagram
 | `friendrequests` | `backend/models/FriendRequest.js` | Pending/accepted/declined/cancelled requests |
 | `notifications` | `backend/models/Notification.js` | In-app bell notifications |
 
-`Comment` is **not** a separate collection — it is an embedded subdocument array on `Post`.
+`Comment` is **not** a separate collection - it is an embedded subdocument array on `Post`.
 
 ---
 

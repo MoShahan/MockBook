@@ -28,8 +28,8 @@ type AddPeopleWidgetProps = {
   /** Hide the in-widget title when the page already provides a heading. */
   showTitle?: boolean
   /**
-   * `pages` — show at most 10 with Previous/Next (home rail).
-   * `infinite` — append pages as you scroll (/people page).
+   * `pages` - show at most 10 with Previous/Next (home rail).
+   * `infinite` - append pages as you scroll (/people page).
    */
   mode?: "pages" | "infinite"
 }

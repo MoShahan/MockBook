@@ -1,6 +1,6 @@
 /**
  * Admin allowlist from ADMIN_EMAILS (comma-separated).
- * No hardcoded emails — leave unset for an empty allowlist (no auto-promotion).
+ * No hardcoded emails - leave unset for an empty allowlist (no auto-promotion).
  */
 
 /**

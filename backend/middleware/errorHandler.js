@@ -26,7 +26,7 @@ export function errorHandler(err, _req, res, _next) {
   }
 
   const status = err.status || err.statusCode || 500
-  // Client-facing errors (validation, feature flags) — no stack noise in logs.
+  // Client-facing errors (validation, feature flags) - no stack noise in logs.
   if (err.expose && status < 500) {
     return res.status(status).json({ error: err.message })
   }

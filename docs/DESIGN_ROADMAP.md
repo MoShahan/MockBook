@@ -1,4 +1,4 @@
-# Xivi — Design roadmap
+# Xivi - Design roadmap
 
 Visual journey of the product UI from the original tutorial shell to today’s left-sidebar app shell. Screenshots live under [`docs/screenshots/`](./screenshots/).
 
@@ -24,7 +24,7 @@ flowchart LR
 
 ---
 
-## Phase 0 — Tutorial baseline
+## Phase 0 - Tutorial baseline
 
 **When:** Starting point (EdRoh-style MERN social tutorial).
 
@@ -32,15 +32,15 @@ flowchart LR
 
 ### Screenshots
 
-**Login — centered dark card, cyan CTA**
+**Login - centered dark card, cyan CTA**
 
 ![Phase 0 login](./screenshots/phase-0/login.png)
 
-**Register — location, occupation, optional photo on signup**
+**Register - location, occupation, optional photo on signup**
 
 ![Phase 0 register](./screenshots/phase-0/register.png)
 
-**Home — navbar search; left user widget; center compose; right Sponsored**
+**Home - navbar search; left user widget; center compose; right Sponsored**
 
 ![Phase 0 home feed](./screenshots/phase-0/home-feed-desktop.png)
 
@@ -60,7 +60,7 @@ flowchart LR
 
 ---
 
-## Phase 1 — MockBook: product MVP + first polish
+## Phase 1 - MockBook: product MVP + first polish
 
 **When:** Feature completion + early UI system (still named **MockBook** in these shots).
 
@@ -68,7 +68,7 @@ flowchart LR
 
 ### Screenshots
 
-**Home — Everyone / Friends tabs; Add people rail; like / comment / save / share**
+**Home - Everyone / Friends tabs; Add people rail; like / comment / save / share**
 
 ![Phase 1 home feed](./screenshots/phase-1/home-feed-everyone.png)
 
@@ -84,7 +84,7 @@ flowchart LR
 
 ![Phase 1 likers dialog](./screenshots/phase-1/likers-dialog.png)
 
-**Profile — Posts / Saved / Liked / Commented; friends on profile**
+**Profile - Posts / Saved / Liked / Commented; friends on profile**
 
 ![Phase 1 profile posts](./screenshots/phase-1/profile-posts-tab.png)
 
@@ -115,7 +115,7 @@ flowchart LR
 
 ---
 
-## Phase 2 — Xivi brand + social graph UX
+## Phase 2 - Xivi brand + social graph UX
 
 **When:** Rebrand to **Xivi**, design-system pass, friend requests + follow, discover pagination.
 
@@ -123,7 +123,7 @@ flowchart LR
 
 ### Screenshot
 
-**Home — Xivi mark; compact compose; Everyone / Following; Add people with Follow+Friend and pagination**
+**Home - Xivi mark; compact compose; Everyone / Following; Add people with Follow+Friend and pagination**
 
 ![Phase 2 home with Add people](./screenshots/phase-2/home-feed-add-people.png)
 
@@ -148,20 +148,20 @@ flowchart LR
 
 ---
 
-## Phase 3 — Left sidebar app shell
+## Phase 3 - Left sidebar app shell
 
 **When:** Current authenticated chrome (this revival pass).
 
 **What changed:** Replaced the full top navbar with a **hybrid shell**:
 
-- **Left rail** — where you go (Home, Find people, Friend requests, Profile; Settings, Help, tutorial, theme, account, logout)
-- **Slim top bar** — glance actions (**notifications** bell only on desktop; hamburger + logo + bell on mobile)
-- **Home** — full feed column (narrow max width ~720px); Add people rail and mobile “Find people” CTA removed (People lives in the rail / `/people`)
-- **`/settings`** — users see coming soon; admins see a disabled Part 2 feature-catalog preview
+- **Left rail** - where you go (Home, Find people, Friend requests, Profile; Settings, Help, tutorial, theme, account, logout)
+- **Slim top bar** - glance actions (**notifications** bell only on desktop; hamburger + logo + bell on mobile)
+- **Home** - full feed column (narrow max width ~720px); Add people rail and mobile “Find people” CTA removed (People lives in the rail / `/people`)
+- **`/settings`** - users see coming soon; admins see a disabled Part 2 feature-catalog preview
 
 ### Screenshot
 
-**Home — left sidebar + slim top bar with notification badge; centered feed**
+**Home - left sidebar + slim top bar with notification badge; centered feed**
 
 ![Phase 3 left sidebar shell](./screenshots/phase-3/home-feed-left-sidebar.png)
 
@@ -181,7 +181,7 @@ flowchart LR
 ### Trade-offs accepted
 
 - Desktop top bar left side is intentionally sparse (brand lives in the rail)
-- Empty gutters beside the narrow feed are background only — not a third column
+- Empty gutters beside the narrow feed are background only - not a third column
 - Admin feature toggles are **preview** until Part 2 API enforcement
 
 ---
@@ -225,5 +225,5 @@ flowchart LR
 
 ## Related docs
 
-- [FEATURES.md](./FEATURES.md) — current feature list (including app shell + settings)
+- [FEATURES.md](./FEATURES.md) - current feature list (including app shell + settings)
 - [API.md](./API.md) · [SCHEMA.md](./SCHEMA.md) · [ERD.md](./ERD.md)

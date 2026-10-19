@@ -68,7 +68,7 @@ export const register = async (req, res, next) => {
       email: normalizedEmail,
       password: hashedPass,
       picturePath: "",
-      // A11: never auto-promote on register — use seed/DB or password login allowlist
+      // A11: never auto-promote on register - use seed/DB or password login allowlist
       role: "user",
       isActive: true,
       friends: [],
@@ -135,7 +135,7 @@ export const me = async (req, res, next) => {
     const user = await User.findById(userId)
     if (!user) return res.status(401).json({ error: "Unauthenticated" })
     if (user.isActive === false) return res.status(403).json({ error: "Account deactivated" })
-    // Do not promote via /me alone (A11) — only login / seed.
+    // Do not promote via /me alone (A11) - only login / seed.
     const safeUser = await withFormattedFriends(user)
     res.status(200).json({ user: safeUser })
   } catch (e) {

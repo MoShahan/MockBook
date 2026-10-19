@@ -39,7 +39,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
   },
   {
     q: "How do friends, follow, and Find people work?",
-    a: "Open Find people from the sidebar (or /people) to search or browse recent users. Send a friend request — they must accept before you are mutual friends. Follow someone anytime to see their posts in the Following feed. The Everyone tab shows the wider public feed.",
+    a: "Open Find people from the sidebar (or /people) to search or browse recent users. Send a friend request - they must accept before you are mutual friends. Follow someone anytime to see their posts in the Following feed. The Everyone tab shows the wider public feed.",
   },
   {
     q: "How do I edit my profile?",

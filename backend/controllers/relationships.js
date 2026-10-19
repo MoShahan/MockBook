@@ -52,7 +52,7 @@ export const getUserRelationship = async (req, res, next) => {
   }
 }
 
-/** POST /users/:id/friend-requests — send request */
+/** POST /users/:id/friend-requests - send request */
 export const sendFriendRequest = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
@@ -81,7 +81,7 @@ export const sendFriendRequest = async (req, res, next) => {
     })
     if (incoming) {
       return res.status(409).json({
-        error: "They already sent you a friend request — accept it instead",
+        error: "They already sent you a friend request - accept it instead",
         incomingRequestId: String(incoming._id),
       })
     }
@@ -153,7 +153,7 @@ export const listFriendRequests = async (req, res, next) => {
   }
 }
 
-/** GET /users/me/friend-requests/count — incoming pending */
+/** GET /users/me/friend-requests/count - incoming pending */
 export const countIncomingFriendRequests = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
@@ -257,7 +257,7 @@ export const declineFriendRequest = async (req, res, next) => {
   }
 }
 
-/** DELETE /users/me/friend-requests/:requestId — cancel outgoing */
+/** DELETE /users/me/friend-requests/:requestId - cancel outgoing */
 export const cancelFriendRequest = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
@@ -282,7 +282,7 @@ export const cancelFriendRequest = async (req, res, next) => {
   }
 }
 
-/** DELETE /users/me/friends/:friendId — mutual unfriend */
+/** DELETE /users/me/friends/:friendId - mutual unfriend */
 export const unfriend = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
@@ -372,7 +372,7 @@ export const unfollowUser = async (req, res, next) => {
   }
 }
 
-/** GET /users/me/following?cursor=&limit= — same shape as GET /users/:id/following */
+/** GET /users/me/following?cursor=&limit= - same shape as GET /users/:id/following */
 export const listFollowing = async (req, res, next) => {
   try {
     const authUserId = req.user?.id

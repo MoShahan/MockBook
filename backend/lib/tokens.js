@@ -49,7 +49,7 @@ export function signAccessToken(userId) {
   })
 }
 
-/** Sign a refresh JWT (includes `jti`). Does not touch the DB — use `issueAuthTokens` in app code. */
+/** Sign a refresh JWT (includes `jti`). Does not touch the DB - use `issueAuthTokens` in app code. */
 export function signRefreshToken(userId, jti = crypto.randomUUID()) {
   return jwt.sign({ id: String(userId), typ: "refresh", jti }, requireRefreshSecret(), {
     expiresIn: getRefreshTokenExpires(),

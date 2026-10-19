@@ -1,4 +1,4 @@
-# Xivi — API overview
+# Xivi - API overview
 
 Express REST API used by the Next.js frontend. Auth (except register, login, refresh, and OAuth start/callback) expects:
 
@@ -68,7 +68,7 @@ Authorization: Bearer <accessToken>
 
 ### Feature flags
 
-Flags apply to **`role: user` only** — admins always bypass. When a write is blocked the API returns **403** `{ error: "This feature is currently disabled" }`. See [FEATURES.md](./FEATURES.md) for the catalog and UI behavior.
+Flags apply to **`role: user` only** - admins always bypass. When a write is blocked the API returns **403** `{ error: "This feature is currently disabled" }`. See [FEATURES.md](./FEATURES.md) for the catalog and UI behavior.
 
 ---
 

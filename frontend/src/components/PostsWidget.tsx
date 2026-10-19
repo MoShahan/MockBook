@@ -37,7 +37,7 @@ const EMPTY_COPY: Record<PostsListKind, { title: string; description: string }> 
   friends: {
     title: "Nothing from people you follow yet",
     description:
-      "Find people from the menu or People page, send friend requests or follow them, then check back here — or browse Everyone for the wider feed.",
+      "Find people from the menu or People page, send friend requests or follow them, then check back here - or browse Everyone for the wider feed.",
   },
   authored: {
     title: "No posts yet",

@@ -1,6 +1,6 @@
 import SiteSettings from "../models/SiteSettings.js"
 
-/** Catalog keys (camelCase) — keep in sync with frontend `featureCatalog.ts`. */
+/** Catalog keys (camelCase) - keep in sync with frontend `featureCatalog.ts`. */
 export const FEATURE_KEYS = [
   "postsCreate",
   "postsImages",
