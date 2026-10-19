@@ -15,6 +15,16 @@ export function errorHandler(err, _req, res, _next) {
     return res.status(403).json({ error: "Origin not allowed" })
   }
 
+  // Mongoose schema validation (e.g. name length) → clear 400 for the client.
+  if (err?.name === "ValidationError" && err.errors) {
+    const first = Object.values(err.errors)[0]
+    const msg =
+      first && typeof first === "object" && "message" in first && typeof first.message === "string"
+        ? first.message
+        : "Invalid input"
+    return res.status(400).json({ error: msg })
+  }
+
   console.error(err)
   return res.status(err.status || err.statusCode || 500).json({
     error: err.expose ? err.message : "Internal server error",

@@ -10,8 +10,18 @@ export const loginSchema: ObjectSchema<LoginFormValues> = yup.object({
 })
 
 export const registerSchema: ObjectSchema<RegisterFormValues> = yup.object({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
+  firstName: yup
+    .string()
+    .trim()
+    .required("First name is required")
+    .min(1, "First name is required")
+    .max(50, "First name must be at most 50 characters"),
+  lastName: yup
+    .string()
+    .trim()
+    .required("Last name is required")
+    .min(1, "Last name is required")
+    .max(50, "Last name must be at most 50 characters"),
   email: yup.string().email("Enter a valid email").required("Email is required"),
   password: yup
     .string()

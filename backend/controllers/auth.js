@@ -26,9 +26,14 @@ const withFormattedFriends = async userDoc => {
 export const register = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password } = req.body
+    const trimmedFirst = typeof firstName === "string" ? firstName.trim() : ""
+    const trimmedLast = typeof lastName === "string" ? lastName.trim() : ""
 
-    if (!firstName || !lastName || !email || !password) {
+    if (!trimmedFirst || !trimmedLast || !email || !password) {
       return res.status(400).json({ error: "Missing required fields" })
+    }
+    if (trimmedFirst.length > 50 || trimmedLast.length > 50) {
+      return res.status(400).json({ error: "Names must be at most 50 characters" })
     }
 
     if (!isValidPassword(password)) {
@@ -45,8 +50,8 @@ export const register = async (req, res, next) => {
     const hashedPass = await bcrypt.hash(password, salt)
 
     const newUser = new User({
-      firstName,
-      lastName,
+      firstName: trimmedFirst,
+      lastName: trimmedLast,
       email: normalizedEmail,
       password: hashedPass,
       picturePath: "",

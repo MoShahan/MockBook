@@ -39,6 +39,30 @@ describe("registerSchema", () => {
     await expect(registerSchema.validate(values)).resolves.toMatchObject(values)
   })
 
+  it("accepts single-character names", async () => {
+    await expect(
+      registerSchema.validate({
+        firstName: "Q",
+        lastName: "A",
+        email: "qa@example.com",
+        password: "Abcdef1!",
+        cPassword: "Abcdef1!",
+      })
+    ).resolves.toMatchObject({ firstName: "Q", lastName: "A" })
+  })
+
+  it("rejects empty names after trim", async () => {
+    await expect(
+      registerSchema.validate({
+        firstName: "  ",
+        lastName: "A",
+        email: "blank@example.com",
+        password: "Abcdef1!",
+        cPassword: "Abcdef1!",
+      })
+    ).rejects.toBeTruthy()
+  })
+
   it("rejects mismatched confirm password", async () => {
     await expect(
       registerSchema.validate({

@@ -83,9 +83,9 @@ const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps
       const { data } = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
         "/auth/register",
         {
-          firstName: vals.firstName,
-          lastName: vals.lastName,
-          email: vals.email,
+          firstName: vals.firstName.trim(),
+          lastName: vals.lastName.trim(),
+          email: vals.email.trim(),
           password: vals.password,
         }
       )

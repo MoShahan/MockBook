@@ -54,8 +54,18 @@ type EditProfileValues = {
 }
 
 const schema = yup.object({
-  firstName: yup.string().trim().required("Required").max(50),
-  lastName: yup.string().trim().required("Required").max(50),
+  firstName: yup
+    .string()
+    .trim()
+    .required("First name is required")
+    .min(1, "First name is required")
+    .max(50, "First name must be at most 50 characters"),
+  lastName: yup
+    .string()
+    .trim()
+    .required("Last name is required")
+    .min(1, "Last name is required")
+    .max(50, "Last name must be at most 50 characters"),
   location: yup.string().trim().max(100),
   occupation: yup.string().trim().max(100),
   facebook: yup.string().trim().max(64),

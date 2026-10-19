@@ -40,6 +40,18 @@ describe("auth API", () => {
     assert.equal(res.status, 400)
   })
 
+  it("allows single-character first and last names", async () => {
+    const res = await request(getApp()).post("/auth/register").send({
+      firstName: "Q",
+      lastName: "A",
+      email: "qa-name@example.com",
+      password: VALID_PASSWORD,
+    })
+    assert.equal(res.status, 201)
+    assert.equal(res.body.user.firstName, "Q")
+    assert.equal(res.body.user.lastName, "A")
+  })
+
   it("logs in with valid credentials and rejects bad password", async () => {
     const email = "login@example.com"
     await registerUser({ email })

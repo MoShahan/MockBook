@@ -9,8 +9,18 @@ const stripPassword = (_doc, ret) => {
 
 const UserSchema = new Schema(
   {
-    firstName: { type: String, required: true, minlength: 2, maxlength: 50 },
-    lastName: { type: String, required: true, minlength: 2, maxlength: 50 },
+    firstName: {
+      type: String,
+      required: [true, "First name is required"],
+      minlength: [1, "First name is required"],
+      maxlength: [50, "First name must be at most 50 characters"],
+    },
+    lastName: {
+      type: String,
+      required: [true, "Last name is required"],
+      minlength: [1, "Last name is required"],
+      maxlength: [50, "Last name must be at most 50 characters"],
+    },
     email: { type: String, required: true, maxlength: 100, unique: true },
     // Hash only - never select by default; plaintext policy enforced in auth controller.
     // OAuth-only accounts still store a random unusable hash.

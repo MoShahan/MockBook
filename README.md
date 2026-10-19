@@ -128,7 +128,7 @@ Or register/login with an email listed in `ADMIN_EMAILS`. Do **not** put real ad
 ### Planned next (see `PROJECT_PLAN.md`) — locked order
 
 1. Admin **feature settings** (Step 8.6)
-2. Profile **follower count** (Step 8.8)
+2. Profile **Friends / Followers / Following** counts + paginated modal lists (Step 8.8)
 3. Audit / bug fixes (Part 9)
 4. Production deploy (Part 7) — **last** (Vercel FE + Render BE)
 
