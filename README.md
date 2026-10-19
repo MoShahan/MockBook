@@ -4,6 +4,8 @@ Social app built with the MERN stack: a Next.js frontend and an Express API back
 
 By Mohammed Shahan.
 
+**Docs:** [Features](./docs/FEATURES.md) · [API overview](./docs/API.md) · [Database schema](./docs/SCHEMA.md) · [ER diagram](./docs/ERD.md)
+
 ## Stack
 
 | Layer    | Technologies                                                                                                     |
@@ -22,105 +24,10 @@ Xivi/
 │   ├── routes/               auth, users, posts
 │   ├── controllers/
 │   └── middleware/           JWT check
-└── package.json              npm workspaces root
+├── docs/                     Product docs (features, API, schema, ERD)
+├── package.json              npm workspaces root
+└── README.md
 ```
-
-## Features
-
-### Auth & accounts
-
-- Register (slim form: first name, last name, email, password + confirm)
-- Auto-login after register (lands on home)
-- Log in / log out
-- Password show/hide on auth forms
-- Client + server password policy on register (8-24 chars; upper, lower, number, symbol)
-- Protected routes (`AuthProvider`); guests redirected to login
-- Bearer **access JWT** (default expiry **1 day**) + **refresh JWT** (default **7 days**)
-- Silent token refresh on API `401` (axios interceptor); logout if refresh fails
-- Password hashes never returned to the client (`select: false` + strip on responses)
-- Rate limiting on login / register / refresh
-- Consistent “Invalid credentials” login errors (no email enumeration)
-
-### Posts & feed
-
-- Create text and/or image posts (emoji picker on the compose bar; image dropzone with preview)
-- Home feed with author name, avatar, and relative time
-- Infinite scroll on home feed and profile Posts tab (`?limit=&cursor=`)
-- Home feed tabs: **Everyone** and **Following** (you + friends + people you follow; `GET /posts?scope=friends|all`)
-- Like / unlike posts (optimistic UI; rolls back on failure)
-- View who liked a post (click like count → list with profiles)
-- Save / unsave posts (bookmark on post cards; list via `GET /posts/saved`)
-- Own profile tabs: Posts / Saved / Liked / Commented (`?tab=`); other profiles show Posts only
-- Comment on posts (optimistic add + list with author; rolls back on failure)
-- Edit / delete **own** comments (⋮ menu; confirm on delete)
-- Like / unlike comments (optimistic; heart + count on each comment)
-- View who liked a comment (click comment like count → list with profiles)
-- Edit **own** posts (⋮ → Edit; text + replace/remove image)
-- Delete **own** posts (⋮ menu + confirm dialog)
-- Single-post page at `/post/[postId]`; Share menu (copy link, X, Facebook, LinkedIn, WhatsApp)
-
-### Friends & profiles
-
-- **Friend requests** (send → accept / decline / cancel) — mutual friends only after accept; unfriend removes both sides
-- **Follow / unfollow** (one-way) — see someone’s posts in your **Following** feed without being friends; no auto-follow-back
-- Navbar friend-request inbox (badge) + `/friend-requests` (Incoming / Outgoing); also notified via the bell
-- Separate **Follow** and **Friend** actions on profiles and Add people (not on post cards)
-- Profile sidebar: **Friends** list (any profile) + **Following** list (own profile only; private)
-- **Admins** (`role: admin`): full normal user (post, comment, friends, follow) **plus** delete any post/comment and deactivate users; profile shows an **Admin** badge (allowlist via `ADMIN_EMAILS` in local env — never commit credentials)
-- **Add people** discovery widget on `/home` (sticky right rail on wide screens; collapsible “Find people” on mobile) with recent users + name search
-- Own profile (`/profile`) and other profiles (`/profile/[userId]`)
-- Edit own profile (name, location, occupation, avatar, social handles, **avatar color**, **cover color**) via manage-account control
-- Solid color profile header (`coverColor`) and initials avatar color (`avatarColor`) when no photo - allowlisted swatches only
-- Optional public social links (Facebook, X, LinkedIn, Instagram) - shown only when set
-- Profile visit counter (`viewedProfile`) increments when another user loads your profile
-- In-app notifications (likes, comments, friend requests / accepts) via navbar bell + `/notifications` page
-- Optional OAuth sign-in: Google, GitHub, Discord (when configured in backend env)
-- Click name/avatar to open the correct profile
-- User details widget on profile only (not on home)
-
-### Media & uploads
-
-- Image uploads via **Multer (memory) → ImageKit**
-- Image MIME whitelist (jpeg/png/gif/webp), **5MB** size limit
-- Server-generated unique filenames
-- Avatars fall back to initials (user-chosen solid color) when no photo
-
-### UX & client architecture
-
-- Light / dark mode (persisted via redux-persist; first visit follows system preference)
-- Stone-first theme + Fraunces / Source Sans 3; Xivi logo + mark in the header; tab favicon / apple-touch icon
-
-- Split **login/register** layout (`AuthLayout`): wave backdrop (`auth-wave-*.jpg`) + café/social panel on the left (`auth-panel-*.jpg`)
-- **Help & FAQ** (`/help`) with Contact section; **Privacy** (`/privacy`) and **Terms** (`/terms`) - linked from navbar Help and auth footers
-- In-app **product tutorial** (`react-joyride`): navbar **Show tutorial** walks through compose, friends/follow, and profile (replayable; optional one-time auto-run)
-- Mobile nav uses a finished side drawer (account, profile, help, theme, log out)
-- Toast / snackbar feedback for key actions
-- Formik + Yup validation with visible field errors
-- Accessibility basics: skip-to-content, labeled controls, `aria-pressed` on toggles, focus-visible rings, secondary text contrast
-- Shared **axios** client + Bearer request interceptor
-- Redux Toolkit for auth, posts, theme (redux-persist)
-- TypeScript frontend (no `any` in `frontend/src`)
-- npm workspaces monorepo (`frontend` + `backend`)
-
-### API security & hygiene
-
-- CORS allowlist via `FRONTEND_URL`
-- Helmet security headers
-- Central error handler (no stack traces to clients)
-- ObjectId validation on route params
-- JWT identity for create post / like / comment / delete / friends (not body `userId` trust)
-- Auth secrets and token lifetimes configurable via env
-
-### Admin accounts (local only)
-
-Admins are normal users with `role: admin`. Promotion comes from **`ADMIN_EMAILS`** in `backend/.env` (not committed). Set emails and an optional seed password there — see placeholders in `backend/.env.example`.
-
-```bash
-# After filling ADMIN_EMAILS + ADMIN_PASSWORD in backend/.env:
-npm run seed:admins -w backend
-```
-
-Or register/login with an email listed in `ADMIN_EMAILS`. Do **not** put real admin emails or passwords in README or any tracked file.
 
 ## Requirements
 
@@ -186,6 +93,8 @@ The backend currently connects with `process.env.MONGODB_URI` only. Username/pas
 
 \*Falls back to `http://localhost:5000` if unset so local `npm run dev` still works. Set it explicitly for deploy and non-default ports.
 
+Admin allowlist / seed password: `ADMIN_EMAILS` and `ADMIN_PASSWORD` in `backend/.env` only — see [Features → Admin](./docs/FEATURES.md#admin) and `backend/.env.example`.
+
 ### 3. Run locally
 
 From the **repo root**, start API + Next.js together:
@@ -234,65 +143,6 @@ npm run start -w backend
 ```
 
 **Backend tests** use an in-memory MongoDB (`mongodb-memory-server`); no Atlas URI is required for `npm run test -w backend`.
-
-## API overview
-
-| Method   | Path                         | Purpose                                                          |
-| -------- | ---------------------------- | ---------------------------------------------------------------- |
-| `POST`   | `/auth/register`             | Create account; returns user + access + refresh tokens           |
-| `POST`   | `/auth/login`                | Log in; returns user + access + refresh tokens                   |
-| `POST`   | `/auth/refresh`              | Exchange refresh token for a new access + refresh pair           |
-| `GET`    | `/auth/me`                   | Current user (Bearer)                                            |
-| `GET`    | `/auth/providers`            | Configured OAuth providers                                       |
-| `GET`    | `/auth/:provider`            | Start OAuth (`google` \| `github` \| `discord`)                  |
-| `GET`    | `/auth/:provider/callback`   | OAuth callback → redirect to FE with tokens in URL fragment      |
-| `GET`    | `/notifications`             | Notifications page (`?limit=&cursor=` → `{ notifications, nextCursor, hasMore }`) |
-| `GET`    | `/notifications/unread-count`| Unread notification count                                        |
-| `PATCH`  | `/notifications/read-all`    | Mark all notifications read                                      |
-| `PATCH`  | `/notifications/:id/read`    | Mark one notification read                                       |
-| `GET`    | `/users/discover`            | Recent users or search (`?q=&limit=`; excludes self; includes `relationship`) |
-| `PATCH`  | `/users/me`                  | Update own profile (multipart optional `picture` → ImageKit; `avatarColor` / `coverColor` allowlisted hex) |
-| `GET`    | `/users/me/friend-requests`  | Pending requests (`?box=incoming\|outgoing`)                     |
-| `GET`    | `/users/me/friend-requests/count` | Incoming pending count                                      |
-| `POST`   | `/users/me/friend-requests/:requestId/accept` | Accept → mutual friends                        |
-| `POST`   | `/users/me/friend-requests/:requestId/decline` | Decline                                       |
-| `DELETE` | `/users/me/friend-requests/:requestId` | Cancel own outgoing request                            |
-| `DELETE` | `/users/me/friends/:friendId`| Unfriend (mutual remove)                                         |
-| `GET`    | `/users/me/following`        | Users I follow (formatted)                                       |
-| `POST`   | `/users/:id/friend-requests` | Send friend request                                              |
-| `POST`   | `/users/:id/follow`          | Follow                                                           |
-| `DELETE` | `/users/:id/follow`          | Unfollow                                                         |
-| `POST`   | `/users/:id/deactivate`      | Admin: soft-deactivate user                                      |
-| `POST`   | `/users/:id/reactivate`      | Admin: reactivate user                                           |
-| `GET`    | `/users/:id/relationship`    | Viewer relationship flags vs `:id`                               |
-| `GET`    | `/users/:id`                 | Get a user (no password)                                         |
-| `GET`    | `/users/:id/friends`         | Get that user’s friends (formatted)                              |
-| `POST`   | `/posts`                     | Create a post (multipart optional `picture` → ImageKit); `{ post }` |
-| `GET`    | `/posts`                     | Home feed (`?scope=all\|friends&limit=&cursor=`; `friends` = me ∪ friends ∪ following) |
-| `GET`    | `/posts/saved`               | Logged-in user’s saved posts (newest save first)                 |
-| `GET`    | `/posts/liked`               | Logged-in user’s liked posts (`createdAt` desc)                  |
-| `GET`    | `/posts/commented`           | Posts the user commented on (`createdAt` desc; distinct)         |
-| `GET`    | `/posts/:userId/posts`       | One user’s posts (same cursor pagination as feed)                |
-| `GET`    | `/posts/:postId`             | Single post                                                      |
-| `PUT`    | `/posts/:postId/save`        | Save/bookmark a post (idempotent)                                |
-| `DELETE` | `/posts/:postId/save`        | Unsave a post                                                    |
-| `PATCH`  | `/posts/:postId`             | Edit own post (multipart optional `picture`, `removeImage`)      |
-| `GET`    | `/posts/:postId/likes`       | Users who liked the post (`?page=&limit=`, default 20, max 50)   |
-| `PATCH`  | `/posts/:postId/like`        | Like or unlike                                                   |
-| `POST`   | `/posts/:postId/comments`    | Add a comment                                                    |
-| `PATCH`  | `/posts/:postId/comments/:commentId` | Edit own comment                                           |
-| `DELETE` | `/posts/:postId/comments/:commentId` | Delete own comment                                       |
-| `GET`    | `/posts/:postId/comments/:commentId/likes` | Users who liked a comment (`?page=&limit=`)           |
-| `PATCH`  | `/posts/:postId/comments/:commentId/like` | Like or unlike a comment                                |
-| `DELETE` | `/posts/:postId`             | Delete own post                                                  |
-
-Routes other than register, login, and refresh expect:
-
-```http
-Authorization: Bearer <accessToken>
-```
-
-Post images are uploaded to **ImageKit** (Multer memory → ImageKit). MongoDB stores the returned HTTPS URL in `Post.url`. Configure `IMAGEKIT_*` in `backend/.env` (see `backend/.env.example`).
 
 ## CI
 
