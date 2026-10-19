@@ -1,137 +1,150 @@
 # Xivi
 
-Social app built with the MERN stack: a Next.js frontend and an Express API backed by MongoDB. Register, post (text + images), like, comment, friend others, and browse profiles - with light/dark mode and a hardened auth API.
+A social networking app built as an **npm workspaces** monorepo: Next.js frontend + Express API + MongoDB.
 
-By Mohammed Shahan.
+Post text and images, like and comment, send friend requests, follow people, browse profiles, and use light/dark mode — with Bearer JWT auth and ImageKit uploads.
 
-**Docs:** [Features](./docs/FEATURES.md) · [API overview](./docs/API.md) · [Database schema](./docs/SCHEMA.md) · [ER diagram](./docs/ERD.md)
+**Author:** Mohammed Shahan
+
+---
+
+## Documentation
+
+| Doc | Contents |
+| --- | -------- |
+| [Features](./docs/FEATURES.md) | What the app does today + coming soon |
+| [API overview](./docs/API.md) | REST endpoints and auth header |
+| [Database schema](./docs/SCHEMA.md) | Collections, fields, indexes |
+| [ER diagram](./docs/ERD.md) | Visual entity relationships |
+
+---
 
 ## Stack
 
-| Layer    | Technologies                                                                                                     |
-| -------- | ---------------------------------------------------------------------------------------------------------------- |
-| Frontend | Next.js 16 (App Router), React 19, TypeScript, Material UI 9, Emotion, Formik, Yup, Redux Toolkit, redux-persist, axios |
-| Backend  | Node.js, Express 4.22, JWT (access + refresh), bcrypt 6, Multer 2, Helmet, CORS allowlist, express-rate-limit, ImageKit |
-| Database | MongoDB with Mongoose 8                                                                                          |
+| Layer | Technologies |
+| ----- | ------------ |
+| Frontend | Next.js 16 (App Router), React 19, TypeScript, Material UI 9, Redux Toolkit, Formik, Yup, axios |
+| Backend | Node.js, Express 4.22, JWT (access + refresh), bcrypt, Multer 2, Helmet, CORS, rate limiting, ImageKit |
+| Database | MongoDB + Mongoose 8 |
+
+---
 
 ## Project structure
 
 ```text
 Xivi/
-├── frontend/                 Next.js app
-├── backend/                  Express API
-│   ├── models/               User, Post
-│   ├── routes/               auth, users, posts
+├── frontend/          Next.js app (UI)
+├── backend/           Express API
+│   ├── models/        User, Post, FriendRequest, Notification
+│   ├── routes/
 │   ├── controllers/
-│   └── middleware/           JWT check
-├── docs/                     Product docs (features, API, schema, ERD)
-├── package.json              npm workspaces root
+│   └── middleware/
+├── docs/              Features, API, schema, ERD
+├── package.json       npm workspaces root
 └── README.md
 ```
 
+---
+
 ## Requirements
 
-- Node.js **20** (LTS)
-- A MongoDB database (local or Atlas)
-- npm 9+ (workspaces)
+- **Node.js 20+** (CI uses 22)
+- **npm 9+** (workspaces)
+- **MongoDB** (local or [Atlas](https://www.mongodb.com/atlas))
+- **ImageKit** account (for post/avatar image uploads)
+- Optional: Google / GitHub / Discord OAuth apps
 
-## Setup
+---
 
-### 1. Install dependencies (from repo root)
+## Quick start
+
+### 1. Install
+
+From the **repo root**:
 
 ```bash
 npm install
 ```
 
-This installs root tooling plus `frontend` and `backend` via npm workspaces.
-
-### 2. Backend environment
-
-Copy the examples, then fill in real values (never commit the real files):
+### 2. Environment files
 
 ```bash
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 ```
 
-**Backend** (`backend/.env`) - see also `backend/.env.example`:
+Fill in at least these **backend** values in `backend/.env`:
 
-```text
-PORT=5000
-MONGODB_USERNAME=your_atlas_db_user
-MONGODB_PASSWORD=your_atlas_db_password
-MONGODB_URI=mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/xivi?retryWrites=true&w=majority
-ACCESS_TOKEN_SECRET=a-long-random-string
-REFRESH_TOKEN_SECRET=another-long-random-string
-ACCESS_TOKEN_EXPIRES=1d
-REFRESH_TOKEN_EXPIRES=7d
-FRONTEND_URL=http://localhost:3000
+| Variable | Required | Purpose |
+| -------- | -------- | ------- |
+| `MONGODB_URI` | Yes | Mongo connection string |
+| `ACCESS_TOKEN_SECRET` | Yes | Access JWT signing secret |
+| `IMAGEKIT_PUBLIC_KEY` | Yes* | Image uploads |
+| `IMAGEKIT_PRIVATE_KEY` | Yes* | Image uploads (server only) |
+| `IMAGEKIT_URL_ENDPOINT` | Yes* | ImageKit CDN endpoint |
+| `PORT` | No | API port (default `5000`) |
+| `REFRESH_TOKEN_SECRET` | No | Prefer separate secret in production |
+| `FRONTEND_URL` | No | CORS origins (default `http://localhost:3000`) |
+| `API_PUBLIC_URL` | No | OAuth callback base (default `http://localhost:5000`) |
+| `ADMIN_EMAILS` | No | Comma-separated admin emails (local only — never commit) |
+
+\*Needed to create posts/avatars with images. Text-only flows can run without ImageKit, but image upload will fail.
+
+**Frontend** (`frontend/.env.local`):
+
+| Variable | Required | Purpose |
+| -------- | -------- | ------- |
+| `NEXT_PUBLIC_API_URL` | No* | API base URL, no trailing slash |
+
+\*Defaults to `http://localhost:5000` if unset.
+
+Full variable list and OAuth keys: see [`backend/.env.example`](./backend/.env.example) and [`frontend/.env.example`](./frontend/.env.example).
+
+Optional admin seed (after setting `ADMIN_EMAILS` + `ADMIN_PASSWORD` in `backend/.env`):
+
+```bash
+npm run seed:admins -w backend
 ```
 
-| Variable               | Required by app | Purpose                                                                 |
-| ---------------------- | --------------- | ----------------------------------------------------------------------- |
-| `PORT`                 | Yes             | API listen port (local default `5000`)                                  |
-| `MONGODB_URI`          | Yes             | Full MongoDB connection string (Atlas or local)                         |
-| `ACCESS_TOKEN_SECRET`  | Yes             | Secret for access JWTs                                                  |
-| `REFRESH_TOKEN_SECRET` | No*             | Secret for refresh JWTs; falls back to access secret if unset           |
-| `ACCESS_TOKEN_EXPIRES` | No              | Access JWT lifetime (default `1d`; jsonwebtoken format e.g. `15m`, `1h`) |
-| `REFRESH_TOKEN_EXPIRES`| No              | Refresh JWT lifetime (default `7d`)                                     |
-| `FRONTEND_URL`         | No†             | Comma-separated browser origins allowed by CORS (default `http://localhost:3000`) |
-| `MONGODB_USERNAME`     | No              | Optional reference; credentials must still be inside `MONGODB_URI`      |
-| `MONGODB_PASSWORD`     | No              | Optional reference; credentials must still be inside `MONGODB_URI`      |
+Details: [Features → Admin](./docs/FEATURES.md#admin).
 
-\*Set a distinct `REFRESH_TOKEN_SECRET` in production.  
-†Defaults to `http://localhost:3000` if unset. Set explicitly when the Next.js app runs on another origin.
-
-The backend currently connects with `process.env.MONGODB_URI` only. Username/password env vars are handy notes; they are not read by the code unless you wire them in later.
-
-**Frontend** (`frontend/.env.local`) - see also `frontend/.env.example`:
-
-| Variable              | Required | Purpose                                                                 |
-| --------------------- | -------- | ----------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_URL` | Yes*     | API base URL used by `frontend/src/lib/api.ts` (no trailing slash)      |
-
-\*Falls back to `http://localhost:5000` if unset so local `npm run dev` still works. Set it explicitly for deploy and non-default ports.
-
-Admin allowlist / seed password: `ADMIN_EMAILS` and `ADMIN_PASSWORD` in `backend/.env` only — see [Features → Admin](./docs/FEATURES.md#admin) and `backend/.env.example`.
-
-### 3. Run locally
-
-From the **repo root**, start API + Next.js together:
+### 3. Run
 
 ```bash
 npm run dev
 ```
 
-- Frontend: [http://localhost:3000](http://localhost:3000)
-- Backend: [http://localhost:5000](http://localhost:5000) (or your `PORT`)
+| App | URL |
+| --- | --- |
+| Frontend | [http://localhost:3000](http://localhost:3000) |
+| Backend | [http://localhost:5000](http://localhost:5000) |
 
-Or run them separately:
+Run separately if you prefer:
 
 ```bash
 npm run dev:backend
 npm run dev:frontend
 ```
 
+---
+
 ## Scripts
 
 ### Root
 
-| Command                | What it does                                |
-| ---------------------- | ------------------------------------------- |
-| `npm install`          | Install all workspace dependencies          |
-| `npm run dev`          | Run backend + frontend together             |
-| `npm run dev:backend`  | Backend only (`node --watch`)               |
-| `npm run dev:frontend` | Frontend only (`next dev`)                  |
-| `npm run build`        | Production build of the frontend            |
-| `npm run lint`         | Lint frontend and backend                   |
-| `npm run lint:fix`     | Auto-fix ESLint issues (incl. import order) |
-| `npm run format`       | Format with Prettier                        |
-| `npm run format:check` | Check Prettier formatting                   |
-| `npm run test`         | Test frontend (Vitest) and backend (node:test + MongoMemoryServer) |
-| `npm run typecheck`    | Frontend `tsc --noEmit`                     |
+| Command | Description |
+| ------- | ----------- |
+| `npm install` | Install all workspace deps |
+| `npm run dev` | Backend + frontend together |
+| `npm run build` | Production build (frontend) |
+| `npm run lint` | Lint both packages |
+| `npm run lint:fix` | Auto-fix ESLint issues |
+| `npm run format` | Format with Prettier |
+| `npm run format:check` | Check Prettier formatting |
+| `npm run test` | Frontend + backend tests |
+| `npm run typecheck` | Frontend `tsc --noEmit` |
 
-### Per package
+### Workspace examples
 
 ```bash
 npm run lint -w frontend
@@ -142,18 +155,30 @@ npm run typecheck -w frontend
 npm run start -w backend
 ```
 
-**Backend tests** use an in-memory MongoDB (`mongodb-memory-server`); no Atlas URI is required for `npm run test -w backend`.
+Backend tests use **in-memory MongoDB** (`mongodb-memory-server`) — no Atlas URI required for `npm run test -w backend`.
+
+---
 
 ## CI
 
-GitHub Actions workflows (Node 22, install from root workspace):
+GitHub Actions (Node 22, install from repo root):
 
-| Workflow             | Command                         |
-| -------------------- | ------------------------------- |
-| Backend Lint         | `npm run lint -w backend`       |
-| Backend Test         | `npm run test -w backend`       |
-| Frontend Lint        | `npm run lint -w frontend`      |
-| Frontend Test        | `npm run test -w frontend`      |
-| Frontend Typecheck   | `npm run typecheck -w frontend` |
+| Workflow | Command |
+| -------- | ------- |
+| Backend Lint | `npm run lint -w backend` |
+| Backend Test | `npm run test -w backend` |
+| Frontend Lint | `npm run lint -w frontend` |
+| Frontend Test | `npm run test -w frontend` |
+| Frontend Typecheck | `npm run typecheck -w frontend` |
 
-Locally: `npm run typecheck` from the repo root.
+---
+
+## Auth note
+
+The API uses **Bearer JWTs** (`Authorization: Bearer <accessToken>`), not cookie sessions. Access and refresh tokens are issued on login/register; the frontend refreshes silently on `401`. See [API overview](./docs/API.md).
+
+---
+
+## License / private
+
+Private project (`"private": true` in root `package.json`). Do not commit secrets (`.env`, admin passwords, ImageKit private key).
