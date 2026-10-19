@@ -28,13 +28,14 @@ import { usePathname, useRouter } from "next/navigation"
 import { useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
-import { formatJoinedDate } from "@/lib/time"
 import {
   DEFAULT_AVATAR_COLOR,
   DEFAULT_COVER_COLOR,
   normalizeProfileColor,
 } from "@/lib/profileColors"
 import { SOCIAL_NETWORKS, type SocialNetwork, socialProfileUrl } from "@/lib/social"
+import { formatJoinedDate } from "@/lib/time"
+import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { useToast } from "@/providers/ToastProvider"
 import type { PeopleListTab, User } from "@/types/models"
 import { sameUserId } from "@/types/models"
@@ -76,6 +77,8 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   const [editOpen, setEditOpen] = useState(false)
   const [modBusy, setModBusy] = useState(false)
   const [peopleModalTab, setPeopleModalTab] = useState<PeopleListTab | null>(null)
+  const { enabled } = useFeatureFlags()
+  const canEditProfile = enabled("profileEdit")
 
   const refreshProfile = () => {
     if (!userId) return
@@ -211,7 +214,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
         }}
       >
         <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}>
-          {isOwnProfile ? (
+          {isOwnProfile && canEditProfile ? (
             <Tooltip title="Edit profile">
               <IconButton
                 size="small"
@@ -226,7 +229,7 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
                 <ManageAccountsOutlined fontSize="small" />
               </IconButton>
             </Tooltip>
-          ) : (
+          ) : isOwnProfile ? null : (
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.75 }}>
               <RelationshipActions userId={userId} onCover onChanged={refreshProfile} />
               {viewerIsAdmin && user.role !== "admin" ? (

@@ -4,8 +4,10 @@ import React, { useState } from "react"
 import { Box, Tab, Tabs, Typography, useTheme } from "@mui/material"
 
 import AppShell from "@/components/AppShell"
+import EmptyState from "@/components/EmptyState"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
+import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 
 import { useAppSelector } from "../hooks"
 
@@ -16,13 +18,22 @@ type HomeTab = "friends" | "everyone"
 const HomePage = () => {
   const user = useAppSelector(state => state.user)
   const theme = useTheme()
+  const { enabled } = useFeatureFlags()
   const [tab, setTab] = useState<HomeTab>("everyone")
 
   const listKind: PostsListKind = tab === "friends" ? "friends" : "feed"
+  const canCreatePosts = enabled("postsCreate")
 
   return (
     <AppShell narrow>
-      <MyPostWidget url={user?.picturePath ?? ""} />
+      {canCreatePosts ? (
+        <MyPostWidget url={user?.picturePath ?? ""} />
+      ) : (
+        <EmptyState
+          title="Posting is temporarily disabled"
+          description="Creating new posts is turned off for regular accounts right now. You can still read the feed below."
+        />
+      )}
       <Box sx={{ mt: "1.15rem", mb: "0.35rem" }}>
         <Typography
           variant="caption"

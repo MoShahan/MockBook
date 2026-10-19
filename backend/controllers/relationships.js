@@ -1,3 +1,4 @@
+import { assertFeatureEnabled } from "../lib/features.js"
 import { formatFriendsList, toFriendId } from "../lib/friends.js"
 import { createNotification } from "../lib/notifications.js"
 import {
@@ -56,6 +57,8 @@ export const sendFriendRequest = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
     if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
+
+    await assertFeatureEnabled(req, "friendRequests")
 
     const { id: toId } = req.params
     if (String(authUserId) === String(toId)) {
@@ -167,6 +170,8 @@ export const acceptFriendRequest = async (req, res, next) => {
     const authUserId = req.user?.id
     if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
 
+    await assertFeatureEnabled(req, "friendRequests")
+
     const { requestId } = req.params
     const request = await FriendRequest.findById(requestId)
     if (!request || request.status !== "pending") {
@@ -227,6 +232,8 @@ export const declineFriendRequest = async (req, res, next) => {
     const authUserId = req.user?.id
     if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
 
+    await assertFeatureEnabled(req, "friendRequests")
+
     const { requestId } = req.params
     const request = await FriendRequest.findById(requestId)
     if (!request || request.status !== "pending") {
@@ -250,6 +257,8 @@ export const cancelFriendRequest = async (req, res, next) => {
     const authUserId = req.user?.id
     if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
 
+    await assertFeatureEnabled(req, "friendRequests")
+
     const { requestId } = req.params
     const request = await FriendRequest.findById(requestId)
     if (!request || request.status !== "pending") {
@@ -272,6 +281,8 @@ export const unfriend = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
     if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
+
+    await assertFeatureEnabled(req, "friendRequests")
 
     const { friendId } = req.params
     if (String(authUserId) === String(friendId)) {
@@ -297,6 +308,8 @@ export const followUser = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
     if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
+
+    await assertFeatureEnabled(req, "follow")
 
     const { id: targetId } = req.params
     if (String(authUserId) === String(targetId)) {
@@ -327,6 +340,8 @@ export const unfollowUser = async (req, res, next) => {
   try {
     const authUserId = req.user?.id
     if (!authUserId) return res.status(401).json({ error: "Unauthenticated" })
+
+    await assertFeatureEnabled(req, "follow")
 
     const { id: targetId } = req.params
     if (String(authUserId) === String(targetId)) {

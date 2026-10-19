@@ -72,7 +72,10 @@ Full feature list for the current app, plus planned items for a later release.
 
 - `/settings` in the left app shell for every signed-in user
 - Regular users see a **coming soon** empty state (personal settings not available yet)
-- Admins see a **Site settings / Features** preview of the Part 2 feature catalog (switches visible but **disabled** until the settings API ships)
+- Admins manage **Site settings / Features** (live toggles): create/edit/delete posts, images, emoji picker, comments, likes, share, notifications, profile edit/avatar, save, friend requests, follow
+- Flags apply to **users only**; **admins always keep full capability**
+- FE hides related controls when a flag is off; API rejects restricted writes with 403
+- `GET /settings/features` (any auth user); `PATCH /settings/features` (admin only)
 
 ## Media & uploads
 

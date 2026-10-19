@@ -15,6 +15,7 @@ import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
 import { ProfilePageSkeleton } from "@/components/skeletons"
 import UserWidget from "@/components/UserWidget"
+import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { sameUserId } from "@/types/models"
 
 import { useAppSelector } from "../hooks"
@@ -53,17 +54,26 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { enabled } = useFeatureFlags()
+  const canSave = enabled("postsSave")
 
   const profileId = id || loggedInUser?._id || ""
   // `/profile` (empty id) is always own; `/profile/:id` is own when ids match.
   const isOwnProfile = !id || sameUserId(id, loggedInUser?._id)
 
+  const visibleOwnTabs = useMemo(
+    () => OWN_TABS.filter(t => (t.value === "saved" ? canSave : true)),
+    [canSave]
+  )
+
   const activeTab = useMemo(() => {
     if (!isOwnProfile) return "posts" as OwnTab
-    return parseOwnTab(searchParams.get("tab"))
-  }, [isOwnProfile, searchParams])
+    const parsed = parseOwnTab(searchParams.get("tab"))
+    if (parsed === "saved" && !canSave) return "posts"
+    return parsed
+  }, [isOwnProfile, searchParams, canSave])
 
-  const activeList = OWN_TABS.find(t => t.value === activeTab)?.list ?? "authored"
+  const activeList = visibleOwnTabs.find(t => t.value === activeTab)?.list ?? "authored"
 
   const handleTabChange = (_: React.SyntheticEvent, value: OwnTab) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -124,7 +134,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
                   aria-label="Profile content sections"
                   sx={segmentedTabsSx}
                 >
-                  {OWN_TABS.map(tab => (
+                  {visibleOwnTabs.map(tab => (
                     <Tab
                       key={tab.value}
                       value={tab.value}

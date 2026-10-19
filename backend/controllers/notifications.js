@@ -1,3 +1,4 @@
+import { assertFeatureEnabled, isFeatureEnabled } from "../lib/features.js"
 import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
 import Notification from "../models/Notification.js"
 
@@ -28,6 +29,10 @@ export const listNotifications = async (req, res, next) => {
     const userId = req.user?.id
     if (!userId) return res.status(401).json({ error: "Unauthenticated" })
 
+    if (!(await isFeatureEnabled(req, "notifications"))) {
+      return res.status(200).json({ notifications: [], nextCursor: null, hasMore: false })
+    }
+
     const { limit, cursorDate } = parseCursorPagination(req.query)
     const filter = {
       recipient: userId,
@@ -55,6 +60,10 @@ export const unreadCount = async (req, res, next) => {
     const userId = req.user?.id
     if (!userId) return res.status(401).json({ error: "Unauthenticated" })
 
+    if (!(await isFeatureEnabled(req, "notifications"))) {
+      return res.status(200).json({ count: 0 })
+    }
+
     const count = await Notification.countDocuments({ recipient: userId, read: false })
     res.status(200).json({ count })
   } catch (e) {
@@ -66,6 +75,8 @@ export const markOneRead = async (req, res, next) => {
   try {
     const userId = req.user?.id
     if (!userId) return res.status(401).json({ error: "Unauthenticated" })
+
+    await assertFeatureEnabled(req, "notifications")
 
     const { id } = req.params
     const updated = await Notification.findOneAndUpdate(
@@ -85,6 +96,8 @@ export const markAllRead = async (req, res, next) => {
   try {
     const userId = req.user?.id
     if (!userId) return res.status(401).json({ error: "Unauthenticated" })
+
+    await assertFeatureEnabled(req, "notifications")
 
     await Notification.updateMany({ recipient: userId, read: false }, { $set: { read: true } })
     res.status(200).json({ ok: true })

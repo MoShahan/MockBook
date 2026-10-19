@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/errorHandler.js"
 import authRoutes from "./routes/auth.js"
 import notificationRoutes from "./routes/notifications.js"
 import postRoutes from "./routes/posts.js"
+import settingsRoutes from "./routes/settings.js"
 import userRoutes from "./routes/users.js"
 
 /**
@@ -48,6 +49,7 @@ export function createApp() {
   app.use("/users", userRoutes)
   app.use("/posts", postRoutes)
   app.use("/notifications", notificationRoutes)
+  app.use("/settings", settingsRoutes)
 
   app.use(errorHandler)
   return app

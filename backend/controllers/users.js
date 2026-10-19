@@ -1,3 +1,4 @@
+import { assertFeatureEnabled } from "../lib/features.js"
 import { formatFriendsList } from "../lib/friends.js"
 import { uploadImageBuffer } from "../lib/imagekit.js"
 import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
@@ -152,6 +153,25 @@ export const updateProfile = async (req, res, next) => {
     const user = await User.findById(authUserId)
     if (!user) {
       return res.status(404).json({ msg: "User not found" })
+    }
+
+    const touchingProfileFields =
+      Object.prototype.hasOwnProperty.call(req.body, "firstName") ||
+      Object.prototype.hasOwnProperty.call(req.body, "lastName") ||
+      Object.prototype.hasOwnProperty.call(req.body, "location") ||
+      Object.prototype.hasOwnProperty.call(req.body, "occupation") ||
+      Object.prototype.hasOwnProperty.call(req.body, "avatarColor") ||
+      Object.prototype.hasOwnProperty.call(req.body, "coverColor") ||
+      Object.prototype.hasOwnProperty.call(req.body, "facebook") ||
+      Object.prototype.hasOwnProperty.call(req.body, "x") ||
+      Object.prototype.hasOwnProperty.call(req.body, "linkedin") ||
+      Object.prototype.hasOwnProperty.call(req.body, "instagram")
+
+    if (touchingProfileFields) {
+      await assertFeatureEnabled(req, "profileEdit")
+    }
+    if (req.file?.buffer) {
+      await assertFeatureEnabled(req, "profileAvatar")
     }
 
     if (Object.prototype.hasOwnProperty.call(req.body, "firstName")) {

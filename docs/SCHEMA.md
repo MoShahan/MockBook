@@ -16,8 +16,22 @@ Database name comes from the path in `MONGODB_URI` (local/Atlas). Collection nam
 | `posts` | `Post.js` | Feed posts; **comments embedded** |
 | `friendrequests` | `FriendRequest.js` | Friend request lifecycle |
 | `notifications` | `Notification.js` | In-app notifications |
+| `sitesettings` | `SiteSettings.js` | Singleton site feature flags (`_id: "global"`) |
 
 There is **no** separate `comments` collection.
+
+---
+
+## `sitesettings`
+
+**File:** `backend/models/SiteSettings.js`  
+**Timestamps:** `createdAt`, `updatedAt`
+
+| Field | Type | Notes |
+| ----- | ---- | ----- |
+| `_id` | String | Always `"global"` (singleton) |
+| `features` | Mixed object | Booleans keyed by catalog (`postsCreate`, `commentsCreate`, …); defaults all `true` |
+| `updatedBy` | ObjectId → User | Last admin who patched flags |
 
 ---
 

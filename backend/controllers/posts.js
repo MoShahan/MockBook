@@ -1,3 +1,4 @@
+import { assertFeatureEnabled } from "../lib/features.js"
 import { uploadImageBuffer } from "../lib/imagekit.js"
 import { createNotification } from "../lib/notifications.js"
 import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
@@ -17,6 +18,8 @@ export const createPost = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthenticated" })
     }
 
+    await assertFeatureEnabled(req, "postsCreate")
+
     const description = typeof req.body.description === "string" ? req.body.description.trim() : ""
 
     if (!description && !req.file?.buffer) {
@@ -25,6 +28,7 @@ export const createPost = async (req, res, next) => {
 
     let url = ""
     if (req.file?.buffer) {
+      await assertFeatureEnabled(req, "postsImages")
       const uploaded = await uploadImageBuffer(req.file.buffer, req.file.originalname, "/xivi/posts")
       url = uploaded.url || ""
     }
@@ -129,6 +133,8 @@ export const likePost = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthenticated" })
     }
 
+    await assertFeatureEnabled(req, "likesPosts")
+
     const post = await Post.findById(postId)
     if (!post) {
       return res.status(404).json({ msg: "Post not found" })
@@ -155,7 +161,10 @@ export const likePost = async (req, res, next) => {
 
     res.status(200).json({ message, updatedPost: formatted })
   } catch (e) {
-    res.status(404).json({ msg: e.message })
+    if (e.status === 403 && e.expose) {
+      return res.status(403).json({ error: e.message })
+    }
+    next(e)
   }
 }
 
@@ -182,6 +191,8 @@ export const addComment = async (req, res, next) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthenticated" })
     }
+
+    await assertFeatureEnabled(req, "commentsCreate")
 
     const { postId } = req.params
     const text = typeof req.body.text === "string" ? req.body.text.trim() : ""
@@ -212,7 +223,10 @@ export const addComment = async (req, res, next) => {
     const [formatted] = await withAuthors([post])
     res.status(201).json({ updatedPost: formatted })
   } catch (e) {
-    res.status(409).json({ msg: e.message })
+    if (e.status === 403 && e.expose) {
+      return res.status(403).json({ error: e.message })
+    }
+    next(e)
   }
 }
 
@@ -222,6 +236,8 @@ export const likeComment = async (req, res, next) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthenticated" })
     }
+
+    await assertFeatureEnabled(req, "likesComments")
 
     const { postId, commentId } = req.params
     const post = await Post.findById(postId)
@@ -293,6 +309,8 @@ export const editComment = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthenticated" })
     }
 
+    await assertFeatureEnabled(req, "commentsEdit")
+
     const { postId, commentId } = req.params
     const text = typeof req.body.text === "string" ? req.body.text.trim() : ""
     if (!text) {
@@ -350,6 +368,10 @@ export const deleteComment = async (req, res, next) => {
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ error: "You can only delete your own comments" })
     }
+    // Owner delete respects flag; admin moderation always allowed.
+    if (isOwner && !isAdmin) {
+      await assertFeatureEnabled(req, "commentsDelete")
+    }
 
     comment.deleteOne()
     await post.save()
@@ -379,6 +401,9 @@ export const deletePost = async (req, res, next) => {
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ error: "You can only delete your own posts" })
     }
+    if (isOwner && !isAdmin) {
+      await assertFeatureEnabled(req, "postsDelete")
+    }
 
     await Post.findByIdAndDelete(postId)
     // Drop deleted post from everyone's bookmarks.
@@ -396,6 +421,8 @@ export const updatePost = async (req, res, next) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthenticated" })
     }
+
+    await assertFeatureEnabled(req, "postsEdit")
 
     const { postId } = req.params
     const post = await Post.findById(postId)
@@ -418,9 +445,11 @@ export const updatePost = async (req, res, next) => {
 
     let url = post.url || ""
     if (removeImage) {
+      await assertFeatureEnabled(req, "postsImages")
       url = ""
     }
     if (req.file?.buffer) {
+      await assertFeatureEnabled(req, "postsImages")
       const uploaded = await uploadImageBuffer(req.file.buffer, req.file.originalname, "/xivi/posts")
       url = uploaded.url || ""
     }
@@ -450,6 +479,8 @@ export const savePost = async (req, res, next) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthenticated" })
     }
+
+    await assertFeatureEnabled(req, "postsSave")
 
     const { postId } = req.params
     const post = await Post.findById(postId).select("_id")
@@ -484,6 +515,8 @@ export const unsavePost = async (req, res, next) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthenticated" })
     }
+
+    await assertFeatureEnabled(req, "postsSave")
 
     const { postId } = req.params
     const post = await Post.findById(postId).select("_id")

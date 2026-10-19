@@ -48,6 +48,7 @@ import { getErrorMessage } from "@/lib/errors"
 import { ACCEPT_IMAGE, validateImageFile } from "@/lib/imageUpload"
 import { buildShareText, buildShareUrls, openShareWindow } from "@/lib/share"
 import { formatPostTime } from "@/lib/time"
+import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { useToast } from "@/providers/ToastProvider"
 import { removePost, setPost, setSavedPosts } from "@/state"
 import { type Post, sameUserId } from "@/types/models"
@@ -80,7 +81,20 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const comments = post.comments ?? []
   const isOwnPost = Boolean(user?._id && String(user._id) === String(post.userId))
   const isAdmin = user?.role === "admin"
-  const canModeratePost = isOwnPost || isAdmin
+  const { enabled } = useFeatureFlags()
+  const canLikePosts = enabled("likesPosts")
+  const canLikeComments = enabled("likesComments")
+  const canCommentsCreate = enabled("commentsCreate")
+  const canCommentsEdit = enabled("commentsEdit")
+  const canCommentsDelete = enabled("commentsDelete")
+  const canPostsEdit = enabled("postsEdit")
+  const canPostsDelete = enabled("postsDelete")
+  const canSave = enabled("postsSave")
+  const canShare = enabled("share")
+  const canEmoji = enabled("postsEmoji")
+  const showEditPost = isOwnPost && canPostsEdit
+  const showDeletePost = (isOwnPost && canPostsDelete) || isAdmin
+  const canModeratePost = showEditPost || showDeletePost
   const isSaved = Boolean(user?.savedPosts?.some(id => String(id) === String(post._id)))
 
   const theme = useTheme()
@@ -419,7 +433,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
-                {isOwnPost ? (
+                {showEditPost ? (
                   <MenuItem onClick={openEditPost}>
                     <ListItemIcon>
                       <EditOutlined fontSize="small" />
@@ -427,19 +441,21 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                     <ListItemText>Edit post</ListItemText>
                   </MenuItem>
                 ) : null}
-                <MenuItem
-                  onClick={() => {
-                    setMenuAnchor(null)
-                    setConfirmDeleteOpen(true)
-                  }}
-                >
-                  <ListItemIcon>
-                    <DeleteOutlined fontSize="small" color="error" />
-                  </ListItemIcon>
-                  <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>
-                    {isOwnPost ? "Delete post" : "Delete post (admin)"}
-                  </ListItemText>
-                </MenuItem>
+                {showDeletePost ? (
+                  <MenuItem
+                    onClick={() => {
+                      setMenuAnchor(null)
+                      setConfirmDeleteOpen(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <DeleteOutlined fontSize="small" color="error" />
+                    </ListItemIcon>
+                    <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>
+                      {isOwnPost ? "Delete post" : "Delete post (admin)"}
+                    </ListItemText>
+                  </MenuItem>
+                ) : null}
               </Menu>
             </>
           ) : undefined
@@ -489,32 +505,34 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       <FlexBetween sx={{ py: 0.15 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Tooltip title={isLiked ? "Unlike" : "Like"}>
-              <IconButton
-                size="small"
-                onClick={() => void patchLike()}
-                aria-label={isLiked ? "Unlike" : "Like"}
-                aria-pressed={isLiked}
-                sx={{
-                  p: "0.35rem",
-                  transition: "transform 0.15s ease",
-                  "&:active": { transform: "scale(0.88)" },
-                }}
-              >
-                {isLiked ? (
-                  <FavoriteOutlined
-                    sx={{
-                      color: primary,
-                      fontSize: "1.25rem",
-                      transform: "scale(1.06)",
-                      transition: "transform 0.15s ease",
-                    }}
-                  />
-                ) : (
-                  <FavoriteBorderOutlined sx={{ fontSize: "1.25rem" }} />
-                )}
-              </IconButton>
-            </Tooltip>
+            {canLikePosts ? (
+              <Tooltip title={isLiked ? "Unlike" : "Like"}>
+                <IconButton
+                  size="small"
+                  onClick={() => void patchLike()}
+                  aria-label={isLiked ? "Unlike" : "Like"}
+                  aria-pressed={isLiked}
+                  sx={{
+                    p: "0.35rem",
+                    transition: "transform 0.15s ease",
+                    "&:active": { transform: "scale(0.88)" },
+                  }}
+                >
+                  {isLiked ? (
+                    <FavoriteOutlined
+                      sx={{
+                        color: primary,
+                        fontSize: "1.25rem",
+                        transform: "scale(1.06)",
+                        transition: "transform 0.15s ease",
+                      }}
+                    />
+                  ) : (
+                    <FavoriteBorderOutlined sx={{ fontSize: "1.25rem" }} />
+                  )}
+                </IconButton>
+              </Tooltip>
+            ) : null}
             <Typography
               component="button"
               type="button"
@@ -577,39 +595,43 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
           </Box>
         </Box>
         <FlexBetween sx={{ gap: 0 }}>
-          <Tooltip title={isSaved ? "Unsave" : "Save"}>
-            <IconButton
-              size="small"
-              onClick={() => void toggleSave()}
-              aria-label={isSaved ? "Unsave post" : "Save post"}
-              aria-pressed={isSaved}
-              sx={{
-                transition: "transform 0.15s ease",
-                "&:active": { transform: "scale(0.88)" },
-              }}
-            >
-              {isSaved ? (
-                <Bookmark sx={{ color: primary, fontSize: "1.25rem" }} />
-              ) : (
-                <BookmarkBorder sx={{ fontSize: "1.25rem" }} />
-              )}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Share">
-            <IconButton
-              size="small"
-              aria-label="Share"
-              aria-haspopup="true"
-              aria-expanded={Boolean(shareAnchor)}
-              onClick={e => setShareAnchor(e.currentTarget)}
-            >
-              <ShareOutlined sx={{ fontSize: "1.25rem" }} />
-            </IconButton>
-          </Tooltip>
+          {canSave ? (
+            <Tooltip title={isSaved ? "Unsave" : "Save"}>
+              <IconButton
+                size="small"
+                onClick={() => void toggleSave()}
+                aria-label={isSaved ? "Unsave post" : "Save post"}
+                aria-pressed={isSaved}
+                sx={{
+                  transition: "transform 0.15s ease",
+                  "&:active": { transform: "scale(0.88)" },
+                }}
+              >
+                {isSaved ? (
+                  <Bookmark sx={{ color: primary, fontSize: "1.25rem" }} />
+                ) : (
+                  <BookmarkBorder sx={{ fontSize: "1.25rem" }} />
+                )}
+              </IconButton>
+            </Tooltip>
+          ) : null}
+          {canShare ? (
+            <Tooltip title="Share">
+              <IconButton
+                size="small"
+                aria-label="Share"
+                aria-haspopup="true"
+                aria-expanded={Boolean(shareAnchor)}
+                onClick={e => setShareAnchor(e.currentTarget)}
+              >
+                <ShareOutlined sx={{ fontSize: "1.25rem" }} />
+              </IconButton>
+            </Tooltip>
+          ) : null}
         </FlexBetween>
         <Menu
           anchorEl={shareAnchor}
-          open={Boolean(shareAnchor)}
+          open={canShare && Boolean(shareAnchor)}
           onClose={() => setShareAnchor(null)}
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           transformOrigin={{ vertical: "top", horizontal: "right" }}
@@ -726,7 +748,8 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                 const isCommentLiked = Boolean(user?._id && commentLikes[user._id])
                 const commentLikesCount = Object.keys(commentLikes).length
                 const isOwnComment = Boolean(comment._id && sameUserId(user?._id, comment.userId))
-                const canModerateComment = isOwnComment || isAdmin
+                const canModerateComment =
+                  (isOwnComment && (canCommentsEdit || canCommentsDelete)) || isAdmin
                 const isEditing = Boolean(comment._id && editingCommentId === comment._id)
                 return (
                   <Box
@@ -945,36 +968,38 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                           )}
                           {comment._id && (
                             <>
-                              <Typography
-                                component="button"
-                                type="button"
-                                onClick={() => void patchCommentLike(comment._id!)}
-                                aria-label={isCommentLiked ? "Unlike comment" : "Like comment"}
-                                aria-pressed={isCommentLiked}
-                                sx={{
-                                  border: 0,
-                                  background: "none",
-                                  cursor: "pointer",
-                                  fontFamily: "inherit",
-                                  fontSize: "0.7rem",
-                                  fontWeight: 700,
-                                  px: 0.65,
-                                  py: 0.2,
-                                  borderRadius: 1,
-                                  color: isCommentLiked ? primary : medium,
-                                  transition: "color 0.15s ease, background-color 0.15s ease",
-                                  "&:hover": {
-                                    color: primary,
-                                    bgcolor: alpha(primary, 0.08),
-                                  },
-                                  "&:focus-visible": {
-                                    outline: `2px solid ${primary}`,
-                                    outlineOffset: 2,
-                                  },
-                                }}
-                              >
-                                {isCommentLiked ? "Liked" : "Like"}
-                              </Typography>
+                              {canLikeComments ? (
+                                <Typography
+                                  component="button"
+                                  type="button"
+                                  onClick={() => void patchCommentLike(comment._id!)}
+                                  aria-label={isCommentLiked ? "Unlike comment" : "Like comment"}
+                                  aria-pressed={isCommentLiked}
+                                  sx={{
+                                    border: 0,
+                                    background: "none",
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    fontSize: "0.7rem",
+                                    fontWeight: 700,
+                                    px: 0.65,
+                                    py: 0.2,
+                                    borderRadius: 1,
+                                    color: isCommentLiked ? primary : medium,
+                                    transition: "color 0.15s ease, background-color 0.15s ease",
+                                    "&:hover": {
+                                      color: primary,
+                                      bgcolor: alpha(primary, 0.08),
+                                    },
+                                    "&:focus-visible": {
+                                      outline: `2px solid ${primary}`,
+                                      outlineOffset: 2,
+                                    },
+                                  }}
+                                >
+                                  {isCommentLiked ? "Liked" : "Like"}
+                                </Typography>
+                              ) : null}
                               {commentLikesCount > 0 ? (
                                 <Typography
                                   component="button"
@@ -1049,9 +1074,11 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
             {(() => {
               const menuTarget = comments.find(c => c._id === commentMenu?.commentId)
               const menuIsOwn = Boolean(menuTarget && sameUserId(user?._id, menuTarget.userId))
+              const showCommentEdit = menuIsOwn && canCommentsEdit
+              const showCommentDelete = (menuIsOwn && canCommentsDelete) || isAdmin
               return (
                 <>
-                  {menuIsOwn ? (
+                  {showCommentEdit ? (
                     <MenuItem
                       onClick={() => {
                         if (menuTarget?._id) startEditComment(menuTarget._id, menuTarget.text)
@@ -1063,25 +1090,28 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                       <ListItemText>Edit</ListItemText>
                     </MenuItem>
                   ) : null}
-                  <MenuItem
-                    onClick={() => {
-                      const id = commentMenu?.commentId
-                      setCommentMenu(null)
-                      if (id) setConfirmDeleteCommentId(id)
-                    }}
-                  >
-                    <ListItemIcon>
-                      <DeleteOutlined fontSize="small" color="error" />
-                    </ListItemIcon>
-                    <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>
-                      {menuIsOwn ? "Delete" : "Delete (admin)"}
-                    </ListItemText>
-                  </MenuItem>
+                  {showCommentDelete ? (
+                    <MenuItem
+                      onClick={() => {
+                        const id = commentMenu?.commentId
+                        setCommentMenu(null)
+                        if (id) setConfirmDeleteCommentId(id)
+                      }}
+                    >
+                      <ListItemIcon>
+                        <DeleteOutlined fontSize="small" color="error" />
+                      </ListItemIcon>
+                      <ListItemText slotProps={{ primary: { sx: { color: "error.main" } } }}>
+                        {menuIsOwn ? "Delete" : "Delete (admin)"}
+                      </ListItemText>
+                    </MenuItem>
+                  ) : null}
                 </>
               )
             })()}
           </Menu>
 
+          {canCommentsCreate ? (
           <Box
             component="form"
             onSubmit={submitComment}
@@ -1185,6 +1215,11 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
               )}
             </Box>
           </Box>
+          ) : comments.length === 0 ? (
+            <Typography sx={{ color: medium, fontSize: "0.85rem", py: 1.25, textAlign: "center" }}>
+              Commenting is temporarily disabled.
+            </Typography>
+          ) : null}
         </Box>
       </Collapse>
 
@@ -1235,18 +1270,20 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                 pb: 0.55,
               }}
             >
-              <EmojiPickerButton
-                dense
-                disabled={isSavingEditPost}
-                onSelect={emoji =>
-                  insertEmojiAtCursor(
-                    editDescriptionInputRef.current,
-                    editDescription,
-                    emoji,
-                    setEditDescription
-                  )
-                }
-              />
+              {canEmoji ? (
+                <EmojiPickerButton
+                  dense
+                  disabled={isSavingEditPost}
+                  onSelect={emoji =>
+                    insertEmojiAtCursor(
+                      editDescriptionInputRef.current,
+                      editDescription,
+                      emoji,
+                      setEditDescription
+                    )
+                  }
+                />
+              ) : null}
             </Box>
           </Box>
           {editError && (

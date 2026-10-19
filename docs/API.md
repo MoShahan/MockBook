@@ -62,6 +62,12 @@ Authorization: Bearer <accessToken>
 | `GET`    | `/posts/:postId/comments/:commentId/likes` | Users who liked a comment (`?page=&limit=`)           |
 | `PATCH`  | `/posts/:postId/comments/:commentId/like` | Like or unlike a comment                                |
 | `DELETE` | `/posts/:postId`             | Delete own post (or any post if admin)                           |
+| `GET`    | `/settings/features`         | Site feature flags (auth; defaults all `true`)                   |
+| `PATCH`  | `/settings/features`         | Admin: merge partial `{ features: { postsCreate: false, … } }`   |
+
+### Feature flags
+
+Flags apply to **`role: user` only** — admins always bypass. When a write is blocked the API returns **403** `{ error: "This feature is currently disabled" }`. See [FEATURES.md](./FEATURES.md) for the catalog and UI behavior.
 
 ---
 

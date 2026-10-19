@@ -36,6 +36,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { TOUR_OPEN_FIND_PEOPLE_NAV_EVENT, TOUR_OPEN_MENU_EVENT } from "@/lib/productTour"
+import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { useProductTour } from "@/providers/ProductTourProvider"
 import { useToast } from "@/providers/ToastProvider"
 import { setLogout, toggleMode } from "@/state"
@@ -74,6 +75,8 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
   const user = useAppSelector(state => state.user)
   const { success } = useToast()
   const { startTour } = useProductTour()
+  const { enabled } = useFeatureFlags()
+  const showNotifications = enabled("notifications")
   const isWide = useMediaQuery("(min-width: 1000px)")
   const [mobileOpen, setMobileOpen] = useState(false)
   const [friendRequestCount, setFriendRequestCount] = useState(0)
@@ -363,20 +366,24 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
             <Box aria-hidden sx={{ width: 8 }} />
           )}
         </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            borderRadius: 2,
-            ...(notificationsActive
-              ? {
-                  bgcolor: alpha(theme.palette.primary.main, isDark ? 0.18 : 0.1),
-                }
-              : null),
-          }}
-        >
-          <NotificationsMenu />
-        </Box>
+        {showNotifications ? (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              borderRadius: 2,
+              ...(notificationsActive
+                ? {
+                    bgcolor: alpha(theme.palette.primary.main, isDark ? 0.18 : 0.1),
+                  }
+                : null),
+            }}
+          >
+            <NotificationsMenu />
+          </Box>
+        ) : (
+          <Box aria-hidden sx={{ width: 8 }} />
+        )}
       </FlexBetween>
     </Box>
   )

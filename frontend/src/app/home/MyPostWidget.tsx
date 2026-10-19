@@ -22,6 +22,7 @@ import WidgetWrapper from "@/components/WidgetWrapper"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 import { ACCEPT_IMAGE, validateImageFile } from "@/lib/imageUpload"
+import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { useToast } from "@/providers/ToastProvider"
 import { prependPost } from "@/state"
 import type { CreatePostFormValues, Post } from "@/types/models"
@@ -143,6 +144,9 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
   const descriptionInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { success, error: toastError } = useToast()
+  const { enabled } = useFeatureFlags()
+  const canImages = enabled("postsImages")
+  const canEmoji = enabled("postsEmoji")
 
   const handleCreatePost = async (vals: CreatePostFormValues, helpers: FormikHelpers<CreatePostFormValues>) => {
     if (!user?._id) {
@@ -306,41 +310,45 @@ const MyPostWidget = ({ url }: MyPostWidgetProps) => {
                         minHeight: 32,
                       }}
                     >
-                      <Tooltip title={hasPhoto ? "Replace photo" : "Add photo"}>
-                        <IconButton
-                          type="button"
-                          size="small"
+                      {canImages ? (
+                        <Tooltip title={hasPhoto ? "Replace photo" : "Add photo"}>
+                          <IconButton
+                            type="button"
+                            size="small"
+                            disabled={isSubmitting}
+                            aria-label={hasPhoto ? "Replace photo" : "Add photo"}
+                            aria-pressed={hasPhoto}
+                            onClick={openFilePicker}
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: "8px",
+                              color: hasPhoto ? palette.primary.main : medMain,
+                              bgcolor: hasPhoto ? alpha(palette.primary.main, 0.1) : "transparent",
+                              "&:hover": {
+                                color: palette.primary.main,
+                                bgcolor: alpha(palette.primary.main, 0.08),
+                              },
+                            }}
+                          >
+                            <AttachFileOutlined sx={{ fontSize: "1.15rem" }} />
+                          </IconButton>
+                        </Tooltip>
+                      ) : null}
+                      {canEmoji ? (
+                        <EmojiPickerButton
+                          dense
                           disabled={isSubmitting}
-                          aria-label={hasPhoto ? "Replace photo" : "Add photo"}
-                          aria-pressed={hasPhoto}
-                          onClick={openFilePicker}
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: "8px",
-                            color: hasPhoto ? palette.primary.main : medMain,
-                            bgcolor: hasPhoto ? alpha(palette.primary.main, 0.1) : "transparent",
-                            "&:hover": {
-                              color: palette.primary.main,
-                              bgcolor: alpha(palette.primary.main, 0.08),
-                            },
-                          }}
-                        >
-                          <AttachFileOutlined sx={{ fontSize: "1.15rem" }} />
-                        </IconButton>
-                      </Tooltip>
-                      <EmojiPickerButton
-                        dense
-                        disabled={isSubmitting}
-                        onSelect={emoji =>
-                          insertEmojiAtCursor(
-                            descriptionInputRef.current,
-                            values.description,
-                            emoji,
-                            next => void setFieldValue("description", next)
-                          )
-                        }
-                      />
+                          onSelect={emoji =>
+                            insertEmojiAtCursor(
+                              descriptionInputRef.current,
+                              values.description,
+                              emoji,
+                              next => void setFieldValue("description", next)
+                            )
+                          }
+                        />
+                      ) : null}
                       <Tooltip title={canSubmit ? "Post" : "Add text or a photo to post"}>
                         <span>
                           <IconButton

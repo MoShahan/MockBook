@@ -1,6 +1,6 @@
 /**
- * Part 2 admin feature-flag catalog (preview only until Part 2 API ships).
- * Keys match PROJECT_PLAN Part 2 naming.
+ * Admin feature-flag catalog (labels for Settings UI).
+ * Keys match `backend/lib/features.js` and PROJECT_PLAN Part 2.
  */
 export type FeatureFlagKey =
   | "postsCreate"

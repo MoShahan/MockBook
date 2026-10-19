@@ -25,8 +25,14 @@ export function errorHandler(err, _req, res, _next) {
     return res.status(400).json({ error: msg })
   }
 
+  const status = err.status || err.statusCode || 500
+  // Client-facing errors (validation, feature flags) — no stack noise in logs.
+  if (err.expose && status < 500) {
+    return res.status(status).json({ error: err.message })
+  }
+
   console.error(err)
-  return res.status(err.status || err.statusCode || 500).json({
-    error: err.expose ? err.message : "Internal server error",
+  return res.status(status).json({
+    error: "Internal server error",
   })
 }

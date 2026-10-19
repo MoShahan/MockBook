@@ -20,6 +20,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { useToast } from "@/providers/ToastProvider"
 import { setFollowing, setFriends } from "@/state"
 import type { Friend } from "@/types/models"
@@ -67,6 +68,9 @@ const RelationshipActions = ({
   const dispatch = useAppDispatch()
   const loggedInId = useAppSelector(state => state.user?._id)
   const { success, error: toastError } = useToast()
+  const { enabled } = useFeatureFlags()
+  const canFriend = enabled("friendRequests")
+  const canFollow = enabled("follow")
   const brand = theme.palette.primary.main
   const dark = theme.palette.neutral.dark
 
@@ -171,6 +175,10 @@ const RelationshipActions = ({
   }, [userId, loggedInId])
 
   if (!loggedInId || String(loggedInId) === String(userId) || rel.isSelf) {
+    return null
+  }
+
+  if (!canFriend && !canFollow) {
     return null
   }
 
@@ -279,93 +287,97 @@ const RelationshipActions = ({
           flexShrink: 0,
         }}
       >
-        <Tooltip title={followTip}>
-          <span>
-            <IconButton
-              size="small"
-              disabled={busy}
-              onClick={() => void toggleFollow()}
-              aria-label={followLabel}
-              aria-pressed={rel.isFollowing}
-              sx={{ ...iconChipBase, ...followSurface }}
-            >
-              {followIcon}
-            </IconButton>
-          </span>
-        </Tooltip>
-
-        {rel.isFriend ? (
-          <Tooltip title="Remove friend">
+        {canFollow ? (
+          <Tooltip title={followTip}>
             <span>
               <IconButton
                 size="small"
                 disabled={busy}
-                onClick={() => void removeFriend()}
-                aria-label="Remove friend"
-                sx={{ ...iconChipBase, ...activeSurface }}
+                onClick={() => void toggleFollow()}
+                aria-label={followLabel}
+                aria-pressed={rel.isFollowing}
+                sx={{ ...iconChipBase, ...followSurface }}
               >
-                <PersonRemoveOutlined sx={{ fontSize: "1.1rem" }} />
+                {followIcon}
               </IconButton>
             </span>
           </Tooltip>
-        ) : rel.incomingRequestId ? (
-          <>
-            <Tooltip title="Accept friend request">
+        ) : null}
+
+        {canFriend ? (
+          rel.isFriend ? (
+            <Tooltip title="Remove friend">
               <span>
                 <IconButton
                   size="small"
                   disabled={busy}
-                  onClick={() => void acceptRequest()}
-                  aria-label="Accept friend request"
+                  onClick={() => void removeFriend()}
+                  aria-label="Remove friend"
                   sx={{ ...iconChipBase, ...activeSurface }}
-                >
-                  <Check sx={{ fontSize: "1.1rem" }} />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title="Decline friend request">
-              <span>
-                <IconButton
-                  size="small"
-                  disabled={busy}
-                  onClick={() => void declineRequest()}
-                  aria-label="Decline friend request"
-                  sx={{ ...iconChipBase, ...coverSurface }}
                 >
                   <PersonRemoveOutlined sx={{ fontSize: "1.1rem" }} />
                 </IconButton>
               </span>
             </Tooltip>
-          </>
-        ) : rel.outgoingRequestId ? (
-          <Tooltip title="Cancel friend request">
-            <span>
-              <IconButton
-                size="small"
-                disabled={busy}
-                onClick={() => void cancelRequest()}
-                aria-label="Cancel friend request"
-                sx={{ ...iconChipBase, ...coverSurface }}
-              >
-                <PersonAddOutlined sx={{ fontSize: "1.1rem" }} />
-              </IconButton>
-            </span>
-          </Tooltip>
-        ) : (
-          <Tooltip title="Send friend request">
-            <span>
-              <IconButton
-                size="small"
-                disabled={busy}
-                onClick={() => void sendRequest()}
-                aria-label="Send friend request"
-                sx={{ ...iconChipBase, ...coverSurface }}
-              >
-                <PersonAddOutlined sx={{ fontSize: "1.1rem" }} />
-              </IconButton>
-            </span>
-          </Tooltip>
-        )}
+          ) : rel.incomingRequestId ? (
+            <>
+              <Tooltip title="Accept friend request">
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={busy}
+                    onClick={() => void acceptRequest()}
+                    aria-label="Accept friend request"
+                    sx={{ ...iconChipBase, ...activeSurface }}
+                  >
+                    <Check sx={{ fontSize: "1.1rem" }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip title="Decline friend request">
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={busy}
+                    onClick={() => void declineRequest()}
+                    aria-label="Decline friend request"
+                    sx={{ ...iconChipBase, ...coverSurface }}
+                  >
+                    <PersonRemoveOutlined sx={{ fontSize: "1.1rem" }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </>
+          ) : rel.outgoingRequestId ? (
+            <Tooltip title="Cancel friend request">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={busy}
+                  onClick={() => void cancelRequest()}
+                  aria-label="Cancel friend request"
+                  sx={{ ...iconChipBase, ...coverSurface }}
+                >
+                  <PersonAddOutlined sx={{ fontSize: "1.1rem" }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Send friend request">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={busy}
+                  onClick={() => void sendRequest()}
+                  aria-label="Send friend request"
+                  sx={{ ...iconChipBase, ...coverSurface }}
+                >
+                  <PersonAddOutlined sx={{ fontSize: "1.1rem" }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )
+        ) : null}
       </Box>
     )
   }
@@ -380,6 +392,7 @@ const RelationshipActions = ({
         gap: 0.75,
       }}
     >
+      {canFollow ? (
       <Tooltip title={followTip}>
         <span>
           <Button
@@ -401,81 +414,84 @@ const RelationshipActions = ({
           </Button>
         </span>
       </Tooltip>
+      ) : null}
 
-      {rel.isFriend ? (
-        <Tooltip title="Remove friend">
-          <span>
-            <Button
-              size="small"
-              disabled={busy}
-              onClick={() => void removeFriend()}
-              aria-label="Remove friend"
-              startIcon={<PersonRemoveOutlined sx={{ fontSize: "1rem !important" }} />}
-              sx={{ ...chipBase, ...activeSurface }}
-            >
-              Friends
-            </Button>
-          </span>
-        </Tooltip>
-      ) : rel.incomingRequestId ? (
-        <>
-          <Tooltip title="Accept friend request">
+      {canFriend ? (
+        rel.isFriend ? (
+          <Tooltip title="Remove friend">
             <span>
               <Button
                 size="small"
                 disabled={busy}
-                onClick={() => void acceptRequest()}
-                aria-label="Accept friend request"
+                onClick={() => void removeFriend()}
+                aria-label="Remove friend"
+                startIcon={<PersonRemoveOutlined sx={{ fontSize: "1rem !important" }} />}
                 sx={{ ...chipBase, ...activeSurface }}
               >
-                Accept
+                Friends
               </Button>
             </span>
           </Tooltip>
-          <Tooltip title="Decline friend request">
+        ) : rel.incomingRequestId ? (
+          <>
+            <Tooltip title="Accept friend request">
+              <span>
+                <Button
+                  size="small"
+                  disabled={busy}
+                  onClick={() => void acceptRequest()}
+                  aria-label="Accept friend request"
+                  sx={{ ...chipBase, ...activeSurface }}
+                >
+                  Accept
+                </Button>
+              </span>
+            </Tooltip>
+            <Tooltip title="Decline friend request">
+              <span>
+                <Button
+                  size="small"
+                  disabled={busy}
+                  onClick={() => void declineRequest()}
+                  aria-label="Decline friend request"
+                  sx={{ ...chipBase, ...coverSurface }}
+                >
+                  Decline
+                </Button>
+              </span>
+            </Tooltip>
+          </>
+        ) : rel.outgoingRequestId ? (
+          <Tooltip title="Cancel friend request">
             <span>
               <Button
                 size="small"
                 disabled={busy}
-                onClick={() => void declineRequest()}
-                aria-label="Decline friend request"
+                onClick={() => void cancelRequest()}
+                aria-label="Cancel friend request"
                 sx={{ ...chipBase, ...coverSurface }}
               >
-                Decline
+                Requested
               </Button>
             </span>
           </Tooltip>
-        </>
-      ) : rel.outgoingRequestId ? (
-        <Tooltip title="Cancel friend request">
-          <span>
-            <Button
-              size="small"
-              disabled={busy}
-              onClick={() => void cancelRequest()}
-              aria-label="Cancel friend request"
-              sx={{ ...chipBase, ...coverSurface }}
-            >
-              Requested
-            </Button>
-          </span>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Send friend request">
-          <span>
-            <Button
-              size="small"
-              disabled={busy}
-              onClick={() => void sendRequest()}
-              aria-label="Send friend request"
-              startIcon={<PersonAddOutlined sx={{ fontSize: "1rem !important" }} />}
-              sx={{ ...chipBase, ...coverSurface }}
-            >
-              Friend
-            </Button>
-          </span>
-        </Tooltip>
-      )}
+        ) : (
+          <Tooltip title="Send friend request">
+            <span>
+              <Button
+                size="small"
+                disabled={busy}
+                onClick={() => void sendRequest()}
+                aria-label="Send friend request"
+                startIcon={<PersonAddOutlined sx={{ fontSize: "1rem !important" }} />}
+                sx={{ ...chipBase, ...coverSurface }}
+              >
+                Friend
+              </Button>
+            </span>
+          </Tooltip>
+        )
+      ) : null}
     </Box>
   )
 }
