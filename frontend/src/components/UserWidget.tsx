@@ -497,14 +497,19 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
         />
       ) : null}
 
-      <PeopleListModal
-        open={peopleModalTab != null}
-        onClose={() => setPeopleModalTab(null)}
-        userId={userId}
-        initialTab={peopleModalTab ?? "friends"}
-        isOwnProfile={isOwnProfile}
-        onRelationshipChanged={refreshProfile}
-      />
+      {peopleModalTab != null ? (
+        <PeopleListModal
+          // Remount per chip so tab state matches the opened section (avoids a stale
+          // "friends" fetch when opening Following / Followers).
+          key={`${userId}-${peopleModalTab}`}
+          open
+          onClose={() => setPeopleModalTab(null)}
+          userId={userId}
+          initialTab={peopleModalTab}
+          isOwnProfile={isOwnProfile}
+          onRelationshipChanged={refreshProfile}
+        />
+      ) : null}
     </WidgetWrapper>
   )
 }

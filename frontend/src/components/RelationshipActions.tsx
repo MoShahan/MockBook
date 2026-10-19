@@ -27,7 +27,7 @@ import type { UserRelationship } from "@/types/relationships"
 
 type RelationshipActionsProps = {
   userId: string
-  /** Prefill from discover / parent; still refreshed after mutations. */
+  /** Prefill from list APIs (skips mount fetch). Still refreshed after mutations. */
   initial?: Partial<UserRelationship> | null
   onCover?: boolean
   /** Compact single-row for list cards. */
@@ -134,9 +134,24 @@ const RelationshipActions = ({
   }, [userId, loggedInId])
 
   useEffect(() => {
+    if (!userId || !loggedInId) return
+
+    // Discover / friends / followers / following already embed `relationship`.
+    // Skip per-row GET /relationship to avoid N+1 requests; still refresh after mutations.
+    if (initial != null) {
+      setRel({
+        isFriend: Boolean(initial.isFriend),
+        isFollowing: Boolean(initial.isFollowing),
+        outgoingRequestId: initial.outgoingRequestId ?? null,
+        incomingRequestId: initial.incomingRequestId ?? null,
+        isSelf: Boolean(initial.isSelf),
+      })
+      setLoading(false)
+      return
+    }
+
     let cancelled = false
     void (async () => {
-      if (!userId || !loggedInId) return
       try {
         const { data } = await api.get<{ relationship: UserRelationship }>(
           `/users/${userId}/relationship`
@@ -151,6 +166,8 @@ const RelationshipActions = ({
     return () => {
       cancelled = true
     }
+    // `initial` is only read when userId mounts/changes (list rows remount per person).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid re-applying stale initial after mutations
   }, [userId, loggedInId])
 
   if (!loggedInId || String(loggedInId) === String(userId) || rel.isSelf) {

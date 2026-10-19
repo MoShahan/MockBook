@@ -92,10 +92,6 @@ const PeopleListModal = ({
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const loadingMoreRef = useRef(false)
 
-  useEffect(() => {
-    if (open) setTab(initialTab)
-  }, [open, initialTab])
-
   const loadFirstPage = useCallback(
     async (activeTab: PeopleListTab) => {
       if (!userId) return
@@ -121,6 +117,7 @@ const PeopleListModal = ({
     [userId]
   )
 
+  // Load only the active tab (parent remounts with the correct initialTab on chip open).
   useEffect(() => {
     if (!open || !userId) return
     void loadFirstPage(tab)
