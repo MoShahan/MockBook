@@ -48,11 +48,11 @@ Full feature list for the current app, plus planned items for a later release.
 - **Friend requests** (send → accept / decline / cancel) — mutual friends only after accept
 - Unfriend removes both sides
 - **Follow / unfollow** (one-way) — see someone’s posts in **Following** without being friends; no auto-follow-back
-- Navbar friend-request inbox (badge) + `/friend-requests` (Incoming / Outgoing)
+- Friend-request inbox in the left rail (badge) + `/friend-requests` (Incoming / Outgoing)
 - Friend-request activity also appears in the notifications bell
 - Separate **Follow** and **Friend** actions on profiles and Add people (icon-only in dense lists)
 - Profile header: clickable **friends / followers / following** counts → modal with tabs + infinite scroll (paginated APIs)
-- **Find people** at `/people` (also in account menu / mobile drawer) with search + **infinite scroll**; home sticky Add people rail uses **10 per page** (Previous / Next); mobile home has a **Find people** button above the feed
+- **Find people** at `/people` (left rail / mobile drawer) with search + **infinite scroll**
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
 - Edit own profile (name, location, occupation, avatar, social handles, avatar color, cover color)
 - Solid color profile header (`coverColor`) and initials avatar color (`avatarColor`) when no photo
@@ -65,8 +65,14 @@ Full feature list for the current app, plus planned items for a later release.
 ## Notifications
 
 - In-app notifications for likes, comments, friend requests / accepts
-- Navbar bell with unread badge
+- Slim top-bar bell with unread badge
 - `/notifications` page with mark-read / mark-all-read
+
+## Settings
+
+- `/settings` in the left app shell for every signed-in user
+- Regular users see a **coming soon** empty state (personal settings not available yet)
+- Admins see a **Site settings / Features** preview of the Part 2 feature catalog (switches visible but **disabled** until the settings API ships)
 
 ## Media & uploads
 
@@ -93,8 +99,9 @@ Full feature list for the current app, plus planned items for a later release.
 - Stone-first theme + Fraunces / Source Sans 3; Xivi logo + mark; favicon / apple-touch icon
 - Split login/register layout with atmosphere images
 - **Help & FAQ** (`/help`), **Privacy** (`/privacy`), **Terms** (`/terms`)
-- In-app **product tutorial** (`react-joyride`): navbar **Show tutorial** (compose, friends/follow, notifications, profile); replayable; optional one-time auto-run
-- Mobile nav side drawer (account, profile, tutorial, help, theme, log out)
+- Authenticated **app shell**: left sidebar (Home, Find people, Friend requests, Profile, Settings, Help, tutorial, theme, account/logout) + slim top bar (notifications bell); mobile hamburger drawer
+- In-app **product tutorial** (`react-joyride`): rail **Show tutorial** (compose, Find people, notifications, profile); replayable; optional one-time auto-run
+- Mobile nav drawer mirrors the left rail items
 - Skeleton loaders for posts feed, profile header, likers / friends / followers / following lists, and friend-request inbox
 - Toast / snackbar feedback for key actions (compact, centered)
 - Formik + Yup validation with visible field errors

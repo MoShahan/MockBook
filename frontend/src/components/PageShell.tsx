@@ -2,7 +2,7 @@
 
 import { Box, type BoxProps } from "@mui/material"
 
-/** Shared content width - keep Navbar inner align in sync. */
+/** Shared content width for AppShell main column and public info pages. */
 export const PAGE_MAX_WIDTH = 1440
 export const PAGE_MAX_WIDTH_NARROW = 720
 

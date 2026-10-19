@@ -10,10 +10,10 @@ export const TOUR_SELECTORS = {
 /** localStorage key — first auto-run only once per browser. */
 export const TOUR_SEEN_KEY = "xivi.tour.v1.seen"
 
-/** Ask Navbar to open the mobile drawer (profile step on small screens). */
+/** Ask AppShell to open the mobile drawer (profile step on small screens). */
 export const TOUR_OPEN_MENU_EVENT = "xivi:tour-open-menu"
 
-/** Ask Navbar to reveal Find people (account menu on desktop, drawer on mobile). */
+/** Ask AppShell to open the mobile drawer so Find people is visible. */
 export const TOUR_OPEN_FIND_PEOPLE_NAV_EVENT = "xivi:tour-open-find-people-nav"
 
 export function hasSeenProductTour(): boolean {

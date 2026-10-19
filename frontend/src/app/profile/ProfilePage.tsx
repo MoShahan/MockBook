@@ -10,8 +10,7 @@ import {
 import { Box, Tab, Tabs, useMediaQuery } from "@mui/material"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
-import Navbar from "@/components/Navbar"
-import PageShell from "@/components/PageShell"
+import AppShell from "@/components/AppShell"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
 import { ProfilePageSkeleton } from "@/components/skeletons"
@@ -77,19 +76,14 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
   // Token present but user not hydrated yet (OAuth race) - avoid a blank shell.
   if (!profileId) {
     return (
-      <Box>
-        <Navbar />
-        <PageShell>
-          <ProfilePageSkeleton wide={isNonMobileScreens} />
-        </PageShell>
-      </Box>
+      <AppShell>
+        <ProfilePageSkeleton wide={isNonMobileScreens} />
+      </AppShell>
     )
   }
 
   return (
-    <Box>
-      <Navbar />
-      <PageShell>
+    <AppShell>
         <Box
           sx={{
             gap: { xs: "1.15rem", md: "1.5rem" },
@@ -148,8 +142,7 @@ const ProfilePage = ({ id }: ProfilePageProps) => {
             )}
           </Box>
         </Box>
-      </PageShell>
-    </Box>
+    </AppShell>
   )
 }
 

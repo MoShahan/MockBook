@@ -16,8 +16,7 @@ import {
 } from "@mui/material"
 import { useRouter } from "next/navigation"
 
-import Navbar from "@/components/Navbar"
-import PageShell from "@/components/PageShell"
+import AppShell from "@/components/AppShell"
 import UserImage from "@/components/UserImage"
 import { api } from "@/lib/api"
 import { notificationCopy, notificationHref } from "@/lib/notifications"
@@ -133,9 +132,7 @@ const NotificationsPage = () => {
   }
 
   return (
-    <Box>
-      <Navbar />
-      <PageShell narrow>
+    <AppShell narrow>
         <Box
           sx={{
             display: "flex",
@@ -241,8 +238,7 @@ const NotificationsPage = () => {
             )}
           </List>
         )}
-      </PageShell>
-    </Box>
+    </AppShell>
   )
 }
 

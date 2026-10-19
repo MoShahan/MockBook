@@ -5,8 +5,8 @@ import { Box, Button, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppSelector } from "@/app/hooks"
+import AppShell from "@/components/AppShell"
 import BrandLogo from "@/components/BrandLogo"
-import Navbar from "@/components/Navbar"
 import PageShell, { PAGE_MAX_WIDTH } from "@/components/PageShell"
 import SiteFooter from "@/components/SiteFooter"
 
@@ -17,71 +17,82 @@ type InfoPageShellProps = {
 }
 
 /**
- * Shell for Help / Privacy / Terms - Navbar when signed in, minimal header when public.
+ * Shell for Help / Privacy / Terms — AppShell when signed in, minimal header when public.
  */
 const InfoPageShell = ({ title, subtitle, children }: InfoPageShellProps) => {
   const theme = useTheme()
   const router = useRouter()
   const isAuth = Boolean(useAppSelector(state => state.accessToken))
 
+  const body = (
+    <>
+      <Box sx={{ mb: subtitle ? 2.5 : 2.25 }}>
+        <Typography variant="h3" sx={{ mb: subtitle ? 0.6 : 0, fontWeight: 700, letterSpacing: "-0.02em" }}>
+          {title}
+        </Typography>
+        {subtitle ? (
+          <Typography
+            variant="body1"
+            sx={{ color: "text.secondary", lineHeight: 1.55, maxWidth: 540 }}
+          >
+            {subtitle}
+          </Typography>
+        ) : null}
+      </Box>
+      {children}
+    </>
+  )
+
+  if (isAuth) {
+    return (
+      <AppShell narrow>
+        {body}
+        <SiteFooter />
+      </AppShell>
+    )
+  }
+
   return (
     <Box sx={{ minHeight: "100dvh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
-      {isAuth ? (
-        <Navbar />
-      ) : (
+      <Box
+        component="header"
+        sx={{
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          bgcolor: "background.alt",
+        }}
+      >
         <Box
-          component="header"
           sx={{
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            bgcolor: "background.alt",
+            width: "100%",
+            maxWidth: PAGE_MAX_WIDTH,
+            margin: "0 auto",
+            px: { xs: 2, sm: 3, md: 4 },
+            py: 1.15,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
           }}
         >
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: PAGE_MAX_WIDTH,
-              margin: "0 auto",
-              px: { xs: 2, sm: 3, md: 4 },
-              py: 1.15,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
-            }}
-          >
-            <BrandLogo size="nav" onClick={() => router.push("/login")} />
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button size="small" onClick={() => router.push("/login")} sx={{ textTransform: "none" }}>
-                Sign in
-              </Button>
-              <Button
-                size="small"
-                variant="contained"
-                onClick={() => router.push("/register")}
-                sx={{ textTransform: "none" }}
-              >
-                Create account
-              </Button>
-            </Box>
+          <BrandLogo size="nav" onClick={() => router.push("/login")} />
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button size="small" onClick={() => router.push("/login")} sx={{ textTransform: "none" }}>
+              Sign in
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() => router.push("/register")}
+              sx={{ textTransform: "none" }}
+            >
+              Create account
+            </Button>
           </Box>
         </Box>
-      )}
+      </Box>
 
       <PageShell narrow sx={{ flex: 1 }}>
-        <Box sx={{ mb: subtitle ? 2.5 : 2.25 }}>
-          <Typography variant="h3" sx={{ mb: subtitle ? 0.6 : 0, fontWeight: 700, letterSpacing: "-0.02em" }}>
-            {title}
-          </Typography>
-          {subtitle ? (
-            <Typography
-              variant="body1"
-              sx={{ color: "text.secondary", lineHeight: 1.55, maxWidth: 540 }}
-            >
-              {subtitle}
-            </Typography>
-          ) : null}
-        </Box>
-        {children}
+        {body}
       </PageShell>
 
       <SiteFooter />

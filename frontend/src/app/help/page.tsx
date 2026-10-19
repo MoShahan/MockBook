@@ -39,11 +39,11 @@ const FAQS: { q: string; a: ReactNode }[] = [
   },
   {
     q: "How do friends and Find people work?",
-    a: "Open Find people from the menu (or /people) to search or browse recent users. On desktop, Home also has an Add people rail. Send a friend request for mutual friends, or follow someone to see their posts in Following. Everyone shows the wider feed.",
+    a: "Open Find people from the left sidebar (or /people) to search or browse recent users. Send a friend request for mutual friends, or follow someone to see their posts in Following. Everyone shows the wider feed.",
   },
   {
     q: "How do I edit my profile?",
-    a: "Open your profile (your name in the navbar), then use the manage-account control on your profile card to update name, location, occupation, avatar, and social links.",
+    a: "Open Profile in the left sidebar, then use the manage-account control on your profile card to update name, location, occupation, avatar, and social links.",
   },
   {
     q: "Is my data private?",

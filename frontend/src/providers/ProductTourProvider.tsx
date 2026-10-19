@@ -29,8 +29,8 @@ export function useProductTour(): ProductTourContextValue {
   return ctx
 }
 
-/** Sticky app bar height — keep page targets below it so the spotlight doesn’t include the header. */
-const STICKY_HEADER_OFFSET_PX = 88
+/** Slim AppShell top bar — keep page targets below it so the spotlight doesn’t include the header. */
+const STICKY_HEADER_OFFSET_PX = 64
 
 async function scrollTourTargetIntoView(selector: string, block: ScrollLogicalPosition = "center") {
   const el = document.querySelector(selector)
@@ -58,7 +58,7 @@ function buildTourSteps(): Step[] {
       title: "Find people",
       content:
         "Open Find people to search and connect. Send a friend request for mutual friends, or follow someone to see their posts in Following.",
-      placement: "left",
+      placement: "right",
       targetWaitTimeout: 4000,
       skipScroll: true,
       before: async () => {
@@ -74,7 +74,7 @@ function buildTourSteps(): Step[] {
         "Open the bell to see likes, comments, and other updates. Unread items show a badge here.",
       placement: "bottom",
       targetWaitTimeout: 4000,
-      // Already in the sticky header — don’t scroll the page.
+      // Already in the slim top bar — don’t scroll the page.
       skipScroll: true,
     },
     {
@@ -82,7 +82,7 @@ function buildTourSteps(): Step[] {
       target: TOUR_SELECTORS.navProfile,
       title: "Your profile",
       content: "Open your profile to edit details, change your photo, and see your posts, friends, and saved items.",
-      placement: "bottom",
+      placement: "right",
       targetWaitTimeout: 4000,
       skipScroll: true,
       before: async () => {
@@ -100,6 +100,8 @@ const AUTH_SHELL_PREFIXES = [
   "/notifications",
   "/friend-requests",
   "/people",
+  "/settings",
+  "/help",
 ]
 
 function isAuthShellPath(pathname: string): boolean {
@@ -136,7 +138,7 @@ const ProductTourProvider = ({ children }: { children: ReactNode }) => {
       overlayColor: isDark ? "rgba(0,0,0,0.65)" : "rgba(28,25,23,0.45)",
       zIndex: theme.zIndex.modal + 2,
       spotlightRadius: 10,
-      // Keep cutout clear of the sticky navbar (logo/theme were bleeding into step 1).
+      // Keep cutout clear of the slim AppShell top bar.
       scrollOffset: STICKY_HEADER_OFFSET_PX,
       spotlightPadding: { top: 6, right: 8, bottom: 8, left: 8 },
       buttons: ["back", "close", "primary", "skip"],

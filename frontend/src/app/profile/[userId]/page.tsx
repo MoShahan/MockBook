@@ -3,7 +3,7 @@
 import React, { Suspense, use } from "react"
 import { Box, CircularProgress } from "@mui/material"
 
-import Navbar from "@/components/Navbar"
+import AppShell from "@/components/AppShell"
 
 import ProfilePage from "../ProfilePage"
 
@@ -12,12 +12,11 @@ type OtherProfilePageProps = {
 }
 
 const ProfileFallback = () => (
-  <Box>
-    <Navbar />
+  <AppShell>
     <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
       <CircularProgress size={32} />
     </Box>
-  </Box>
+  </AppShell>
 )
 
 const OtherProfilePage = ({ params }: OtherProfilePageProps) => {

@@ -5,9 +5,8 @@ import { Box, Button, Tab, Tabs, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch } from "@/app/hooks"
+import AppShell from "@/components/AppShell"
 import EmptyState from "@/components/EmptyState"
-import Navbar from "@/components/Navbar"
-import PageShell from "@/components/PageShell"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
 import { PeopleListSkeleton } from "@/components/skeletons"
 import UserImage from "@/components/UserImage"
@@ -92,9 +91,7 @@ const FriendRequestsPage = () => {
   }
 
   return (
-    <Box>
-      <Navbar />
-      <PageShell narrow>
+    <AppShell narrow>
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
           Friend requests
         </Typography>
@@ -209,8 +206,7 @@ const FriendRequestsPage = () => {
             })}
           </Box>
         )}
-      </PageShell>
-    </Box>
+    </AppShell>
   )
 }
 
