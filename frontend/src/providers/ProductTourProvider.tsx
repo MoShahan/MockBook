@@ -81,7 +81,7 @@ function buildTourSteps(): Step[] {
       id: "nav-profile",
       target: TOUR_SELECTORS.navProfile,
       title: "Your profile",
-      content: "Open your profile to edit details, change your photo, and see your posts, friends, and saved items.",
+      content: "Click your name at the bottom of the sidebar to open your profile — edit details, change your photo, and see your posts, friends, and saved items.",
       placement: "right",
       targetWaitTimeout: 4000,
       skipScroll: true,

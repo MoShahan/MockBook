@@ -10,7 +10,6 @@ import {
   LogoutOutlined,
   Menu as MenuIcon,
   PersonAddAlt1,
-  PersonOutlined,
   PersonSearchOutlined,
   SettingsOutlined,
   TourOutlined,
@@ -180,20 +179,14 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
       badge: friendRequestCount,
       match: p => p === "/friend-requests" || p.startsWith("/friend-requests/"),
     },
-    {
-      id: "profile",
-      label: "Profile",
-      href: "/profile",
-      icon: <PersonOutlined />,
-      tour: "nav-profile",
-      match: p => {
-        if (p === "/profile") return true
-        if (!user?._id) return false
-        const m = /^\/profile\/([^/]+)/.exec(p)
-        return Boolean(m && sameUserId(m[1], user._id))
-      },
-    },
   ]
+
+  const profileActive =
+    pathname === "/profile" ||
+    Boolean(user?._id && (() => {
+      const m = /^\/profile\/([^/]+)/.exec(pathname)
+      return m && sameUserId(m[1], user._id)
+    })())
 
   const renderNavList = () => (
     <List sx={{ px: 1, py: 0.5, flex: 1 }}>
@@ -282,8 +275,43 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
   )
 
   const renderAccountBlock = () => (
-    <Box sx={{ px: 2, py: 1.5 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1, minWidth: 0 }}>
+    <Box sx={{ px: 1.5, py: 1.5 }}>
+      <Box
+        component="button"
+        type="button"
+        data-tour="nav-profile"
+        onClick={() => navigate("/profile")}
+        aria-label={`Open your profile (${fullName})`}
+        aria-current={profileActive ? "page" : undefined}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.25,
+          width: "100%",
+          minWidth: 0,
+          border: 0,
+          borderRadius: 2,
+          px: 1,
+          py: 0.85,
+          mb: 1,
+          cursor: "pointer",
+          textAlign: "left",
+          bgcolor: profileActive
+            ? alpha(theme.palette.primary.main, isDark ? 0.18 : 0.1)
+            : "transparent",
+          color: "inherit",
+          transition: "background-color 0.15s ease",
+          "&:hover": {
+            bgcolor: profileActive
+              ? alpha(theme.palette.primary.main, isDark ? 0.24 : 0.14)
+              : alpha(theme.palette.primary.main, isDark ? 0.1 : 0.06),
+          },
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.primary.main}`,
+            outlineOffset: 2,
+          },
+        }}
+      >
         <UserImage
           image={user?.picturePath || ""}
           name={fullName}
@@ -291,11 +319,19 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
           bgColor={user?.avatarColor}
         />
         <Box sx={{ minWidth: 0 }}>
-          <Typography noWrap title={fullName} sx={{ fontWeight: 600, color: dark, fontSize: "0.9rem" }}>
+          <Typography
+            noWrap
+            title={fullName}
+            sx={{
+              fontWeight: profileActive ? 700 : 600,
+              color: profileActive ? "primary.main" : dark,
+              fontSize: "0.9rem",
+            }}
+          >
             {fullName}
           </Typography>
           <Typography variant="body2" sx={{ color: medium, fontSize: "0.75rem" }}>
-            Your account
+            View profile
           </Typography>
         </Box>
       </Box>

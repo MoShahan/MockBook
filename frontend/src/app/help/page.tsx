@@ -43,7 +43,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
   },
   {
     q: "How do I edit my profile?",
-    a: "Open Profile in the left sidebar, then use the manage-account control on your profile card to update name, location, occupation, avatar, and social links.",
+    a: "Click your name and photo at the bottom of the left sidebar to open your profile, then use the manage-account control on your profile card to update name, location, occupation, avatar, and social links.",
   },
   {
     q: "Is my data private?",

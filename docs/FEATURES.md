@@ -102,7 +102,7 @@ Full feature list for the current app, plus planned items for a later release.
 - Stone-first theme + Fraunces / Source Sans 3; Xivi logo + mark; favicon / apple-touch icon
 - Split login/register layout with atmosphere images
 - **Help & FAQ** (`/help`), **Privacy** (`/privacy`), **Terms** (`/terms`)
-- Authenticated **app shell**: left sidebar (Home, Find people, Friend requests, Profile, Settings, Help, tutorial, theme, account/logout) + slim top bar (notifications bell); mobile hamburger drawer
+- Authenticated **app shell**: left sidebar (Home, Find people, Friend requests, Settings, Help, tutorial, theme; name/photo opens your profile; logout) + slim top bar (notifications bell); mobile hamburger drawer
 - In-app **product tutorial** (`react-joyride`): rail **Show tutorial** (compose, Find people, notifications, profile); replayable; optional one-time auto-run
 - Mobile nav drawer mirrors the left rail items
 - Skeleton loaders for posts feed, profile header, likers / friends / followers / following lists, and friend-request inbox
