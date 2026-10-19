@@ -34,7 +34,7 @@ const TAB_META: Record<
   friends: {
     label: "Friends",
     emptyTitle: "No friends yet",
-    emptyOwn: "Send a friend request from Home → Add people, or visit a profile.",
+    emptyOwn: "Send a friend request from Find people, or visit a profile.",
     emptyOther: "This person hasn’t added any friends yet.",
   },
   followers: {

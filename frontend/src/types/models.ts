@@ -45,6 +45,8 @@ export type User = {
   linkedin?: string
   instagram?: string
   viewedProfile?: number
+  /** Account creation time (ISO). */
+  createdAt?: string
 }
 
 /** Paginated people list (`/users/:id/friends|followers|following`). */
@@ -73,6 +75,8 @@ export type DiscoverUser = {
   avatarColor?: string
   location?: string
   occupation?: string
+  /** Account creation time (ISO). */
+  createdAt?: string
   relationship?: {
     isFriend: boolean
     isFollowing: boolean

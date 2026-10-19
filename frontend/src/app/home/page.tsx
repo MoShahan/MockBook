@@ -1,25 +1,23 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+import React, { useState } from "react"
+import PersonSearchOutlined from "@mui/icons-material/PersonSearchOutlined"
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
+  Button,
   Tab,
   Tabs,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material"
+import { useRouter } from "next/navigation"
 
 import AddPeopleWidget from "@/components/AddPeopleWidget"
 import Navbar from "@/components/Navbar"
 import PageShell from "@/components/PageShell"
 import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
 import { segmentedTabsSx } from "@/components/segmentedTabsSx"
-import { TOUR_EXPAND_PEOPLE_EVENT } from "@/lib/productTour"
 
 import { useAppSelector } from "../hooks"
 
@@ -30,17 +28,11 @@ type HomeTab = "friends" | "everyone"
 const HomePage = () => {
   const user = useAppSelector(state => state.user)
   const theme = useTheme()
+  const router = useRouter()
   const isWide = useMediaQuery("(min-width:1000px)")
   const [tab, setTab] = useState<HomeTab>("everyone")
-  const [peopleExpanded, setPeopleExpanded] = useState(false)
 
   const listKind: PostsListKind = tab === "friends" ? "friends" : "feed"
-
-  useEffect(() => {
-    const expand = () => setPeopleExpanded(true)
-    window.addEventListener(TOUR_EXPAND_PEOPLE_EVENT, expand)
-    return () => window.removeEventListener(TOUR_EXPAND_PEOPLE_EVENT, expand)
-  }, [])
 
   return (
     <Box>
@@ -56,6 +48,29 @@ const HomePage = () => {
         >
           <Box sx={{ flex: isWide ? "1 1 auto" : undefined, minWidth: 0, width: "100%" }}>
             <MyPostWidget url={user?.picturePath ?? ""} />
+            {!isWide ? (
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<PersonSearchOutlined />}
+                onClick={() => router.push("/people")}
+                sx={{
+                  mt: "1rem",
+                  mb: "0.25rem",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  justifyContent: "flex-start",
+                  borderColor: theme.palette.divider,
+                  color: theme.palette.neutral.dark,
+                  "&:hover": {
+                    borderColor: theme.palette.primary.main,
+                    bgcolor: "action.hover",
+                  },
+                }}
+              >
+                Find people
+              </Button>
+            ) : null}
             <Box sx={{ mt: "1.15rem", mb: "0.35rem" }}>
               <Typography
                 variant="caption"
@@ -93,38 +108,21 @@ const HomePage = () => {
               }}
             >
               <AddPeopleWidget />
-            </Box>
-          ) : (
-            <Accordion
-              disableGutters
-              elevation={0}
-              expanded={peopleExpanded}
-              onChange={(_, expanded) => setPeopleExpanded(expanded)}
-              sx={{
-                mt: "1.25rem",
-                width: "100%",
-                bgcolor: "transparent",
-                "&:before": { display: "none" },
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: 2,
-                overflow: "hidden",
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon fontSize="small" />}
-                aria-controls="add-people-content"
-                id="add-people-header"
-                sx={{ minHeight: 44, "& .MuiAccordionSummary-content": { my: 0.75 } }}
+              <Button
+                fullWidth
+                size="small"
+                onClick={() => router.push("/people")}
+                sx={{
+                  mt: 1,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  color: "text.secondary",
+                }}
               >
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: theme.palette.neutral.dark }}>
-                  Find people
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0, px: 0, pb: 0 }}>
-                <AddPeopleWidget embedded />
-              </AccordionDetails>
-            </Accordion>
-          )}
+                Open full page
+              </Button>
+            </Box>
+          ) : null}
         </Box>
       </PageShell>
     </Box>

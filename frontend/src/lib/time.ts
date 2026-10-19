@@ -1,3 +1,12 @@
+/** Calendar-style join date for profiles and discover rows (e.g. "Joined Jan 2024"). */
+export function formatJoinedDate(iso: string | Date | undefined | null): string {
+  if (!iso) return ""
+  const date = iso instanceof Date ? iso : new Date(iso)
+  if (Number.isNaN(date.getTime())) return ""
+  const monthYear = date.toLocaleString(undefined, { month: "short", year: "numeric" })
+  return `Joined ${monthYear}`
+}
+
 /** Human-readable time for post cards (relative when recent, else short date). */
 export function formatPostTime(iso: string | Date | undefined | null): string {
   if (!iso) return ""

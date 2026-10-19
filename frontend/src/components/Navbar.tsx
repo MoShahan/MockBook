@@ -11,6 +11,7 @@ import {
   Menu,
   PersonAddAlt1,
   PersonOutlined,
+  PersonSearchOutlined,
   TourOutlined,
 } from "@mui/icons-material"
 import {
@@ -34,7 +35,7 @@ import {
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { TOUR_OPEN_MENU_EVENT } from "@/lib/productTour"
+import { TOUR_OPEN_FIND_PEOPLE_NAV_EVENT, TOUR_OPEN_MENU_EVENT } from "@/lib/productTour"
 import { useProductTour } from "@/providers/ProductTourProvider"
 import { useToast } from "@/providers/ToastProvider"
 
@@ -77,6 +78,19 @@ const Navbar = () => {
     return () => window.removeEventListener(TOUR_OPEN_MENU_EVENT, openMenu)
   }, [isNonMobileScreens])
 
+  useEffect(() => {
+    const openFindPeopleNav = () => {
+      if (isNonMobileScreens) {
+        const btn = document.querySelector('[data-tour="nav-profile"]')
+        if (btn instanceof HTMLElement) btn.click()
+      } else {
+        setMobileOpen(true)
+      }
+    }
+    window.addEventListener(TOUR_OPEN_FIND_PEOPLE_NAV_EVENT, openFindPeopleNav)
+    return () => window.removeEventListener(TOUR_OPEN_FIND_PEOPLE_NAV_EVENT, openFindPeopleNav)
+  }, [isNonMobileScreens])
+
   const handleShowTutorial = () => {
     closeAccount()
     closeMobile()
@@ -91,6 +105,12 @@ const Navbar = () => {
     closeAccount()
     closeMobile()
     router.push("/profile")
+  }
+
+  const handleGoToPeople = () => {
+    closeAccount()
+    closeMobile()
+    router.push("/people")
   }
 
   const handleLogout = () => {
@@ -240,6 +260,12 @@ const Navbar = () => {
                 </ListItemIcon>
                 <ListItemText>Profile</ListItemText>
               </MenuItem>
+              <MenuItem data-tour="nav-find-people" onClick={handleGoToPeople}>
+                <ListItemIcon>
+                  <PersonSearchOutlined fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Find people</ListItemText>
+              </MenuItem>
               <Divider sx={{ my: 0.5 }} />
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>
@@ -330,6 +356,16 @@ const Navbar = () => {
                 <PersonOutlined />
               </ListItemIcon>
               <ListItemText primary="Profile" />
+            </ListItemButton>
+            <ListItemButton
+              data-tour="nav-find-people"
+              onClick={handleGoToPeople}
+              sx={{ borderRadius: 2 }}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <PersonSearchOutlined />
+              </ListItemIcon>
+              <ListItemText primary="Find people" />
             </ListItemButton>
             <ListItemButton
               onClick={() => {

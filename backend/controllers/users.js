@@ -263,6 +263,7 @@ export const discoverUsers = async (req, res, next) => {
           avatarColor: u.avatarColor || DEFAULT_AVATAR_COLOR,
           location: u.location || "",
           occupation: u.occupation || "",
+          createdAt: u.createdAt ? new Date(u.createdAt).toISOString() : undefined,
           relationship: rel,
         }
       }),

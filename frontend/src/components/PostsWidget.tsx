@@ -32,7 +32,7 @@ const EMPTY_COPY: Record<PostsListKind, { title: string; description: string }> 
   },
   friends: {
     title: "No friend posts yet",
-    description: "Add people from the right panel, or switch to Everyone to browse the wider feed.",
+    description: "Find people from the menu or Home, or switch to Everyone to browse the wider feed.",
   },
   authored: {
     title: "No posts yet",

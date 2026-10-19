@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import {
+  CalendarMonthOutlined,
   Facebook,
   Instagram,
   LinkedIn,
@@ -27,6 +28,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useAppSelector } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
+import { formatJoinedDate } from "@/lib/time"
 import {
   DEFAULT_AVATAR_COLOR,
   DEFAULT_COVER_COLOR,
@@ -438,6 +440,14 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
               {user.occupation?.trim() || "-"}
             </Typography>
           </Box>
+          {formatJoinedDate(user.createdAt) ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+              <CalendarMonthOutlined sx={{ fontSize: "1.05rem", color: main }} />
+              <Typography variant="body2" sx={{ color: medium }}>
+                {formatJoinedDate(user.createdAt)}
+              </Typography>
+            </Box>
+          ) : null}
         </Box>
 
         <Divider />

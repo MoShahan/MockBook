@@ -38,8 +38,8 @@ const FAQS: { q: string; a: ReactNode }[] = [
     a: "Use the heart to like, the comment field under a post to reply, and the bookmark to save posts for later. On your profile, open the Saved, Liked, or Commented tabs to find them again.",
   },
   {
-    q: "How do friends and Add people work?",
-    a: "Use Add people on Home to search or browse recent users and add friends. On someone’s profile you can add or remove them. Friend feeds only show posts from you and your friends; Everyone shows the wider feed.",
+    q: "How do friends and Find people work?",
+    a: "Open Find people from the menu (or /people) to search or browse recent users. On desktop, Home also has an Add people rail. Send a friend request for mutual friends, or follow someone to see their posts in Following. Everyone shows the wider feed.",
   },
   {
     q: "How do I edit my profile?",

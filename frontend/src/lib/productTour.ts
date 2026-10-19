@@ -2,6 +2,7 @@
 export const TOUR_SELECTORS = {
   compose: '[data-tour="compose"]',
   addPeople: '[data-tour="add-people"]',
+  findPeopleNav: '[data-tour="nav-find-people"]',
   notifications: '[data-tour="notifications"]',
   navProfile: '[data-tour="nav-profile"]',
 } as const
@@ -9,11 +10,11 @@ export const TOUR_SELECTORS = {
 /** localStorage key — first auto-run only once per browser. */
 export const TOUR_SEEN_KEY = "xivi.tour.v1.seen"
 
-/** Ask home page to expand the mobile Find people accordion. */
-export const TOUR_EXPAND_PEOPLE_EVENT = "xivi:tour-expand-people"
-
 /** Ask Navbar to open the mobile drawer (profile step on small screens). */
 export const TOUR_OPEN_MENU_EVENT = "xivi:tour-open-menu"
+
+/** Ask Navbar to reveal Find people (account menu on desktop, drawer on mobile). */
+export const TOUR_OPEN_FIND_PEOPLE_NAV_EVENT = "xivi:tour-open-find-people-nav"
 
 export function hasSeenProductTour(): boolean {
   if (typeof window === "undefined") return true

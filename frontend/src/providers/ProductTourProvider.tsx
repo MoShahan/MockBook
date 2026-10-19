@@ -10,7 +10,7 @@ import {
   delay,
   hasSeenProductTour,
   markProductTourSeen,
-  TOUR_EXPAND_PEOPLE_EVENT,
+  TOUR_OPEN_FIND_PEOPLE_NAV_EVENT,
   TOUR_OPEN_MENU_EVENT,
   TOUR_SELECTORS,
 } from "@/lib/productTour"
@@ -54,16 +54,16 @@ function buildTourSteps(): Step[] {
     },
     {
       id: "add-people",
-      target: TOUR_SELECTORS.addPeople,
-      title: "Friends & follow",
+      target: TOUR_SELECTORS.findPeopleNav,
+      title: "Find people",
       content:
-        "Find people to connect with. Send a friend request for mutual friends, or follow someone to see their posts in Following.",
+        "Open Find people to search and connect. Send a friend request for mutual friends, or follow someone to see their posts in Following.",
       placement: "left",
       targetWaitTimeout: 4000,
+      skipScroll: true,
       before: async () => {
-        window.dispatchEvent(new Event(TOUR_EXPAND_PEOPLE_EVENT))
+        window.dispatchEvent(new Event(TOUR_OPEN_FIND_PEOPLE_NAV_EVENT))
         await delay(400)
-        await scrollTourTargetIntoView(TOUR_SELECTORS.addPeople, "center")
       },
     },
     {
@@ -93,7 +93,14 @@ function buildTourSteps(): Step[] {
   ]
 }
 
-const AUTH_SHELL_PREFIXES = ["/home", "/profile", "/post/", "/notifications", "/friend-requests"]
+const AUTH_SHELL_PREFIXES = [
+  "/home",
+  "/profile",
+  "/post/",
+  "/notifications",
+  "/friend-requests",
+  "/people",
+]
 
 function isAuthShellPath(pathname: string): boolean {
   return AUTH_SHELL_PREFIXES.some(p => pathname === p || pathname.startsWith(p))
