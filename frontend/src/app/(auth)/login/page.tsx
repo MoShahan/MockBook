@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation"
 
 import Form from "@/components/Form"
 import { loginSchema } from "@/lib/authSchemas"
+import { resolveOauthError } from "@/lib/oauthErrors"
 import type { LoginFormValues } from "@/types/models"
 
 const loginInitVals: LoginFormValues = {
@@ -15,7 +16,7 @@ const loginInitVals: LoginFormValues = {
 
 function LoginFormWithOauth() {
   const searchParams = useSearchParams()
-  const oauthError = searchParams.get("oauthError")
+  const oauthError = resolveOauthError(searchParams.get("oauthError"))
   return (
     <>
       <Typography variant="h4" sx={{ mb: 0.75 }}>

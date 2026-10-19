@@ -47,6 +47,8 @@ import { api, mediaUrl } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 import { ACCEPT_IMAGE, validateImageFile } from "@/lib/imageUpload"
 import {
+  COMMENT_MAX,
+  COMMENT_TOO_LONG,
   graphemeLength,
   POST_DESCRIPTION_LIMIT_REACHED,
   POST_DESCRIPTION_MAX,
@@ -223,6 +225,10 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       setCommentError("Write a comment")
       return
     }
+    if (graphemeLength(text) > COMMENT_MAX) {
+      setCommentError(COMMENT_TOO_LONG)
+      return
+    }
     if (!user?._id) {
       setCommentError("You must be signed in to comment")
       return
@@ -375,8 +381,8 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
       setEditCommentError("Write a comment")
       return
     }
-    if (text.length > 2000) {
-      setEditCommentError("Comment is too long")
+    if (graphemeLength(text) > COMMENT_MAX) {
+      setEditCommentError(COMMENT_TOO_LONG)
       return
     }
     try {
@@ -924,7 +930,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                               }}
                               value={editCommentText}
                               onChange={e => {
-                                setEditCommentText(e.target.value)
+                                setEditCommentText(truncateGraphemes(e.target.value, COMMENT_MAX))
                                 if (editCommentError) setEditCommentError(undefined)
                               }}
                               disabled={isSavingEdit}
@@ -1197,7 +1203,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                   inputProps={{ "aria-label": "Add a comment", "aria-invalid": Boolean(commentError) }}
                   value={commentText}
                   onChange={e => {
-                    setCommentText(e.target.value)
+                    setCommentText(truncateGraphemes(e.target.value, COMMENT_MAX))
                     if (commentError) setCommentError(undefined)
                   }}
                   disabled={isSubmittingComment}

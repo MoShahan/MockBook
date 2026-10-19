@@ -1,10 +1,12 @@
 "use client"
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Box, Typography, useTheme } from "@mui/material"
+import { Box, Button, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { api } from "@/lib/api"
+import { getErrorMessage } from "@/lib/errors"
+import { useToast } from "@/providers/ToastProvider"
 import { appendPosts, setPosts } from "@/state"
 import type { PaginatedPosts, Post } from "@/types/models"
 
@@ -98,6 +100,7 @@ const PostsWidget = ({
   const router = useRouter()
   const posts = useAppSelector(state => state.posts)
   const theme = useTheme()
+  const { error: toastError } = useToast()
   const kind = resolveList(list, isProfile)
   const paginated = usesCursorPagination(kind)
 
@@ -105,6 +108,7 @@ const PostsWidget = ({
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
   const [nextCursor, setNextCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(false)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
@@ -120,6 +124,7 @@ const PostsWidget = ({
       try {
         setLoading(true)
         setLoadError(null)
+        setLoadMoreError(null)
         setNextCursor(null)
         setHasMore(false)
         const path = pathForList(kind, userId)
@@ -157,20 +162,26 @@ const PostsWidget = ({
     if (!paginated || !hasMore || !nextCursor || loadingMoreRef.current) return
     loadingMoreRef.current = true
     setLoadingMore(true)
+    setLoadMoreError(null)
     try {
       const path = pathForList(kind, userId, nextCursor)
       const { data } = await api.get<PaginatedPosts>(path)
       dispatch(appendPosts({ posts: data.posts || [] }))
       setNextCursor(data.nextCursor)
       setHasMore(Boolean(data.hasMore))
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, "Couldn’t load more posts")
+      setLoadMoreError(msg)
+      toastError(msg)
     } finally {
       loadingMoreRef.current = false
       setLoadingMore(false)
     }
-  }, [paginated, hasMore, nextCursor, kind, userId, dispatch])
+  }, [paginated, hasMore, nextCursor, kind, userId, dispatch, toastError])
 
   useEffect(() => {
-    if (!paginated || !hasMore) return
+    // Pause auto-fetch while an error is showing so we don't spam retries.
+    if (!paginated || !hasMore || loadMoreError) return
     const el = sentinelRef.current
     if (!el) return
 
@@ -184,7 +195,7 @@ const PostsWidget = ({
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [paginated, hasMore, loadMore, loadedFor, posts.length])
+  }, [paginated, hasMore, loadMore, loadMoreError, loadedFor, posts.length])
 
   if (loading || loadedFor !== loadKey) {
     return <PostsFeedSkeleton count={3} />
@@ -237,12 +248,36 @@ const PostsWidget = ({
           <PostWidget post={post} />
         </Box>
       ))}
-      {paginated && hasMore ? (
+      {paginated && hasMore && !loadMoreError ? (
         <Box ref={sentinelRef} role="status" aria-live="polite">
           {loadingMore ? <PostCardSkeleton /> : <Box sx={{ height: 1 }} aria-hidden />}
         </Box>
       ) : null}
-      {paginated && !hasMore && posts.length > 0 ? (
+      {loadMoreError ? (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+            py: 1.5,
+          }}
+        >
+          <Typography sx={{ color: "error.main", fontSize: "0.875rem", textAlign: "center" }} role="alert">
+            {loadMoreError}
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            disabled={loadingMore}
+            onClick={() => void loadMore()}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            {loadingMore ? "Loading…" : "Try again"}
+          </Button>
+        </Box>
+      ) : null}
+      {paginated && !hasMore && !loadMoreError && posts.length > 0 ? (
         <Typography sx={{ color: theme.palette.neutral.medium, textAlign: "center", py: 1 }}>
           You’re all caught up.
         </Typography>

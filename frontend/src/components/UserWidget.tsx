@@ -41,6 +41,7 @@ import type { PeopleListTab, User } from "@/types/models"
 import { sameUserId } from "@/types/models"
 
 import EditProfileDialog from "./EditProfileDialog"
+import EmptyState from "./EmptyState"
 import FlexBetween from "./FlexBetween"
 import PeopleListModal from "./PeopleListModal"
 import RelationshipActions from "./RelationshipActions"
@@ -74,22 +75,38 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   const main = palette.neutral.main
 
   const [fetched, setFetched] = useState<User | null>(null)
+  const [profileLoading, setProfileLoading] = useState(true)
+  const [profileError, setProfileError] = useState<string | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const [modBusy, setModBusy] = useState(false)
   const [peopleModalTab, setPeopleModalTab] = useState<PeopleListTab | null>(null)
   const { enabled } = useFeatureFlags()
   const canEditProfile = enabled("profileEdit")
 
-  const refreshProfile = () => {
+  const loadProfile = (opts?: { silent?: boolean }) => {
     if (!userId) return
     void (async () => {
       try {
+        if (!opts?.silent) {
+          setProfileLoading(true)
+          setProfileError(null)
+        }
         const { data } = await api.get<User>(`/users/${userId}`)
         setFetched(data)
-      } catch {
-        // keep last known
+        setProfileError(null)
+      } catch (err: unknown) {
+        // Silent refresh keeps last known profile; full load surfaces the error.
+        if (!opts?.silent) {
+          setProfileError(getErrorMessage(err, "Couldn’t load this profile"))
+        }
+      } finally {
+        if (!opts?.silent) setProfileLoading(false)
       }
     })()
+  }
+
+  const refreshProfile = () => {
+    loadProfile({ silent: true })
   }
 
   const isOwnProfile = isOwnProfileProp ?? sameUserId(loggedInUser?._id, userId)
@@ -97,10 +114,25 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
 
   useEffect(() => {
     if (!userId) return
+    setFetched(null)
+    setProfileLoading(true)
+    setProfileError(null)
     let cancelled = false
     void (async () => {
-      const { data } = await api.get<User>(`/users/${userId}`)
-      if (!cancelled) setFetched(data)
+      try {
+        const { data } = await api.get<User>(`/users/${userId}`)
+        if (!cancelled) {
+          setFetched(data)
+          setProfileError(null)
+        }
+      } catch (err: unknown) {
+        if (!cancelled) {
+          setFetched(null)
+          setProfileError(getErrorMessage(err, "Couldn’t load this profile"))
+        }
+      } finally {
+        if (!cancelled) setProfileLoading(false)
+      }
     })()
     return () => {
       cancelled = true
@@ -149,6 +181,21 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
     } else {
       router.push(`/profile/${userId}`)
     }
+  }
+
+  if (profileLoading && !user) {
+    return <ProfileWidgetSkeleton />
+  }
+
+  if (profileError && !user) {
+    return (
+      <EmptyState
+        title="Couldn’t load profile"
+        description={profileError}
+        actionLabel="Try again"
+        onAction={() => loadProfile()}
+      />
+    )
   }
 
   if (!user) {

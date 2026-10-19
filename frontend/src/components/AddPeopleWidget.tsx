@@ -206,9 +206,15 @@ const AddPeopleWidget = ({
       {loading ? (
         <PeopleListSkeleton count={5} />
       ) : error && users.length === 0 ? (
-        <Typography sx={{ color: "error.main", fontSize: "0.875rem", py: 1 }} role="alert">
-          {error}
-        </Typography>
+        <EmptyState
+          title="Couldn’t load people"
+          description={error}
+          actionLabel="Try again"
+          onAction={() => {
+            if (infinite) void loadInfiniteFirst(debounced)
+            else void loadPaged(pageIndex, debounced, cursors)
+          }}
+        />
       ) : !users.length ? (
         <EmptyState
           title={debounced ? "No matches" : "No people to show"}
@@ -282,9 +288,30 @@ const AddPeopleWidget = ({
             </Box>
           ) : null}
           {error ? (
-            <Typography sx={{ color: "error.main", fontSize: "0.8125rem", mt: 0.5 }} role="alert">
-              {error}
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 1,
+                mt: 0.5,
+              }}
+            >
+              <Typography sx={{ color: "error.main", fontSize: "0.8125rem" }} role="alert">
+                {error}
+              </Typography>
+              <Button
+                size="small"
+                onClick={() => {
+                  setError(undefined)
+                  if (infinite) void loadMoreInfinite()
+                  else void loadPaged(pageIndex, debounced, cursors)
+                }}
+                sx={{ textTransform: "none", fontWeight: 600, flexShrink: 0 }}
+              >
+                Retry
+              </Button>
+            </Box>
           ) : null}
         </Box>
       )}

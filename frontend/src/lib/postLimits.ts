@@ -1,9 +1,14 @@
-/** Match planned backend post description cap (A2). */
+/** Match backend `lib/postLimits.js` (A2 / F1). */
 export const POST_DESCRIPTION_MAX = 5000
 
 export const POST_DESCRIPTION_MAX_LABEL = "5,000 characters"
 
 export const POST_DESCRIPTION_LIMIT_REACHED = "Max limit reached"
+
+/** Match backend comment text cap. */
+export const COMMENT_MAX = 2000
+
+export const COMMENT_TOO_LONG = "Comment is too long (max 2,000 characters)"
 
 /**
  * Count user-visible characters (Unicode grapheme clusters).

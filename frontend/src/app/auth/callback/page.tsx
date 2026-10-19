@@ -1,14 +1,19 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Box, CircularProgress, Typography } from "@mui/material"
+import { Box, Button, CircularProgress, Typography } from "@mui/material"
 import { useRouter } from "next/navigation"
 
 import { useAppDispatch } from "@/app/hooks"
 import { api } from "@/lib/api"
 import { useToast } from "@/providers/ToastProvider"
-import { setLogin, setTokens } from "@/state"
+import { setLogin, setLogout, setTokens } from "@/state"
 import type { User } from "@/types/models"
+
+function clearOAuthHash() {
+  if (typeof window === "undefined") return
+  window.history.replaceState(null, "", "/auth/callback")
+}
 
 export default function OAuthCallbackPage() {
   const router = useRouter()
@@ -25,7 +30,9 @@ export default function OAuthCallbackPage() {
         const accessToken = params.get("accessToken")
         const refreshToken = params.get("refreshToken")
         if (!accessToken || !refreshToken) {
-          setError("Missing OAuth tokens")
+          clearOAuthHash()
+          dispatch(setLogout())
+          if (!cancelled) setError("Missing OAuth tokens")
           return
         }
 
@@ -35,11 +42,12 @@ export default function OAuthCallbackPage() {
         const { data } = await api.get<{ user: User }>("/auth/me")
         if (cancelled) return
         dispatch(setLogin({ user: data.user, accessToken, refreshToken }))
-        // Clear sensitive fragment from the address bar.
-        window.history.replaceState(null, "", "/auth/callback")
+        clearOAuthHash()
         success("Signed in")
         router.replace("/home")
       } catch {
+        clearOAuthHash()
+        dispatch(setLogout())
         if (!cancelled) {
           setError("Could not complete sign-in")
           toastError("Could not complete sign-in")
@@ -60,12 +68,18 @@ export default function OAuthCallbackPage() {
         alignItems: "center",
         justifyContent: "center",
         gap: 2,
+        px: 2,
       }}
     >
       {error ? (
-        <Typography color="error" role="alert">
-          {error}
-        </Typography>
+        <>
+          <Typography color="error" role="alert" sx={{ textAlign: "center" }}>
+            {error}
+          </Typography>
+          <Button variant="contained" onClick={() => router.replace("/login")} sx={{ textTransform: "none" }}>
+            Back to login
+          </Button>
+        </>
       ) : (
         <>
           <CircularProgress />

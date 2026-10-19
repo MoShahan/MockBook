@@ -2,6 +2,7 @@ import { assertFeatureEnabled } from "../lib/features.js"
 import { uploadImageBuffer } from "../lib/imagekit.js"
 import { createNotification } from "../lib/notifications.js"
 import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
+import { graphemeLength, POST_DESCRIPTION_MAX } from "../lib/postLimits.js"
 import {
   likesMapKeys,
   parseLikersPagination,
@@ -24,6 +25,9 @@ export const createPost = async (req, res, next) => {
 
     if (!description && !req.file?.buffer) {
       return res.status(400).json({ error: "Post must include text or an image" })
+    }
+    if (graphemeLength(description) > POST_DESCRIPTION_MAX) {
+      return res.status(400).json({ error: `Post text must be ${POST_DESCRIPTION_MAX} characters or fewer` })
     }
 
     let url = ""
@@ -456,6 +460,9 @@ export const updatePost = async (req, res, next) => {
 
     if (!description && !url) {
       return res.status(400).json({ error: "Post must include text or an image" })
+    }
+    if (graphemeLength(description) > POST_DESCRIPTION_MAX) {
+      return res.status(400).json({ error: `Post text must be ${POST_DESCRIPTION_MAX} characters or fewer` })
     }
 
     post.description = description

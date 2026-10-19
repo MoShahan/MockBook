@@ -102,4 +102,13 @@ describe("posts API", () => {
     const res = await request(getApp()).post("/posts").send({ description: "Nope" })
     assert.equal(res.status, 401)
   })
+
+  it("rejects create post when description exceeds 5000 characters", async () => {
+    const res = await request(getApp())
+      .post("/posts")
+      .set(authHeader(token))
+      .send({ description: "x".repeat(5001) })
+    assert.equal(res.status, 400)
+    assert.match(String(res.body.error || ""), /5000/i)
+  })
 })
