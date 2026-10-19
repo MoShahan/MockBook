@@ -25,7 +25,7 @@ Authorization: Bearer <accessToken>
 | `GET`    | `/notifications/unread-count`| Unread notification count                                        |
 | `PATCH`  | `/notifications/read-all`    | Mark all notifications read                                      |
 | `PATCH`  | `/notifications/:id/read`    | Mark one notification read                                       |
-| `GET`    | `/users/discover`            | Recent users or search (`?q=&limit=`; excludes self; includes `relationship`) |
+| `GET`    | `/users/discover`            | Recent users or search (`?q=&limit=&cursor=` → `{ users, nextCursor, hasMore }`; excludes self; includes `relationship`) |
 | `PATCH`  | `/users/me`                  | Update own profile (multipart optional `picture` → ImageKit; `avatarColor` / `coverColor` allowlisted hex) |
 | `GET`    | `/users/me/friend-requests`  | Pending requests (`?box=incoming\|outgoing`)                     |
 | `GET`    | `/users/me/friend-requests/count` | Incoming pending count                                      |

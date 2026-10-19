@@ -52,7 +52,7 @@ Full feature list for the current app, plus planned items for a later release.
 - Friend-request activity also appears in the notifications bell
 - Separate **Follow** and **Friend** actions on profiles and Add people (icon-only in dense lists)
 - Profile header: clickable **friends / followers / following** counts → modal with tabs + infinite scroll (paginated APIs)
-- **Add people** on `/home` (sticky rail on wide screens; collapsible “Find people” on mobile) with recent users + name search
+- **Add people** on `/home` (sticky rail on wide screens; collapsible “Find people” on mobile) with recent users + name search + **10 per page** (Previous / Next)
 - Own profile (`/profile`) and other profiles (`/profile/[userId]`)
 - Edit own profile (name, location, occupation, avatar, social handles, avatar color, cover color)
 - Solid color profile header (`coverColor`) and initials avatar color (`avatarColor`) when no photo

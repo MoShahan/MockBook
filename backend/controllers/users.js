@@ -1,5 +1,6 @@
 import { formatFriendsList } from "../lib/friends.js"
 import { uploadImageBuffer } from "../lib/imagekit.js"
+import { pageFromDocs, parseCursorPagination } from "../lib/pagination.js"
 import {
   listFollowersPage,
   pageIdList,
@@ -19,7 +20,7 @@ import User from "../models/User.js"
 const PUBLIC_USER_FIELDS =
   "_id firstName lastName picturePath avatarColor coverColor location occupation facebook x linkedin instagram friends following viewedProfile createdAt role isActive"
 
-const DISCOVER_FIELDS = "_id firstName lastName picturePath avatarColor location occupation"
+const DISCOVER_FIELDS = "_id firstName lastName picturePath avatarColor location occupation createdAt"
 
 function sanitizeName(raw, fallback) {
   if (typeof raw !== "string") return fallback
@@ -211,7 +212,7 @@ export const updateProfile = async (req, res, next) => {
 
 /**
  * Discover users: recent registrants by default, or name/email search when `q` is set.
- * Excludes the authenticated user. Limit 10-20.
+ * Excludes the authenticated user. Cursor pagination: `?limit=&cursor=` (default 10, max 30).
  */
 export const discoverUsers = async (req, res, next) => {
   try {
@@ -220,8 +221,7 @@ export const discoverUsers = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthenticated" })
     }
 
-    const rawLimit = Number.parseInt(String(req.query.limit ?? "10"), 10)
-    const limit = Math.min(20, Math.max(1, Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : 10))
+    const { limit, cursorDate } = parseCursorPagination(req.query)
     const q = typeof req.query.q === "string" ? req.query.q.trim() : ""
 
     const filter = { _id: { $ne: authUserId }, isActive: { $ne: false } }
@@ -232,17 +232,22 @@ export const discoverUsers = async (req, res, next) => {
       filter.$or = [{ firstName: re }, { lastName: re }, { email: re }]
     }
 
-    const users = await User.find(filter)
+    if (cursorDate) {
+      filter.createdAt = { $lt: cursorDate }
+    }
+
+    const docs = await User.find(filter)
       .select(DISCOVER_FIELDS)
       .sort({ createdAt: -1 })
-      .limit(limit)
+      .limit(limit + 1)
       .lean()
 
-    const ids = users.map(u => String(u._id))
+    const { pageDocs, nextCursor, hasMore } = pageFromDocs(docs, limit)
+    const ids = pageDocs.map(u => String(u._id))
     const relMap = await getRelationshipsMap(authUserId, ids)
 
     res.status(200).json({
-      users: users.map(u => {
+      users: pageDocs.map(u => {
         const id = String(u._id)
         const rel = relMap[id] || {
           isFriend: false,
@@ -261,6 +266,8 @@ export const discoverUsers = async (req, res, next) => {
           relationship: rel,
         }
       }),
+      nextCursor,
+      hasMore,
     })
   } catch (e) {
     next(e)
