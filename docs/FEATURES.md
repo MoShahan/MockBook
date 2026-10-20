@@ -33,7 +33,7 @@ Full feature list for the current app, plus planned items for a later release.
 - View who liked a post (click like count → list with profiles)
 - Save / unsave posts (bookmark on post cards)
 - Own profile tabs: Posts / Saved / Liked / Commented; other profiles show Posts only
-- Comment on posts (optimistic add + list with author)
+- Comment on posts (optimistic add + list with author; emoji picker on the comment box)
 - Edit / delete **own** comments (⋮ menu; confirm on delete)
 - Like / unlike comments (optimistic; heart + count)
 - View who liked a comment (click comment like count → list)

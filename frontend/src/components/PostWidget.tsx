@@ -139,6 +139,8 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
   const [isSavingEditPost, setIsSavingEditPost] = useState(false)
   const [imageFailed, setImageFailed] = useState(false)
   const editDescriptionInputRef = useRef<HTMLInputElement>(null)
+  const commentInputRef = useRef<HTMLInputElement>(null)
+  const editCommentInputRef = useRef<HTMLInputElement>(null)
   const likeInFlight = useRef(false)
   const commentLikeInFlight = useRef<Set<string>>(new Set())
 
@@ -912,7 +914,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                                 onClick={() => void patchCommentLike(comment._id!)}
                                 aria-label={isCommentLiked ? "Unlike comment" : "Like comment"}
                                 aria-pressed={isCommentLiked}
-                                sx={{ p: 0.35, color: isCommentLiked ? "error.main" : medium }}
+                                sx={{ p: 0.35, color: isCommentLiked ? primary : medium }}
                               >
                                 {isCommentLiked ? (
                                   <FavoriteOutlined sx={{ fontSize: "1rem" }} />
@@ -940,7 +942,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                                   fontFamily: "inherit",
                                   fontSize: "0.8rem",
                                   fontWeight: 500,
-                                  color: isCommentLiked ? "error.main" : medium,
+                                  color: isCommentLiked ? primary : medium,
                                   p: 0,
                                   minWidth: "1.75ch",
                                   textAlign: "left",
@@ -1010,6 +1012,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                             multiline
                             maxRows={4}
                             autoFocus
+                            inputRef={editCommentInputRef}
                             inputProps={{
                               "aria-label": "Edit comment",
                               "aria-invalid": Boolean(editCommentError),
@@ -1042,7 +1045,21 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                               {editCommentError}
                             </Typography>
                           )}
-                          <Box sx={{ display: "flex", gap: 0.75, mt: 0.85 }}>
+                          <Box sx={{ display: "flex", gap: 0.75, mt: 0.85, alignItems: "center" }}>
+                            {canEmoji ? (
+                              <EmojiPickerButton
+                                dense
+                                disabled={isSavingEdit}
+                                onSelect={emoji =>
+                                  insertEmojiAtCursor(
+                                    editCommentInputRef.current,
+                                    editCommentText,
+                                    emoji,
+                                    next => setEditCommentText(truncateGraphemes(next, COMMENT_MAX))
+                                  )
+                                }
+                              />
+                            ) : null}
                             <Button
                               size="small"
                               variant="contained"
@@ -1200,6 +1217,7 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                   fullWidth
                   multiline
                   maxRows={4}
+                  inputRef={commentInputRef}
                   placeholder="Add a comment…"
                   inputProps={{ "aria-label": "Add a comment", "aria-invalid": Boolean(commentError) }}
                   value={commentText}
@@ -1225,6 +1243,23 @@ const PostWidget = ({ post, onDeleted }: PostWidgetProps) => {
                     }
                   }}
                 />
+                {canEmoji ? (
+                  <EmojiPickerButton
+                    dense
+                    disabled={isSubmittingComment}
+                    onSelect={emoji =>
+                      insertEmojiAtCursor(
+                        commentInputRef.current,
+                        commentText,
+                        emoji,
+                        next => {
+                          setCommentText(truncateGraphemes(next, COMMENT_MAX))
+                          if (commentError) setCommentError(undefined)
+                        }
+                      )
+                    }
+                  />
+                ) : null}
                 <Tooltip title="Post comment">
                   <span>
                     <IconButton
