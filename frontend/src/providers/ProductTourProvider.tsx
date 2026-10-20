@@ -102,6 +102,7 @@ const AUTH_SHELL_PREFIXES = [
   "/people",
   "/settings",
   "/help",
+  "/coming-soon",
 ]
 
 function isAuthShellPath(pathname: string): boolean {

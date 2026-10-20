@@ -13,6 +13,7 @@ import {
   PersonSearchOutlined,
   SettingsOutlined,
   TourOutlined,
+  Upcoming,
 } from "@mui/icons-material"
 import {
   alpha,
@@ -248,6 +249,16 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
           <SettingsOutlined />
         </ListItemIcon>
         <ListItemText primary="Settings" />
+      </ListItemButton>
+      <ListItemButton
+        selected={pathname === "/coming-soon" || pathname.startsWith("/coming-soon/")}
+        onClick={() => navigate("/coming-soon")}
+        sx={{ borderRadius: 2, mb: 0.25 }}
+      >
+        <ListItemIcon sx={{ minWidth: 40 }}>
+          <Upcoming />
+        </ListItemIcon>
+        <ListItemText primary="Coming soon" />
       </ListItemButton>
       <ListItemButton onClick={() => navigate("/help")} sx={{ borderRadius: 2, mb: 0.25 }}>
         <ListItemIcon sx={{ minWidth: 40 }}>

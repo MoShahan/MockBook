@@ -7,6 +7,7 @@ import { PAGE_MAX_WIDTH } from "@/components/PageShell"
 
 const LINKS = [
   { href: "/help", label: "Help" },
+  { href: "/coming-soon", label: "Coming soon" },
   { href: "/help#contact", label: "Contact" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },

@@ -100,8 +100,8 @@ Full feature list for the current app, plus planned items for a later release.
 - Light / dark mode (persisted; first visit follows system preference)
 - Stone-first theme + Fraunces / Source Sans 3; Xivi logo + mark; favicon / apple-touch icon
 - Split login/register layout with atmosphere images
-- **Help & FAQ** (`/help`), **Privacy** (`/privacy`), **Terms** (`/terms`)
-- Authenticated **app shell**: left sidebar (Home, Find people, Friend requests, Settings, Help, tutorial, theme; name/photo opens your profile; logout) + slim top bar (notifications bell); mobile hamburger drawer
+- **Help & FAQ** (`/help`), **Coming soon** (`/coming-soon`), **Privacy** (`/privacy`), **Terms** (`/terms`)
+- Authenticated **app shell**: left sidebar (Home, Find people, Friend requests, Settings, Coming soon, Help, tutorial, theme; name/photo opens your profile; logout) + slim top bar (notifications bell); mobile hamburger drawer
 - In-app **product tutorial** (`react-joyride`): rail **Show tutorial** (compose, Find people, notifications, profile); replayable; optional one-time auto-run
 - Mobile nav drawer mirrors the left rail items
 - Skeleton loaders for posts feed, profile header, likers / friends / followers / following lists, and friend-request inbox
@@ -128,7 +128,7 @@ Full feature list for the current app, plus planned items for a later release.
 
 These are **not** in the current release. Planned for a later update:
 
-- Private friend graphs — option to hide friends / followers / following **lists** from other users (counts may still show)
+- Private friend graphs - option to hide friends / followers / following **lists** from other users (counts may still show)
 - Separate admin SPA / dedicated admin host
 - Moderator role (between regular user and full admin)
 - Report / block user
@@ -140,7 +140,7 @@ These are **not** in the current release. Planned for a later update:
 
 ### Comment replies + @mentions (design)
 
-**Not in this release.** Scope is **comments and replies only** — not the home compose / new-post box.
+**Not in this release.** Scope is **comments and replies only** - not the home compose / new-post box.
 
 **@mentions (Instagram / Facebook style)**
 
@@ -149,7 +149,7 @@ These are **not** in the current release. Planned for a later update:
 - Choosing a user inserts `@username` as a hyperlink to that person’s profile.
 - Clicking a posted mention opens `/profile/[userId]`.
 
-**Replies — one indent only (not Reddit / Tumblr nesting)**
+**Replies - one indent only (not Reddit / Tumblr nesting)**
 
 - A **top-level comment** sits flush with the comment list.
 - A **reply** is indented once, slightly to the right of that comment.
