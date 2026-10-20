@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import {
   Check,
+  HourglassEmpty,
   PersonAddOutlined,
   PersonRemoveOutlined,
   RssFeed,
@@ -361,7 +362,7 @@ const RelationshipActions = ({
                   aria-label="Cancel friend request"
                   sx={{ ...iconChipBase, ...coverSurface }}
                 >
-                  <PersonAddOutlined sx={{ fontSize: "1.1rem" }} />
+                  <HourglassEmpty sx={{ fontSize: "1.1rem" }} />
                 </IconButton>
               </span>
             </Tooltip>
@@ -472,6 +473,7 @@ const RelationshipActions = ({
                 disabled={busy}
                 onClick={() => void cancelRequest()}
                 aria-label="Cancel friend request"
+                startIcon={<HourglassEmpty sx={{ fontSize: "1rem !important" }} />}
                 sx={{ ...chipBase, ...coverSurface }}
               >
                 Requested
