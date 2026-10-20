@@ -140,6 +140,9 @@ npm run dev:frontend
 | `npm run format:check` | Check Prettier formatting   |
 | `npm run test`         | Frontend + backend tests    |
 | `npm run typecheck`    | Frontend `tsc --noEmit`     |
+| `npm run prepare`      | Installs Husky git hooks (runs after `npm install`) |
+
+Husky runs `npm run lint` (frontend + backend) on every **commit**. If lint fails, the commit is blocked. After clone, run `npm install` once so the hook is installed.
 
 ### Workspace examples
 
@@ -173,15 +176,17 @@ Set production secrets only in the host dashboards (never commit `.env`). Import
 
 ## CI
 
-GitHub Actions (Node 22, install from repo root):
+One GitHub Actions workflow (`.github/workflows/ci.yml`, Node 22, `npm ci` from the repo root). Jobs run **in parallel** so a lint failure does not hide a test failure:
 
-| Workflow           | Command                         |
+| Job                | Command                         |
 | ------------------ | ------------------------------- |
+| Frontend Lint      | `npm run lint -w frontend`      |
+| Frontend Typecheck | `npm run typecheck -w frontend` |
+| Frontend Test      | `npm run test -w frontend`      |
 | Backend Lint       | `npm run lint -w backend`       |
 | Backend Test       | `npm run test -w backend`       |
-| Frontend Lint      | `npm run lint -w frontend`      |
-| Frontend Test      | `npm run test -w frontend`      |
-| Frontend Typecheck | `npm run typecheck -w frontend` |
+
+Runs on pull requests and on pushes to `main`. A new commit on the same branch cancels an in-progress run.
 
 ---
 
