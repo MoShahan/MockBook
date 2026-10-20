@@ -133,6 +133,7 @@ These are **not** in the current release. Planned for a later update:
 - Moderator role (between regular user and full admin)
 - Report / block user
 - Comment replies + @mentions (see below)
+- Live feed updates (see below)
 - Multiple images per post, image compression, and soft-delete posts
 - Messaging / DMs / chat
 - Ads / sponsored content
@@ -166,6 +167,10 @@ A   Comment
 ```
 
 So: comment A → children B, C, D in one column. Reply to C still lands under D as another child of A, not pushed further right.
+
+### Live feed updates
+
+**Not in this release.** Opening Home, a profile, or a post loads that snapshot once. New posts, comments, and profile photos from other people do not appear until you refresh or navigate. A later update will show those changes without a manual refresh. The delivery method (periodic refetch vs realtime) is not decided yet.
 
 ---
 

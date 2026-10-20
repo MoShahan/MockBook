@@ -11,6 +11,7 @@ import {
   ImageOutlined,
   MailOutlined,
   ShieldOutlined,
+  SyncOutlined,
   Upcoming,
   VisibilityOffOutlined,
 } from "@mui/icons-material"
@@ -141,6 +142,16 @@ const ITEMS: RoadmapItem[] = [
     ],
     mockup: <CommentThreadMockup />,
     icon: <AlternateEmail />,
+  },
+  {
+    title: "Live feed updates",
+    summary:
+      "See new posts, comments, and profile photos without refreshing the page. Not available yet - we will add this later and choose the right way to deliver it then.",
+    details: [
+      "Today the feed is a snapshot from when you opened the page.",
+      "Someone else’s new post, comment, or photo change will not appear until you refresh or navigate.",
+    ],
+    icon: <SyncOutlined />,
   },
   {
     title: "Richer posts",
