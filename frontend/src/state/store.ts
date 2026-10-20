@@ -7,8 +7,10 @@ import authReducer from "@/state"
 const persistConfig = {
   key: "root",
   storage,
-  // v2: refreshToken; v3: ensure user.savedPosts exists after bookmark feature
-  version: 3,
+  // Feed is fetched from the API; do not keep it in localStorage.
+  blacklist: ["posts"],
+  // v2: refreshToken; v3: user.savedPosts; v4: drop persisted posts
+  version: 4,
   migrate: async (state: unknown) => {
     if (!state || typeof state !== "object") return state as never
     const s = state as Record<string, unknown>
@@ -26,6 +28,7 @@ const persistConfig = {
       ...s,
       user: nextUser,
       refreshToken: (s.refreshToken as string | null | undefined) ?? null,
+      posts: [],
     } as never
   },
 }
