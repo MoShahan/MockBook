@@ -6,11 +6,15 @@ import {
   Block,
   CampaignOutlined,
   ChatBubbleOutlineOutlined,
+  EventOutlined,
   ForumOutlined,
   GavelOutlined,
+  GroupsOutlined,
   ImageOutlined,
   MailOutlined,
+  NewspaperOutlined,
   ShieldOutlined,
+  StorefrontOutlined,
   SyncOutlined,
   Upcoming,
   VisibilityOffOutlined,
@@ -161,11 +165,43 @@ const ITEMS: RoadmapItem[] = [
   {
     title: "Messaging and DMs",
     summary: "Private conversations so you can talk one-to-one without putting everything on a post.",
+    details: [
+      "A Messages tab is in the sidebar now. Conversations are not built yet.",
+      "Friends inbox: message someone here only after they accept your friend request.",
+      "Other inbox: follow-only or a still-pending friend request does not land in Friends. That message goes to a separate requests inbox.",
+    ],
     icon: <ForumOutlined />,
   },
   {
+    title: "Groups",
+    summary: "Create or join communities with their own feed. Ongoing, unlike a one-off event.",
+    details: ["A Groups tab is in the sidebar. Joining and posting in a group is not built yet."],
+    icon: <GroupsOutlined />,
+  },
+  {
+    title: "Events",
+    summary: "Host or join hangouts with a date and time - meetups, birthdays, or anything scheduled.",
+    details: ["An Events tab is in the sidebar. Creating and RSVPing is not built yet."],
+    icon: <EventOutlined />,
+  },
+  {
+    title: "Marketplace",
+    summary: "Buy and sell with other people on Xivi. Member listings, not site-sold ads.",
+    details: [
+      "A Marketplace tab is in the sidebar. Listings are not built yet.",
+      "Sponsored feed ads, if they come later, stay a separate product.",
+    ],
+    icon: <StorefrontOutlined />,
+  },
+  {
+    title: "News",
+    summary: "Headlines and stories in their own place, separate from posts by people you know.",
+    details: ["A News tab is in the sidebar. Sources are not chosen yet."],
+    icon: <NewspaperOutlined />,
+  },
+  {
     title: "Ads and sponsored content",
-    summary: "Optional sponsored placements later. Not part of the product you use today.",
+    summary: "Optional sponsored placements later. Not the same as Marketplace, and not a sidebar tab.",
     icon: <CampaignOutlined />,
   },
   {
@@ -206,7 +242,8 @@ const ComingSoonPage = () => {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+          gridTemplateColumns: "1fr",
+          alignItems: "start",
           gap: 1.5,
         }}
       >
@@ -219,6 +256,8 @@ const ComingSoonPage = () => {
               borderRadius: 3,
               bgcolor: "background.alt",
               border: `1px solid ${theme.palette.divider}`,
+              alignSelf: "start",
+              height: "fit-content",
               gridColumn: item.mockup ? { xs: "1", md: "1 / -1" } : undefined,
               transition: "border-color 0.15s ease, box-shadow 0.15s ease",
               "&:hover": {

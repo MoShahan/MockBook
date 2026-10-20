@@ -4,14 +4,19 @@ import { type ReactNode, useCallback, useEffect, useState } from "react"
 import {
   Close,
   DarkMode,
+  EventOutlined,
+  GroupsOutlined,
   Help,
   HomeOutlined,
   LightMode,
   LogoutOutlined,
+  MailOutlined,
   Menu as MenuIcon,
+  NewspaperOutlined,
   PersonAddAlt1,
   PersonSearchOutlined,
   SettingsOutlined,
+  StorefrontOutlined,
   TourOutlined,
   Upcoming,
 } from "@mui/icons-material"
@@ -165,6 +170,13 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
       match: p => p === "/home",
     },
     {
+      id: "messages",
+      label: "Messages",
+      href: "/messages",
+      icon: <MailOutlined />,
+      match: p => p === "/messages" || p.startsWith("/messages/"),
+    },
+    {
       id: "people",
       label: "Find people",
       href: "/people",
@@ -179,6 +191,34 @@ const AppShell = ({ children, narrow = false }: AppShellProps) => {
       icon: <PersonAddAlt1 />,
       badge: friendRequestCount,
       match: p => p === "/friend-requests" || p.startsWith("/friend-requests/"),
+    },
+    {
+      id: "groups",
+      label: "Groups",
+      href: "/groups",
+      icon: <GroupsOutlined />,
+      match: p => p === "/groups" || p.startsWith("/groups/"),
+    },
+    {
+      id: "events",
+      label: "Events",
+      href: "/events",
+      icon: <EventOutlined />,
+      match: p => p === "/events" || p.startsWith("/events/"),
+    },
+    {
+      id: "marketplace",
+      label: "Marketplace",
+      href: "/marketplace",
+      icon: <StorefrontOutlined />,
+      match: p => p === "/marketplace" || p.startsWith("/marketplace/"),
+    },
+    {
+      id: "news",
+      label: "News",
+      href: "/news",
+      icon: <NewspaperOutlined />,
+      match: p => p === "/news" || p.startsWith("/news/"),
     },
   ]
 

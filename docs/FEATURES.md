@@ -101,7 +101,7 @@ Full feature list for the current app, plus planned items for a later release.
 - Stone-first theme + Fraunces / Source Sans 3; Xivi logo + mark; favicon / apple-touch icon
 - Split login/register layout with atmosphere images
 - **Help & FAQ** (`/help`), **Coming soon** (`/coming-soon`), **Privacy** (`/privacy`), **Terms** (`/terms`)
-- Authenticated **app shell**: left sidebar (Home, Find people, Friend requests, Settings, Coming soon, Help, tutorial, theme; name/photo opens your profile; logout) + slim top bar (notifications bell); mobile hamburger drawer
+- Authenticated **app shell**: left sidebar (Home, Messages, Find people, Friend requests, Groups, Events, Marketplace, News, Settings, Coming soon, Help, tutorial, theme; name/photo opens your profile; logout) + slim top bar (notifications bell); mobile hamburger drawer. Messages / Groups / Events / Marketplace / News are **Coming soon placeholders** (no product yet). Notifications stay on the bell, not a second rail item.
 - In-app **product tutorial** (`react-joyride`): rail **Show tutorial** (compose, Find people, notifications, profile); replayable; optional one-time auto-run
 - Mobile nav drawer mirrors the left rail items
 - Skeleton loaders for posts feed, profile header, likers / friends / followers / following lists, and friend-request inbox
@@ -135,8 +135,12 @@ These are **not** in the current release. Planned for a later update:
 - Comment replies + @mentions (see below)
 - Live feed updates (see below)
 - Multiple images per post, image compression, and soft-delete posts
-- Messaging / DMs / chat
-- Ads / sponsored content
+- Messaging / DMs / chat (see below) - sidebar tab exists as a placeholder
+- Groups - create/join communities with their own feed (sidebar placeholder)
+- Events - time-bound hangouts, separate from Groups (sidebar placeholder)
+- Marketplace - member buy/sell listings, not site ads (sidebar placeholder)
+- News - headlines in their own tab, separate from the social feed (sidebar placeholder)
+- Ads / sponsored content - not a sidebar tab; different from Marketplace
 - GIF, audio, or other non-image post attachments
 
 ### Comment replies + @mentions (design)
@@ -171,6 +175,28 @@ So: comment A → children B, C, D in one column. Reply to C still lands under D
 ### Live feed updates
 
 **Not in this release.** Opening Home, a profile, or a post loads that snapshot once. New posts, comments, and profile photos from other people do not appear until you refresh or navigate. A later update will show those changes without a manual refresh. The delivery method (periodic refetch vs realtime) is not decided yet.
+
+### Messaging / DMs
+
+**Not in this release.** A **Messages** tab is in the sidebar (`/messages`) as a placeholder.
+
+Two inboxes when it ships:
+
+- **Friends inbox** - you can message someone here only after they **accept your friend request**. Mutual friends only.
+- **Other / requests inbox** - if you **only follow** them, or a friend request is still **pending**, the message does **not** enter their Friends inbox. It goes to a separate inbox they can open or ignore.
+
+Following someone is not enough for the Friends inbox.
+
+### Groups, Events, Marketplace, News
+
+**Not in this release.** Each has a sidebar tab that explains the idea:
+
+- **Groups** (`/groups`) - ongoing communities people can create and join.
+- **Events** (`/events`) - one occasion with a date/time (meetup, birthday). Not a group.
+- **Marketplace** (`/marketplace`) - person-to-person listings. **Not** sponsored ads.
+- **News** (`/news`) - headlines in their own place, not mixed into Home.
+
+**Ads / sponsored content** stay on this roadmap only (no member sidebar tab). **Notifications** stay on the existing bell / `/notifications` page.
 
 ---
 
