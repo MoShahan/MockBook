@@ -1,244 +1,339 @@
 "use client"
 
-import { setLogin } from "@/state"
-import { Box, Button, TextField, Typography, useMediaQuery, useTheme } from "@mui/material"
-import React from "react"
+import React, { useState } from "react"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
+import {
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Link as MuiLink,
+  TextField,
+  Typography,
+  useMediaQuery,
+} from "@mui/material"
+import { Formik, type FormikHelpers } from "formik"
 import { useRouter } from "next/navigation"
-import * as yup from "yup"
-import { Formik, FormikHelpers } from "formik"
-import { EditOutlined } from "@mui/icons-material"
-import Dropzone from "react-dropzone"
+import type { ObjectSchema } from "yup"
+
 import { useAppDispatch } from "@/app/hooks"
-import FlexBetween from "./FlexBetween"
+import OauthButtons from "@/components/OauthButtons"
+import { api } from "@/lib/api"
+import { getErrorMessage } from "@/lib/errors"
+import { useToast } from "@/providers/ToastProvider"
+import { setLogin } from "@/state"
+import type { LoginFormValues, RegisterFormValues, User } from "@/types/models"
 
-type FormProps = { type: "login" | "register"; validationSchema: any; initVals: any }
+type AuthFormValues = LoginFormValues | RegisterFormValues
 
-const Form = ({ type, validationSchema, initVals }: FormProps) => {
+type FormProps =
+  | {
+      type: "login"
+      validationSchema: ObjectSchema<LoginFormValues>
+      initVals: LoginFormValues
+      oauthError?: string | null
+    }
+  | {
+      type: "register"
+      validationSchema: ObjectSchema<RegisterFormValues>
+      initVals: RegisterFormValues
+      oauthError?: string | null
+    }
+
+const Form = ({ type, validationSchema, initVals, oauthError = null }: FormProps) => {
   const router = useRouter()
-  const { palette }: any = useTheme()
   const dispatch = useAppDispatch()
+  const { success, error: toastError } = useToast()
   const isNonMobile = useMediaQuery("(min-width:600px)")
   const isLogin = type === "login"
   const isRegister = type === "register"
 
-  const handleGoToLogin = () => {
-    router.push("/login")
-  }
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const handleGoToRegister = () => {
-    router.push("/register")
-  }
-
-  const handleGoToHome = () => {
-    router.push("/home")
-  }
-
-  const login = async (vals: any, onSubmitProps: FormikHelpers<any>) => {
-    const response = await fetch("http://localhost:5000/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(vals),
-    })
-    const res = await response.json()
-    onSubmitProps.resetForm()
-
-    if (res) {
-      dispatch(setLogin({ user: res.user, accessToken: res.accessToken }))
-      handleGoToHome()
+  const login = async (vals: LoginFormValues, onSubmitProps: FormikHelpers<LoginFormValues>) => {
+    try {
+      onSubmitProps.setStatus(undefined)
+      const { data } = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
+        "/auth/login",
+        {
+          email: vals.email,
+          password: vals.password,
+        }
+      )
+      onSubmitProps.resetForm()
+      dispatch(
+        setLogin({
+          user: data.user,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        })
+      )
+      router.push("/home")
+    } catch (e: unknown) {
+      const msg = getErrorMessage(e, "Invalid credentials")
+      onSubmitProps.setStatus(msg)
+      toastError(msg)
     }
   }
 
-  const register = async (vals: any, onSubmitProps: FormikHelpers<any>) => {
-    const formData = new FormData() // to send image also
-    for (let value in vals) {
-      formData.append(value, vals[value])
-    }
-    formData.append("picture", vals.picture.name)
-    // formData.append("url", vals.picture.name)
-
-    const response = await fetch("http://localhost:5000/auth/register", { method: "POST", body: formData })
-    const res = await response.json()
-    onSubmitProps.resetForm()
-
-    if (res) {
-      handleGoToLogin()
+  const register = async (vals: RegisterFormValues, onSubmitProps: FormikHelpers<RegisterFormValues>) => {
+    try {
+      onSubmitProps.setStatus(undefined)
+      const { data } = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
+        "/auth/register",
+        {
+          firstName: vals.firstName.trim(),
+          lastName: vals.lastName.trim(),
+          email: vals.email.trim(),
+          password: vals.password,
+        }
+      )
+      onSubmitProps.resetForm()
+      dispatch(
+        setLogin({
+          user: data.user,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        })
+      )
+      success("Welcome to Xivi!")
+      router.push("/home")
+    } catch (e: unknown) {
+      const msg = getErrorMessage(e, "Registration failed")
+      onSubmitProps.setStatus(msg)
+      toastError(msg)
     }
   }
 
-  const handleFormSubmit = async (vals: any, onSubmitProps: FormikHelpers<any>) => {
-    if (isLogin) await login(vals, onSubmitProps)
-    if (isRegister) await register(vals, onSubmitProps)
+  const handleFormSubmit = async (vals: AuthFormValues, onSubmitProps: FormikHelpers<AuthFormValues>) => {
+    if (isLogin) {
+      await login(vals as LoginFormValues, onSubmitProps as FormikHelpers<LoginFormValues>)
+    }
+    if (isRegister) {
+      await register(vals as RegisterFormValues, onSubmitProps as FormikHelpers<RegisterFormValues>)
+    }
   }
 
   return (
-    <Formik onSubmit={handleFormSubmit} initialValues={initVals} validationSchema={validationSchema}>
-      {({ values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue }: any) => (
-        <form onSubmit={handleSubmit}>
-          <Box
-            display="grid"
-            gap="30px"
-            gridTemplateColumns="repeat(4,minmax(0,1fr))"
-            sx={{
-              "& > div": {
-                gridColumn: isNonMobile ? undefined : "span 4",
-              },
-            }}
-          >
-            {isRegister && (
-              <>
-                <TextField
-                  label="First Name"
-                  name="firstName"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.firstName}
-                  error={Boolean(touched.firstName) && Boolean(errors.firstName)}
-                  helperText={touched.firstName && errors.firstName}
-                  sx={{ gridColumn: "span 2" }}
-                />
-                <TextField
-                  label="Last Name"
-                  name="lastName"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.lastName}
-                  error={Boolean(touched.lastName) && Boolean(errors.lastName)}
-                  helperText={touched.lastName && errors.lastName}
-                  sx={{ gridColumn: "span 2" }}
-                />
-                <TextField
-                  label="Location"
-                  name="location"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.location}
-                  error={Boolean(touched.location) && Boolean(errors.location)}
-                  helperText={touched.location && errors.location}
-                  sx={{ gridColumn: "span 4" }}
-                />
-                <TextField
-                  label="Occupation"
-                  name="occupation"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.occupation}
-                  error={Boolean(touched.occupation) && Boolean(errors.occupation)}
-                  helperText={touched.occupation && errors.occupation}
-                  sx={{ gridColumn: "span 4" }}
-                />
-                <Box p="1rem" borderRadius="4px" gridColumn="span 4" border={`1px solid ${palette.neutral.medium}`}>
-                  <Dropzone multiple={false} onDrop={acceptedFiles => setFieldValue("picture", acceptedFiles[0])}>
-                    {({ getRootProps, getInputProps }) => (
-                      <Box
-                        {...getRootProps()}
-                        border={`2px dashed ${palette.primary.main}`}
-                        p="1rem"
-                        sx={{
-                          "&:hover": {
-                            cursor: "pointer",
-                          },
-                        }}
-                      >
-                        <input {...getInputProps()} />
-                        {!values.picture ? (
-                          <p>Add photo here</p>
-                        ) : (
-                          <FlexBetween>
-                            <Typography>{values.picture.name}</Typography>
-                            <EditOutlined />
-                          </FlexBetween>
-                        )}
-                      </Box>
-                    )}
-                  </Dropzone>
-                </Box>
-              </>
-            )}
-            <TextField
-              label="Email"
-              sx={{ gridColumn: "span 4" }}
-              type="email"
-              name="email"
-              onBlur={handleBlur}
-              onChange={handleChange}
-              value={values.email}
-              error={Boolean(touched.email) && Boolean(errors.email)}
-              helperText={touched.email && errors.email}
-            />
-            <TextField
-              onBlur={handleBlur}
-              onChange={handleChange}
-              value={values.password}
-              error={Boolean(touched.password) && Boolean(errors.password)}
-              helperText={touched.password && errors.password}
-              label="Password"
-              sx={{ gridColumn: "span 4" }}
-              type="password"
-              name="password"
-            />
-            {isRegister && (
+    <Formik<AuthFormValues>
+      onSubmit={handleFormSubmit}
+      initialValues={initVals}
+      validationSchema={validationSchema}
+      validateOnBlur
+      validateOnChange={false}
+    >
+      {({
+        values,
+        errors,
+        touched,
+        handleBlur,
+        handleChange,
+        handleSubmit,
+        status,
+        submitCount,
+        isSubmitting,
+      }) => {
+        const touchedFields = touched as Record<string, boolean | undefined>
+        const errorFields = errors as Record<string, string | undefined>
+        const fieldError = (name: string) =>
+          Boolean((touchedFields[name] || submitCount > 0) && errorFields[name])
+        const fieldHelper = (name: string) =>
+          (touchedFields[name] || submitCount > 0) && errorFields[name]
+            ? String(errorFields[name])
+            : " "
+
+        const registerValues = values as RegisterFormValues
+
+        return (
+          <form onSubmit={handleSubmit} noValidate>
+            <Box
+              sx={{
+                display: "grid",
+                gap: 2,
+                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                "& > div": {
+                  gridColumn: isNonMobile ? undefined : "span 4",
+                },
+              }}
+            >
+              {isRegister && (
+                <>
+                  <TextField
+                    label="First name"
+                    name="firstName"
+                    autoComplete="given-name"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={registerValues.firstName}
+                    error={fieldError("firstName")}
+                    helperText={fieldHelper("firstName")}
+                    sx={{ gridColumn: "span 2" }}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Last name"
+                    name="lastName"
+                    autoComplete="family-name"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={registerValues.lastName}
+                    error={fieldError("lastName")}
+                    helperText={fieldHelper("lastName")}
+                    sx={{ gridColumn: "span 2" }}
+                    fullWidth
+                  />
+                </>
+              )}
+              <TextField
+                label="Email"
+                sx={{ gridColumn: "span 4" }}
+                type="email"
+                name="email"
+                autoComplete="email"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.email}
+                error={fieldError("email")}
+                helperText={fieldHelper("email")}
+                fullWidth
+              />
               <TextField
                 onBlur={handleBlur}
                 onChange={handleChange}
-                value={values.cPassword}
-                error={Boolean(touched.cPassword) && Boolean(errors.cPassword)}
-                helperText={touched.cPassword && errors.cPassword}
-                label="Confirm Password"
+                value={values.password}
+                error={fieldError("password")}
+                helperText={fieldHelper("password")}
+                label="Password"
                 sx={{ gridColumn: "span 4" }}
-                type="password"
-                name="cPassword"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                autoComplete={isLogin ? "current-password" : "new-password"}
+                fullWidth
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          onClick={() => setShowPassword(v => !v)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
               />
-            )}
-          </Box>
-          <Box>
+              {isRegister && (
+                <TextField
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={registerValues.cPassword}
+                  error={fieldError("cPassword")}
+                  helperText={fieldHelper("cPassword")}
+                  label="Confirm password"
+                  sx={{ gridColumn: "span 4" }}
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="cPassword"
+                  autoComplete="new-password"
+                  fullWidth
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label={
+                              showConfirmPassword ? "Hide confirm password" : "Show confirm password"
+                            }
+                            onClick={() => setShowConfirmPassword(v => !v)}
+                            edge="end"
+                          >
+                            {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            </Box>
+
+            {status ? (
+              <Typography sx={{ color: "error.main", mt: 1.5 }} role="alert">
+                {String(status)}
+              </Typography>
+            ) : null}
+
             <Button
               fullWidth
               type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isSubmitting}
               sx={{
-                m: "2rem 0",
-                p: "1rem",
-                backgroundColor: palette.primary.main,
-                color: palette.background.alt,
-                "&:hover": { color: palette.primary.main },
+                mt: 2.5,
+                mb: 2,
+                py: 1.35,
+                fontSize: "1rem",
+                transition: "transform 0.15s ease, background-color 0.15s ease",
+                "&:active:not(:disabled)": { transform: "scale(0.985)" },
               }}
             >
-              {isLogin ? "LOGIN" : "REGISTER"}
+              {isSubmitting ? (isLogin ? "Signing in…" : "Creating account…") : isLogin ? "Sign in" : "Create account"}
             </Button>
-            {isLogin && (
-              <Typography
-                sx={{
-                  textAlign: "center",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  color: palette.primary.main,
-                  "&:hover": {
-                    color: palette.primary.light,
-                  },
-                }}
-                onClick={handleGoToRegister}
-              >
-                New User? Click here to register
-              </Typography>
-            )}
-            {isRegister && (
-              <Typography
-                sx={{
-                  textAlign: "center",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  color: palette.primary.main,
-                  "&:hover": {
-                    color: palette.primary.light,
-                  },
-                }}
-                onClick={handleGoToLogin}
-              >
-                Have an account already? Log In
-              </Typography>
-            )}
-          </Box>
-        </form>
-      )}
+
+            <Typography sx={{ textAlign: "center", color: "text.secondary", fontSize: "0.95rem" }}>
+              {isLogin ? (
+                <>
+                  New to Xivi?{" "}
+                  <MuiLink
+                    component="button"
+                    type="button"
+                    underline="hover"
+                    onClick={() => router.replace("/register")}
+                    sx={{
+                      fontWeight: 600,
+                      color: "primary.main",
+                      verticalAlign: "baseline",
+                      cursor: "pointer",
+                      border: 0,
+                      background: "none",
+                      font: "inherit",
+                    }}
+                  >
+                    Create an account
+                  </MuiLink>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <MuiLink
+                    component="button"
+                    type="button"
+                    underline="hover"
+                    onClick={() => router.replace("/login")}
+                    sx={{
+                      fontWeight: 600,
+                      color: "primary.main",
+                      verticalAlign: "baseline",
+                      cursor: "pointer",
+                      border: 0,
+                      background: "none",
+                      font: "inherit",
+                    }}
+                  >
+                    Sign in
+                  </MuiLink>
+                </>
+              )}
+            </Typography>
+
+            <OauthButtons oauthError={oauthError} />
+          </form>
+        )
+      }}
     </Formik>
   )
 }

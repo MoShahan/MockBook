@@ -1,41 +1,109 @@
 "use client"
 
-import Navbar from "@/components/Navbar"
-import { Box, Divider, useMediaQuery } from "@mui/material"
-import React from "react"
-import { useAppSelector } from "../hooks"
-import UserWidget from "@/components/UserWidget"
-import MyPostWidget from "./MyPostWidget"
-import PostsWidget from "@/components/PostsWidget"
-import AdvertWidget from "@/components/AdvertWidget"
-import FriendsListWidget from "@/components/FriendsListWidget"
+import React, { Suspense, useCallback, useEffect, useState } from "react"
+import { Box, CircularProgress, Tab, Tabs, Typography, useTheme } from "@mui/material"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
-const HomePage = () => {
-  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)")
-  const user = useAppSelector((state: any) => state?.user)
+import AppShell from "@/components/AppShell"
+import EmptyState from "@/components/EmptyState"
+import PostsWidget, { type PostsListKind } from "@/components/PostsWidget"
+import { segmentedTabsSx } from "@/components/segmentedTabsSx"
+import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
+
+import { useAppSelector } from "../hooks"
+
+import MyPostWidget from "./MyPostWidget"
+
+type HomeTab = "friends" | "everyone"
+
+function tabFromFeedParam(value: string | null): HomeTab {
+  return value === "friends" || value === "following" ? "friends" : "everyone"
+}
+
+const HomeFallback = () => (
+  <AppShell narrow>
+    <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+      <CircularProgress size={32} />
+    </Box>
+  </AppShell>
+)
+
+const HomePageContent = () => {
+  const user = useAppSelector(state => state.user)
+  const theme = useTheme()
+  const { enabled } = useFeatureFlags()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [tab, setTab] = useState<HomeTab>(() => tabFromFeedParam(searchParams.get("feed")))
+
+  useEffect(() => {
+    setTab(tabFromFeedParam(searchParams.get("feed")))
+  }, [searchParams])
+
+  const setFeedTab = useCallback(
+    (next: HomeTab) => {
+      setTab(next)
+      const params = new URLSearchParams(searchParams.toString())
+      if (next === "everyone") params.delete("feed")
+      else params.set("feed", "friends")
+      const qs = params.toString()
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    },
+    [pathname, router, searchParams]
+  )
+
+  const listKind: PostsListKind = tab === "friends" ? "friends" : "feed"
+  const canCreatePosts = enabled("postsCreate")
 
   return (
-    <Box>
-      <Navbar />
-      <Box gap="0.5rem" justifyContent="space-between" width="100%" padding="2rem 6%" display={isNonMobileScreens ? "flex" : "block"}>
-        <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-          <UserWidget url={user?.picturePath} userId={user?._id} />
-        </Box>
-        <Box flexBasis={isNonMobileScreens ? "42%" : undefined} mt={isNonMobileScreens ? undefined : "2rem"}>
-          <MyPostWidget url={user?.picturePath} />
-          <Divider sx={{ margin: "1rem" }} />
-          <PostsWidget isProfile={false} userId={user?._id}></PostsWidget>
-        </Box>
-        {isNonMobileScreens && (
-          <Box flexBasis="26%">
-            <AdvertWidget />
-            <Box m="2rem 0" />
-            <FriendsListWidget userId={user?._id} />
-          </Box>
-        )}
+    <AppShell narrow>
+      {canCreatePosts ? (
+        <MyPostWidget url={user?.picturePath ?? ""} />
+      ) : (
+        <EmptyState
+          title="Posting is temporarily disabled"
+          description="Creating new posts is turned off for regular accounts right now. You can still read the feed below."
+        />
+      )}
+      <Box sx={{ mt: "1.15rem", mb: "0.35rem" }}>
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            mb: 0.75,
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            color: theme.palette.neutral.medium,
+          }}
+        >
+          Feed
+        </Typography>
+        <Tabs
+          value={tab}
+          onChange={(_, value: HomeTab) => setFeedTab(value)}
+          aria-label="Home feed"
+          sx={segmentedTabsSx}
+        >
+          <Tab value="everyone" label="Everyone" disableRipple />
+          <Tab value="friends" label="Following" disableRipple />
+        </Tabs>
       </Box>
-    </Box>
+      <PostsWidget
+        key={listKind}
+        list={listKind}
+        userId={user?._id ?? ""}
+        onBrowseEveryone={() => setFeedTab("everyone")}
+      />
+    </AppShell>
   )
 }
+
+const HomePage = () => (
+  <Suspense fallback={<HomeFallback />}>
+    <HomePageContent />
+  </Suspense>
+)
 
 export default HomePage

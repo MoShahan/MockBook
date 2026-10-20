@@ -1,76 +1,196 @@
 "use client"
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { Box, IconButton, Typography, useTheme } from "@mui/material"
 import React from "react"
-import FlexBetween from "./FlexBetween"
+import { alpha, Box, Typography, useTheme } from "@mui/material"
 import { useRouter } from "next/navigation"
-import { setFriends } from "@/state"
+
+import { useAppSelector } from "@/app/hooks"
+import { sameUserId } from "@/types/models"
+import type { UserRelationship } from "@/types/relationships"
+
+import FlexBetween from "./FlexBetween"
+import RelationshipActions from "./RelationshipActions"
 import UserImage from "./UserImage"
-import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material"
 
-type FriendProps = { id: string; subtitle: string; url: string; name: string }
+type FriendProps = {
+  id: string
+  subtitle: string
+  url: string
+  name: string
+  /** Initials avatar background when no photo. */
+  avatarColor?: string
+  /** Avatar size - lists use 48px; post headers keep 55px. */
+  avatarSize?: string
+  /** When false, hide follow/friend actions (e.g. post cards). Default true. */
+  showFriendButton?: boolean
+  /** Prefill relationship (e.g. from discover). */
+  relationship?: Partial<UserRelationship> | null
+  /** Optional trailing control (e.g. post ⋮ menu). */
+  endAction?: React.ReactNode
+  /** Soft row hover for list contexts (friends / discover). */
+  listHover?: boolean
+  /** After friend/follow mutation from this row. */
+  onRelationshipChanged?: () => void
+  /** Called before navigating to this user’s profile (e.g. close a modal). */
+  onBeforeNavigate?: () => void
+}
 
-const Friend = ({ id, name, subtitle, url }: FriendProps) => {
-  const dispatch = useAppDispatch()
+const Friend = ({
+  id,
+  name,
+  subtitle,
+  url,
+  avatarColor,
+  avatarSize = "42px",
+  showFriendButton = true,
+  relationship = null,
+  endAction,
+  listHover = false,
+  onRelationshipChanged,
+  onBeforeNavigate,
+}: FriendProps) => {
   const router = useRouter()
-  const accessToken = useAppSelector((state: any) => state.accessToken)
-  const user = useAppSelector((state: any) => state?.user)
+  const user = useAppSelector(state => state.user)
 
-  const theme: any = useTheme()
-  const pLight = theme.palette.primary.light
+  const theme = useTheme()
   const main = theme.palette.neutral.main
   const medium = theme.palette.neutral.medium
+  const nameHover = theme.palette.primary.main
 
-  const isFriend = user?.friends.find((friend: any) => friend.id === id)
+  const isSelf = sameUserId(user?._id, id)
 
   const handleGoToProfile = () => {
-    if (id === user?._id) {
+    if (!id) return
+    onBeforeNavigate?.()
+    if (isSelf) {
       router.push("/profile")
     } else {
       router.push(`/profile/${id}`)
     }
-    router.refresh()
-  }
-
-  const patchFriend = async () => {
-    const response = await fetch(`http://localhost:5000/users/${user?._id}/${id}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    })
-    const res = await response.json()
-    dispatch(setFriends({ friends: res.friends }))
   }
 
   return (
-    <FlexBetween>
-      <FlexBetween gap="1rem">
-        <UserImage image={url} size="55px" />
-        <Box onClick={handleGoToProfile}>
-          <Typography
-            color={main}
-            variant="h5"
-            fontWeight="500"
-            sx={{
+    <FlexBetween
+      sx={{
+        width: "100%",
+        gap: 1,
+        minWidth: 0,
+        alignItems: "center",
+        ...(listHover
+          ? {
+              mx: -0.75,
+              px: 0.75,
+              py: 0.55,
+              borderRadius: 2,
+              transition: "background-color 0.15s ease",
               "&:hover": {
-                cursor: "pointer",
-                color: pLight,
+                bgcolor: alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.08 : 0.05
+                ),
+              },
+            }
+          : null),
+      }}
+    >
+      <FlexBetween sx={{ gap: "0.65rem", flex: "1 1 auto", minWidth: 0 }}>
+        <Box
+          onClick={handleGoToProfile}
+          onKeyDown={e => {
+            if (!id) return
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              handleGoToProfile()
+            }
+          }}
+          role={id ? "link" : undefined}
+          tabIndex={id ? 0 : undefined}
+          sx={{
+            cursor: id ? "pointer" : "default",
+            flexShrink: 0,
+            borderRadius: "50%",
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 2,
+            },
+          }}
+        >
+          <UserImage image={url} name={name} size={avatarSize} bgColor={avatarColor} />
+        </Box>
+        <Box
+          onClick={handleGoToProfile}
+          onKeyDown={e => {
+            if (!id) return
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              handleGoToProfile()
+            }
+          }}
+          role={id ? "link" : undefined}
+          tabIndex={id ? 0 : undefined}
+          sx={{
+            minWidth: 0,
+            flex: "1 1 auto",
+            borderRadius: 1,
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 2,
+            },
+          }}
+        >
+          <Typography
+            title={name}
+            sx={{
+              color: main,
+              fontWeight: 600,
+              fontSize: "0.9rem",
+              lineHeight: 1.45,
+              display: "block",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              py: "0.1em",
+              transition: "color 0.15s ease",
+              "&:hover": {
+                cursor: id ? "pointer" : "default",
+                color: id ? nameHover : main,
               },
             }}
           >
             {name}
           </Typography>
-          <Typography color={medium} fontSize="0.75rem">
-            {subtitle}
-          </Typography>
+          {subtitle ? (
+            <Typography
+              title={subtitle}
+              sx={{
+                color: medium,
+                fontSize: "0.75rem",
+                lineHeight: 1.4,
+                display: "block",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                py: "0.05em",
+              }}
+            >
+              {subtitle}
+            </Typography>
+          ) : null}
         </Box>
       </FlexBetween>
-      <IconButton sx={{ backgroundColor: pLight, p: "0.6rem" }} onClick={patchFriend}>
-        {isFriend ? <PersonRemoveOutlined /> : <PersonAddOutlined />}
-      </IconButton>
+      {(showFriendButton && id && !isSelf) || endAction ? (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
+          {showFriendButton && id && !isSelf ? (
+            <RelationshipActions
+              userId={id}
+              initial={relationship}
+              dense
+              onChanged={onRelationshipChanged}
+            />
+          ) : null}
+          {endAction}
+        </Box>
+      ) : null}
     </FlexBetween>
   )
 }
