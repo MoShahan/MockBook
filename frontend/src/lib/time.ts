@@ -33,3 +33,27 @@ export function formatPostTime(iso: string | Date | undefined | null): string {
     minute: "2-digit",
   })
 }
+
+/** Compact relative time for comment rows (e.g. 45m, 3h, 2d). */
+export function formatCompactTime(iso: string | Date | undefined | null): string {
+  if (!iso) return ""
+  const date = iso instanceof Date ? iso : new Date(iso)
+  if (Number.isNaN(date.getTime())) return ""
+
+  const diffMs = Math.max(0, Date.now() - date.getTime())
+  const sec = Math.floor(diffMs / 1000)
+  const min = Math.floor(sec / 60)
+  const hr = Math.floor(min / 60)
+  const day = Math.floor(hr / 24)
+
+  if (sec < 60) return "now"
+  if (min < 60) return `${min}m`
+  if (hr < 24) return `${hr}h`
+  if (day < 7) return `${day}d`
+
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
+  })
+}
