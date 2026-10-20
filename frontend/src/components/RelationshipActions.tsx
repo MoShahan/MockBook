@@ -23,6 +23,7 @@ import { getErrorMessage } from "@/lib/errors"
 import { useFeatureFlags } from "@/providers/FeatureFlagsProvider"
 import { useToast } from "@/providers/ToastProvider"
 import { setFollowing, setFriends } from "@/state"
+import { colorTokens } from "@/theme"
 import type { Friend } from "@/types/models"
 import type { UserRelationship } from "@/types/relationships"
 
@@ -73,6 +74,7 @@ const RelationshipActions = ({
   const canFollow = enabled("follow")
   const brand = theme.palette.primary.main
   const dark = theme.palette.neutral.dark
+  const coverInk = colorTokens.stone[800]
 
   const [rel, setRel] = useState<UserRelationship>(() => ({
     isFriend: Boolean(initial?.isFriend),
@@ -89,7 +91,8 @@ const RelationshipActions = ({
         bgcolor: alpha(theme.palette.common.white, theme.palette.mode === "dark" ? 0.92 : 0.94),
         border: `1px solid ${alpha(theme.palette.common.black, 0.08)}`,
         boxShadow: `0 1px 2px ${alpha(theme.palette.common.black, 0.18)}`,
-        color: dark,
+        color: coverInk,
+        "& .MuiButton-startIcon, & .MuiSvgIcon-root": { color: "inherit" },
         "&:hover": {
           bgcolor: theme.palette.common.white,
           borderColor: alpha(brand, 0.35),
