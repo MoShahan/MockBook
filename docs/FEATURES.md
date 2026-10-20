@@ -128,7 +128,9 @@ Full feature list for the current app, plus planned items for a later release.
 
 These are **not** in the current release. Planned for a later update:
 
-- Option to hide friends / followers / following **lists** from other users on your profile (counts may still show)
+- Private friend graphs — option to hide friends / followers / following **lists** from other users (counts may still show)
+- Separate admin SPA / dedicated admin host
+- Moderator role (between regular user and full admin)
 - Report / block user
 - Multiple images per post, image compression, and soft-delete posts
 - Messaging / DMs / chat

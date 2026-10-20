@@ -6,6 +6,8 @@ Post text and images, like and comment, send friend requests, follow people, bro
 
 **Author:** Mohammed Shahan
 
+**Live app:** [https://xivi.vercel.app](https://xivi.vercel.app) · **API:** [https://xivi-api.onrender.com](https://xivi-api.onrender.com)
+
 ---
 
 ## Documentation
@@ -151,6 +153,21 @@ npm run start -w backend
 ```
 
 Backend tests use **in-memory MongoDB** (`mongodb-memory-server`) - no Atlas URI required for `npm run test -w backend`.
+
+---
+
+## Production deployment
+
+| Piece | Host | Notes |
+| ----- | ---- | ----- |
+| Frontend (Next.js) | [Vercel](https://vercel.com) | Root Directory `frontend/`; `NEXT_PUBLIC_API_URL` = Render API URL |
+| Backend (Express) | [Render](https://render.com) | Root Directory `backend/`; Build `npm install`; Start `npm start`; health `GET /health` |
+| Database | MongoDB Atlas | `MONGODB_URI` on Render |
+| Images | ImageKit | `IMAGEKIT_*` on Render (server only) |
+
+Set production secrets only in the host dashboards (never commit `.env`). Important Render vars: `ACCESS_TOKEN_SECRET`, `REFRESH_TOKEN_SECRET`, `FRONTEND_URL` (Vercel origin, no trailing slash), `API_PUBLIC_URL` (Render origin), `TRUST_PROXY=1`, plus ImageKit and optional OAuth keys. Full list: [`backend/.env.example`](./backend/.env.example).
+
+**Free-tier note:** Render may sleep after idle; the first request can take 30–60s.
 
 ---
 
