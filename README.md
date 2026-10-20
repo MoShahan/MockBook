@@ -1,8 +1,8 @@
 # Xivi
 
-A social networking app built as an **npm workspaces** monorepo: Next.js frontend + Express API + MongoDB.
+Xivi is a full-stack social networking platform packaged as an **npm workspaces** monorepo: a Next.js frontend, an Express REST API, and MongoDB.
 
-Post text and images, like and comment, send friend requests, follow people, browse profiles, and use light/dark mode - with Bearer JWT auth and ImageKit uploads.
+Share posts with text and images, engage with likes and comments, grow your network through friend requests and one-way follows, and browse rich profiles with friends, followers, and following. The product also includes in-app notifications, OAuth sign-in (Google, GitHub, Discord), admin feature flags, light/dark mode, and ImageKit-backed media — secured with Bearer JWT access and refresh tokens.
 
 **Author:** Mohammed Shahan
 
