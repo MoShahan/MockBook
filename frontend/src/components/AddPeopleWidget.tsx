@@ -53,6 +53,7 @@ const AddPeopleWidget = ({
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | undefined>()
+  const [retryTick, setRetryTick] = useState(0)
 
   const loadingMoreRef = useRef(false)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
@@ -97,36 +98,51 @@ const AddPeopleWidget = ({
     }
   }, [])
 
-  const loadInfiniteFirst = useCallback(async (search: string) => {
-    setLoading(true)
-    setError(undefined)
+  const requestKey = `${infinite ? "infinite" : "pages"}:${debounced}:${retryTick}`
+  const [appliedKey, setAppliedKey] = useState(requestKey)
+  if (appliedKey !== requestKey) {
+    setAppliedKey(requestKey)
     setUsers([])
-    setNextCursor(null)
-    setHasMore(false)
-    try {
-      const { data } = await api.get<DiscoverPage>("/users/discover", {
-        params: { limit: PAGE_LIMIT, ...(search ? { q: search } : {}) },
-      })
-      setUsers(Array.isArray(data.users) ? data.users : [])
-      setNextCursor(data.nextCursor ?? null)
-      setHasMore(Boolean(data.hasMore))
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, "Failed to load people"))
-      setUsers([])
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (infinite) {
-      void loadInfiniteFirst(debounced)
-      return
-    }
     setCursors([null])
     setPageIndex(0)
-    void loadPaged(0, debounced, [null])
-  }, [debounced, infinite, loadInfiniteFirst, loadPaged])
+    setNextCursor(null)
+    setHasMore(false)
+    setError(undefined)
+    setLoading(true)
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const { data } = await api.get<DiscoverPage>("/users/discover", {
+          params: { limit: PAGE_LIMIT, ...(debounced ? { q: debounced } : {}) },
+        })
+        if (cancelled) return
+        if (infinite) {
+          setUsers(Array.isArray(data.users) ? data.users : [])
+          setNextCursor(data.nextCursor ?? null)
+          setHasMore(Boolean(data.hasMore))
+        } else {
+          const pageUsers = Array.isArray(data.users) ? data.users.slice(0, PAGE_LIMIT) : []
+          setUsers(pageUsers)
+          setHasMore(Boolean(data.hasMore))
+          setPageIndex(0)
+          setCursors(data.nextCursor ? [null, data.nextCursor] : [null])
+        }
+      } catch (err: unknown) {
+        if (cancelled) return
+        setError(getErrorMessage(err, "Failed to load people"))
+        setUsers([])
+        setHasMore(false)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [debounced, infinite, retryTick])
 
   const loadMoreInfinite = useCallback(async () => {
     if (!hasMore || !nextCursor || loadingMoreRef.current || loading) return
@@ -210,10 +226,7 @@ const AddPeopleWidget = ({
           title="Couldn’t load people"
           description={error}
           actionLabel="Try again"
-          onAction={() => {
-            if (infinite) void loadInfiniteFirst(debounced)
-            else void loadPaged(pageIndex, debounced, cursors)
-          }}
+          onAction={() => setRetryTick(n => n + 1)}
         />
       ) : !users.length ? (
         <EmptyState

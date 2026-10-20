@@ -74,9 +74,17 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
   const medium = palette.neutral.medium
   const main = palette.neutral.main
 
+  const [loadedUserId, setLoadedUserId] = useState(userId)
   const [fetched, setFetched] = useState<User | null>(null)
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
+
+  if (loadedUserId !== userId) {
+    setLoadedUserId(userId)
+    setFetched(null)
+    setProfileLoading(Boolean(userId))
+    setProfileError(null)
+  }
   const [editOpen, setEditOpen] = useState(false)
   const [modBusy, setModBusy] = useState(false)
   const [peopleModalTab, setPeopleModalTab] = useState<PeopleListTab | null>(null)
@@ -114,9 +122,6 @@ const UserWidget = ({ userId, url, isOwnProfile: isOwnProfileProp }: UserWidgetP
 
   useEffect(() => {
     if (!userId) return
-    setFetched(null)
-    setProfileLoading(true)
-    setProfileError(null)
     let cancelled = false
     void (async () => {
       try {

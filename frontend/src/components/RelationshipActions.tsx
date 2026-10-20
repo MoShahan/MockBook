@@ -39,6 +39,16 @@ type RelationshipActionsProps = {
   onChanged?: () => void
 }
 
+function relFromInitial(initial?: Partial<UserRelationship> | null): UserRelationship {
+  return {
+    isFriend: Boolean(initial?.isFriend),
+    isFollowing: Boolean(initial?.isFollowing),
+    outgoingRequestId: initial?.outgoingRequestId ?? null,
+    incomingRequestId: initial?.incomingRequestId ?? null,
+    isSelf: Boolean(initial?.isSelf),
+  }
+}
+
 const chipBase = {
   flexShrink: 0,
   textTransform: "none" as const,
@@ -77,15 +87,16 @@ const RelationshipActions = ({
   const dark = theme.palette.neutral.dark
   const coverInk = colorTokens.stone[800]
 
-  const [rel, setRel] = useState<UserRelationship>(() => ({
-    isFriend: Boolean(initial?.isFriend),
-    isFollowing: Boolean(initial?.isFollowing),
-    outgoingRequestId: initial?.outgoingRequestId ?? null,
-    incomingRequestId: initial?.incomingRequestId ?? null,
-    isSelf: Boolean(initial?.isSelf),
-  }))
-  const [loading, setLoading] = useState(() => !initial)
+  const [relUserId, setRelUserId] = useState(userId)
+  const [rel, setRel] = useState<UserRelationship>(() => relFromInitial(initial))
+  const [loading, setLoading] = useState(() => initial == null)
   const [busy, setBusy] = useState(false)
+
+  if (relUserId !== userId) {
+    setRelUserId(userId)
+    setRel(relFromInitial(initial))
+    setLoading(initial == null)
+  }
 
   const coverSurface = onCover
     ? {
@@ -143,20 +154,8 @@ const RelationshipActions = ({
 
   useEffect(() => {
     if (!userId || !loggedInId) return
-
     // Discover / friends / followers / following already embed `relationship`.
-    // Skip per-row GET /relationship to avoid N+1 requests; still refresh after mutations.
-    if (initial != null) {
-      setRel({
-        isFriend: Boolean(initial.isFriend),
-        isFollowing: Boolean(initial.isFollowing),
-        outgoingRequestId: initial.outgoingRequestId ?? null,
-        incomingRequestId: initial.incomingRequestId ?? null,
-        isSelf: Boolean(initial.isSelf),
-      })
-      setLoading(false)
-      return
-    }
+    if (initial != null) return
 
     let cancelled = false
     void (async () => {
@@ -174,9 +173,7 @@ const RelationshipActions = ({
     return () => {
       cancelled = true
     }
-    // `initial` is only read when userId mounts/changes (list rows remount per person).
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid re-applying stale initial after mutations
-  }, [userId, loggedInId])
+  }, [userId, loggedInId, initial])
 
   if (!loggedInId || String(loggedInId) === String(userId) || rel.isSelf) {
     return null

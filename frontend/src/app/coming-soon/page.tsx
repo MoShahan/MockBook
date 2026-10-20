@@ -1,6 +1,5 @@
 "use client"
 
-import type { ReactNode } from "react"
 import {
   AdminPanelSettingsOutlined,
   AlternateEmail,
@@ -17,6 +16,7 @@ import {
 } from "@mui/icons-material"
 import { alpha, Box, Button, Link as MuiLink, Typography, useTheme } from "@mui/material"
 import NextLink from "next/link"
+import type { ReactNode } from "react"
 
 import InfoPageShell from "@/components/InfoPageShell"
 

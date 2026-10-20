@@ -1,6 +1,6 @@
 "use client"
 
-import React, { Suspense, useCallback, useEffect, useState } from "react"
+import React, { Suspense, useCallback } from "react"
 import { Box, CircularProgress, Tab, Tabs, Typography, useTheme } from "@mui/material"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
@@ -35,15 +35,10 @@ const HomePageContent = () => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [tab, setTab] = useState<HomeTab>(() => tabFromFeedParam(searchParams.get("feed")))
-
-  useEffect(() => {
-    setTab(tabFromFeedParam(searchParams.get("feed")))
-  }, [searchParams])
+  const tab = tabFromFeedParam(searchParams.get("feed"))
 
   const setFeedTab = useCallback(
     (next: HomeTab) => {
-      setTab(next)
       const params = new URLSearchParams(searchParams.toString())
       if (next === "everyone") params.delete("feed")
       else params.set("feed", "friends")

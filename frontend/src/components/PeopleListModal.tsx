@@ -92,36 +92,42 @@ const PeopleListModal = ({
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const loadingMoreRef = useRef(false)
 
-  const loadFirstPage = useCallback(
-    async (activeTab: PeopleListTab) => {
-      if (!userId) return
-      setLoading(true)
-      setError(undefined)
-      setPeople([])
-      setNextCursor(null)
-      setHasMore(false)
-      try {
-        const { data } = await api.get<PaginatedPeople>(pathForTab(userId, activeTab), {
-          params: { limit: PAGE_LIMIT },
-        })
-        setPeople(Array.isArray(data.users) ? data.users : [])
-        setNextCursor(data.nextCursor ?? null)
-        setHasMore(Boolean(data.hasMore))
-      } catch (err: unknown) {
-        setError(getErrorMessage(err, "Failed to load people"))
-        setPeople([])
-      } finally {
-        setLoading(false)
-      }
-    },
-    [userId]
-  )
+  const fetchKey = open && userId ? `${userId}:${tab}:${listVersion}` : ""
+  const [appliedFetchKey, setAppliedFetchKey] = useState(fetchKey)
+  if (fetchKey && appliedFetchKey !== fetchKey) {
+    setAppliedFetchKey(fetchKey)
+    setPeople([])
+    setNextCursor(null)
+    setHasMore(false)
+    setError(undefined)
+    setLoading(true)
+  }
 
   // Load only the active tab (parent remounts with the correct initialTab on chip open).
   useEffect(() => {
     if (!open || !userId) return
-    void loadFirstPage(tab)
-  }, [open, userId, tab, listVersion, loadFirstPage])
+    let cancelled = false
+    void (async () => {
+      try {
+        const { data } = await api.get<PaginatedPeople>(pathForTab(userId, tab), {
+          params: { limit: PAGE_LIMIT },
+        })
+        if (cancelled) return
+        setPeople(Array.isArray(data.users) ? data.users : [])
+        setNextCursor(data.nextCursor ?? null)
+        setHasMore(Boolean(data.hasMore))
+      } catch (err: unknown) {
+        if (cancelled) return
+        setError(getErrorMessage(err, "Failed to load people"))
+        setPeople([])
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [open, userId, tab, listVersion])
 
   const loadMore = useCallback(async () => {
     if (!userId || !hasMore || !nextCursor || loadingMoreRef.current) return
