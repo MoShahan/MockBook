@@ -88,8 +88,7 @@ Full feature list for the current app, plus planned items for a later release.
 ## Admin
 
 - Admins are normal users with `role: admin`
-- Promotion from **`ADMIN_EMAILS`** in local `backend/.env` (not committed)
-- Optional seed: `npm run seed:admins -w backend` (needs `ADMIN_PASSWORD` in env)
+- Promotion from **`ADMIN_EMAILS`** in local `backend/.env` on password login only (not committed; not on register/OAuth signup)
 - Admins can delete **any** post or comment
 - Admins can deactivate / reactivate users (not self / not other admins)
 - Deactivated users cannot authenticate

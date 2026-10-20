@@ -11,8 +11,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "node --test --test-concurrency=1 lib/**/*.test.js test/**/*.test.js",
-    "seed:admins": "node scripts/seedAdmins.js"
+    "test": "node --test --test-concurrency=1 lib/**/*.test.js test/**/*.test.js"
   },
   "keywords": [],
   "author": "",
