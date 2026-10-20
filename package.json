@@ -19,10 +19,12 @@
     "typecheck": "npm run typecheck -w frontend",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm run test -w frontend && npm run test -w backend"
+    "test": "npm run test -w frontend && npm run test -w backend",
+    "prepare": "husky"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
     "prettier": "^3.9.10"
   },
   "overrides": {
