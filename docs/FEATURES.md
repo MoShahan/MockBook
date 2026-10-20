@@ -132,10 +132,40 @@ These are **not** in the current release. Planned for a later update:
 - Separate admin SPA / dedicated admin host
 - Moderator role (between regular user and full admin)
 - Report / block user
+- Comment replies + @mentions (see below)
 - Multiple images per post, image compression, and soft-delete posts
 - Messaging / DMs / chat
 - Ads / sponsored content
 - GIF, audio, or other non-image post attachments
+
+### Comment replies + @mentions (design)
+
+**Not in this release.** Scope is **comments and replies only** — not the home compose / new-post box.
+
+**@mentions (Instagram / Facebook style)**
+
+- Typing `@` in a comment or reply opens a small user picker.
+- The list filters as you type after `@`.
+- Choosing a user inserts `@username` as a hyperlink to that person’s profile.
+- Clicking a posted mention opens `/profile/[userId]`.
+
+**Replies — one indent only (not Reddit / Tumblr nesting)**
+
+- A **top-level comment** sits flush with the comment list.
+- A **reply** is indented once, slightly to the right of that comment.
+- There is **no second indent**. A reply cannot have its own nested thread.
+- Replying to a reply still creates a sibling at that same indent, stacked below.
+
+Example:
+
+```text
+A   Comment
+    B   Reply to A
+    C   Reply to B (same indent as B, directly under B)
+    D   Another reply to A (same indent as B and C)
+```
+
+So: comment A → children B, C, D in one column. Reply to C still lands under D as another child of A, not pushed further right.
 
 ---
 
